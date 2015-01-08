@@ -43,5 +43,13 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/lo1tuma/pr-log.git"
-    }
+    },
+    "keywords": [
+        "pr-log",
+        "changelog",
+        "changelog.md",
+        "github",
+        "history",
+        "history.md"
+    ]
 }
