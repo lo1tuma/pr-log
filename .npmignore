@@ -1,0 +1,10 @@
+*.iml
+.DS_Store
+.eslintrc
+.eslintignore
+.git
+.gitignore
+.idea/
+.travis.yml
+build/
+test/
