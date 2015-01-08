@@ -14,7 +14,7 @@
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "bluebird": "2.5.3",
+        "bluebird": "2.6.2",
         "commander": "2.6.0",
         "git-promise": "0.2.0",
         "lodash.find": "2.4.1",
