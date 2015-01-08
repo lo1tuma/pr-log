@@ -39,5 +39,9 @@
         "sinon": "1.12.2",
         "sinon-as-promised": "2.0.3",
         "sinon-chai": "2.6.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/lo1tuma/pr-log.git"
     }
 }
