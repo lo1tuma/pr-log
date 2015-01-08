@@ -51,5 +51,8 @@
         "github",
         "history",
         "history.md"
+    ],
+    "contributors": [
+        "Alexander Schmidt <alexanderschmidt1@gmail.com>"
     ]
 }
