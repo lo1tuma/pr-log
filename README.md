@@ -45,10 +45,10 @@ build: 'Build-Related',
 breaking: 'Breaking Changes'
 ```
 
-To fully profit from `pr-log` your GitHub project needs some small configuration:
+To use `pr-log` your GitHub project needs some small configuration:
 
 * Create the labels mentioned above (you can create GitHub labels from `Issues -> Labels -> New Label`)
-* Set the correct labels on your pull requests
+* Set the correct label on your pull requests - you need to set exactly one label, multiple labels or one that is not recognized will throw an error
 * Use correct semver versioning for your tags (e.g. `2.4.7`)
 
 To setup the categories of the project correctly that will be used for the changelog, there 
