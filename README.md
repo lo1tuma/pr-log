@@ -39,7 +39,7 @@ You have to follow these steps to use `pr-log` without problems.
 
 ### GitHub
 
-Currently the categories for the changelog are hardcoded in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>)`:
+Currently the categories for the changelog are hardcoded in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
 
 ```
 bug: 'Bug Fixes',
