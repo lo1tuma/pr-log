@@ -96,6 +96,14 @@ Given the following setup:
 * Fix some spelling mistakes in documentation. (#22)
 ```
 
+### Correct usage makes a clean and complete changelog
+
+If you want your changelog to be complete and clean you have to follow these rules:
+
+1. Don't commit directly to master - if you do, your changes will not be covered in the changelog (this might be ok but you should know this implication)
+2. Use pull requests for your features that you want to be in your changelog
+3. Use the correct categories for your pull request: If you introduce a new feature that will be a breaking change, give it the according label `Breaking Changes`
+
 ## Advanced reading: Reason for this project
 
 Many projects have problems with their changelogs. Most of them try one of the following ways
