@@ -25,13 +25,19 @@ The main features:
         * The current working directory is not clean (e.g. contains files that are modified): `Error: Local copy is not clean`
 * Well tested
 
-## Install & setup
+## Install
 
 Simply run this to install `pr-log`:
 
 ```
 npm install pr-log
 ```
+
+## Setup and configuration
+
+You have to follow these steps to use `pr-log` without problems.
+
+### GitHub
 
 Currently the categories for the changelog are hardcoded in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>)`:
 
@@ -51,7 +57,16 @@ To use `pr-log` your GitHub project needs some small configuration:
 * Set the correct label on your pull requests - you need to set exactly one label, multiple labels or one that is not recognized will throw an error
 * Use correct semver versioning for your tags (e.g. `2.4.7`)
 
-To setup the categories of the project correctly that will be used for the changelog, there 
+### Project
+
+As `pr-log` reads repository information from your project you have to add the `repository` information in your `package.json`
+
+```
+"repository": {
+    "type": "git",
+    "url": "https://github.com/<your username>/<your repository name>.git"
+}
+```
 
 ## Usage
 
