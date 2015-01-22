@@ -102,7 +102,7 @@ If you want your changelog to be complete and clean you have to follow these rul
 
 1. Don't commit directly to master - if you do, your changes will not be covered in the changelog (this might be ok but you should know this implication)
 2. Use pull requests for your features that you want to be in your changelog
-3. Use the correct categories for your pull request: If you introduce a new feature that will be a breaking change, give it the according label `Breaking Changes`
+3. Use the correct categories for your pull request: If you introduce a new feature that will be a breaking change, give it the according label `breaking` (which will later result in this feature being listed under the `Breaking Changes` point in your changelog)
 
 ## Advanced reading: Reason for this project
 
