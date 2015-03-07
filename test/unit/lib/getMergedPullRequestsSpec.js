@@ -7,6 +7,7 @@ var chai = require('chai'),
 
 require('sinon-as-promised');
 chai.use(require('sinon-chai'));
+chai.use(require('chai-as-promised'));
 
 describe('getMergedPullRequests', function () {
     var getPullRequestLabel = sinon.stub(),
@@ -82,5 +83,21 @@ describe('getMergedPullRequests', function () {
 
                 expect(pullRequests).to.deep.equal(expectedPullRequests);
             });
+    });
+
+    it('should work with line feeds in commit message body', function () {
+        var gitLogMessages = [
+                'Merge pull request #1 from A (pr-1 message\n)',
+                'Merge pull request #2 from B (pr-2 message)'
+            ],
+            expectedResults = [
+                { id: '1', title: 'pr-1 message', label: 'bug' },
+                { id: '2', title: 'pr-2 message', label: 'bug' }
+            ];
+
+        gitLog.resolves(gitLogMessages.join('\n'));
+
+        return expect(getMergedPullRequests(anyRepo))
+            .to.become(expectedResults);
     });
 });
