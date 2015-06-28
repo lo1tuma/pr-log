@@ -60,4 +60,13 @@ describe('CLI', function () {
                 expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'generated changelog');
             });
     });
+
+    it('should strip trailing empty lines from the generated changelog', function () {
+        createChangelog.returns('generated changelog\n\n');
+
+        return cli.run('1.0.0')
+            .then(function () {
+                expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'generated changelog\n');
+            });
+    });
 });
