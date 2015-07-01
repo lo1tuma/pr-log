@@ -2,11 +2,12 @@
 
 var chai = require('chai'),
     sinon = require('sinon'),
+    Promise = require('bluebird'),
     getPullRequestLabel = require('../../../lib/getPullRequestLabel'),
-    superagent = require('superagent-promise'),
+    rest = require('restling'),
     expect = chai.expect;
 
-require('sinon-as-promised');
+require('sinon-as-promised')(Promise);
 chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
 
@@ -17,10 +18,9 @@ describe('getPullRequestLabel', function () {
         response = {};
 
     beforeEach(function () {
-        response.body = [ { name: 'bug' } ];
+        response.data = [ { name: 'bug' } ];
 
-        getStub = sinon.stub(superagent, 'get');
-        getStub.returns({ end: sinon.stub().resolves(response) });
+        getStub = sinon.stub(rest, 'get').resolves(response);
     });
 
     afterEach(function () {
@@ -47,7 +47,7 @@ describe('getPullRequestLabel', function () {
         var expectedErrorMessage = 'Pull Request #123 has no label of ' +
             'bug, upgrade, documentation, feature, enhancement, build, breaking';
 
-        response.body = [];
+        response.data = [];
 
         return expect(getPullRequestLabel(anyRepo, anyPullRequestId))
             .to.be.rejectedWith(expectedErrorMessage);
@@ -57,7 +57,7 @@ describe('getPullRequestLabel', function () {
         var expectedErrorMessage = 'Pull Request #123 has multiple labels of ' +
             'bug, upgrade, documentation, feature, enhancement, build, breaking';
 
-        response.body = [ { name: 'bug' }, { name: 'documentation' } ];
+        response.data = [ { name: 'bug' }, { name: 'documentation' } ];
 
         return expect(getPullRequestLabel(anyRepo, anyPullRequestId))
             .to.be.rejectedWith(expectedErrorMessage);
