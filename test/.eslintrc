@@ -6,9 +6,9 @@
     "plugins": [ "eslint-plugin-mocha" ],
 
     "rules": {
-        "no-unused-expressions": 0,
-        "max-nested-callbacks": [ 2, 5 ],
+        "no-unused-expressions": "off",
+        "max-nested-callbacks": [ "error", 5 ],
 
-        "mocha/no-exclusive-tests": 2
+        "mocha/no-exclusive-tests": "error"
     }
 }
