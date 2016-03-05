@@ -26,23 +26,21 @@ describe('createChangelog', function () {
     });
 
     it('should create a formatted changelog', function () {
-        var mergedPullRequests = [
-                {
-                    id: '1',
-                    title: 'Fixed bug foo',
-                    label: 'bug'
-                },
-                {
-                    id: '2',
-                    title: 'Fixed bug bar',
-                    label: 'bug'
-                },
-                {
-                    id: '3',
-                    title: 'Fix spelling error',
-                    label: 'documentation'
-                }
-            ],
+        var mergedPullRequests = [ {
+                id: '1',
+                title: 'Fixed bug foo',
+                label: 'bug'
+            },
+            {
+                id: '2',
+                title: 'Fixed bug bar',
+                label: 'bug'
+            },
+            {
+                id: '3',
+                title: 'Fix spelling error',
+                label: 'documentation'
+            } ],
             expectedChangelog = [
                 '### Bug Fixes',
                 '',
