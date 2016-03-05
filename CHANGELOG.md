@@ -1,3 +1,19 @@
+## 1.4.0 (March 5, 2016)
+
+### Dependency Upgrades
+
+* Update all dependencies 🌴 (#11)
+* Update to ESLint 2 and use eslint-config-holidaycheck (#12)
+
+### Enhancements
+
+* Replace lodash by ramda (#10)
+
+### Bug Fixes
+
+* Fix long computation time (#9)
+
+
 ## 1.3.0 (July 1, 2015)
 
 ### Enhancements
