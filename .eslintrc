@@ -1,5 +1,5 @@
 {
-    "extends": "holidaycheck",
+    "extends": "holidaycheck/es2015",
 
     "env": {
         "node": true

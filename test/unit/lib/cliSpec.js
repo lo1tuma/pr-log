@@ -1,28 +1,30 @@
-'use strict';
+import chai from 'chai';
+import sinon from 'sinon';
+import proxyquireModule from 'proxyquire';
+import sinonChai from 'sinon-chai';
+import 'sinon-as-promised';
 
-var chai = require('chai'),
-    sinon = require('sinon'),
-    proxyquire = require('proxyquire').noCallThru(),
-    expect = chai.expect;
+const expect = chai.expect;
+const proxyquire = proxyquireModule.noCallThru();
 
-chai.use(require('sinon-chai'));
-require('sinon-as-promised');
+chai.use(sinonChai);
 
 describe('CLI', function () {
-    var ensureCleanLocalGitState = sinon.stub().resolves(),
-        getMergedPullRequests = sinon.stub().resolves([]),
-        createChangelog = sinon.stub().returns(''),
-        prependFile = sinon.stub().yields(),
-        requireStubs = {
-            './ensureCleanLocalGitState': ensureCleanLocalGitState,
-            './getMergedPullRequests': getMergedPullRequests,
-            './createChangelog': createChangelog,
-            '/foo/package.json': {
-                repository: { url: 'https://github.com/foo/bar.git' }
-            },
-            prepend: prependFile
+    const ensureCleanLocalGitState = sinon.stub().resolves();
+    const getMergedPullRequests = sinon.stub().resolves([]);
+    const createChangelog = sinon.stub().returns('');
+    const prependFile = sinon.stub().yields();
+    const requireStubs = {
+        './ensureCleanLocalGitState': ensureCleanLocalGitState,
+        './getMergedPullRequests': getMergedPullRequests,
+        './createChangelog': createChangelog,
+        '/foo/package.json': {
+            repository: { url: 'https://github.com/foo/bar.git' }
         },
-        cli = proxyquire('../../../lib/cli', requireStubs);
+        prepend: prependFile
+    };
+
+    const cli = proxyquire('../../../lib/cli', requireStubs).default;
 
     beforeEach(function () {
         sinon.stub(process, 'cwd').returns('/foo');
@@ -41,7 +43,7 @@ describe('CLI', function () {
     });
 
     it('should report the generated changelog', function () {
-        var expectedGithubRepo = 'foo/bar';
+        const expectedGithubRepo = 'foo/bar';
 
         createChangelog.returns('generated changelog');
 

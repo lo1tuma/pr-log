@@ -1,21 +1,24 @@
-'use strict';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
+import sinonAsPromised from 'sinon-as-promised';
+import Promise from 'bluebird';
+import rest from 'restling';
+import getPullRequestLabel from '../../../lib/getPullRequestLabel';
 
-var chai = require('chai'),
-    sinon = require('sinon'),
-    Promise = require('bluebird'),
-    getPullRequestLabel = require('../../../lib/getPullRequestLabel'),
-    rest = require('restling'),
-    expect = chai.expect;
+const expect = chai.expect;
 
-require('sinon-as-promised')(Promise);
-chai.use(require('sinon-chai'));
-chai.use(require('chai-as-promised'));
+sinonAsPromised(Promise);
+chai.use(sinonChai);
+chai.use(chaiAsPromised);
 
 describe('getPullRequestLabel', function () {
-    var getStub,
-        anyRepo = 'any/repo',
-        anyPullRequestId = 123,
-        response = {};
+    const anyRepo = 'any/repo';
+    const anyPullRequestId = 123;
+    const response = {};
+
+    let getStub;
 
     beforeEach(function () {
         response.data = [ { name: 'bug' } ];
@@ -28,7 +31,7 @@ describe('getPullRequestLabel', function () {
     });
 
     it('should request the correct URL', function () {
-        var expectedUrl = 'https://api.github.com/repos/' + anyRepo + '/issues/' + anyPullRequestId + '/labels';
+        const expectedUrl = `https://api.github.com/repos/${anyRepo}/issues/${anyPullRequestId}/labels`;
 
         getPullRequestLabel(anyRepo, anyPullRequestId);
 
@@ -37,15 +40,15 @@ describe('getPullRequestLabel', function () {
     });
 
     it('should fulfill with the correct label name', function () {
-        var expectedLabelName = 'bug';
+        const expectedLabelName = 'bug';
 
         return expect(getPullRequestLabel(anyRepo, anyPullRequestId))
             .to.become(expectedLabelName);
     });
 
     it('should reject if the pull request doesn’t have one valid label', function () {
-        var expectedErrorMessage = 'Pull Request #123 has no label of ' +
-            'bug, upgrade, documentation, feature, enhancement, build, breaking';
+        // eslint-disable-next-line max-len
+        const expectedErrorMessage = 'Pull Request #123 has no label of bug, upgrade, documentation, feature, enhancement, build, breaking';
 
         response.data = [];
 
@@ -54,8 +57,8 @@ describe('getPullRequestLabel', function () {
     });
 
     it('should reject if the pull request has more than one valid label', function () {
-        var expectedErrorMessage = 'Pull Request #123 has multiple labels of ' +
-            'bug, upgrade, documentation, feature, enhancement, build, breaking';
+        // eslint-disable-next-line max-len
+        const expectedErrorMessage = 'Pull Request #123 has multiple labels of bug, upgrade, documentation, feature, enhancement, build, breaking';
 
         response.data = [ { name: 'bug' }, { name: 'documentation' } ];
 

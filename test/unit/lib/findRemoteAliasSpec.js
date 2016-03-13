@@ -1,21 +1,23 @@
-'use strict';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
+import proxyquire from 'proxyquire';
+import 'sinon-as-promised';
 
-var chai = require('chai'),
-    sinon = require('sinon'),
-    proxyquire = require('proxyquire'),
-    expect = chai.expect;
+const expect = chai.expect;
 
-require('sinon-as-promised');
-chai.use(require('sinon-chai'));
-chai.use(require('chai-as-promised'));
+chai.use(sinonChai);
+chai.use(chaiAsPromised);
 
 describe('findRemoteAlias', function () {
-    var git = sinon.stub(),
-        requireStubs = {
-            'git-promise': git
-        },
-        findRemoteAlias = proxyquire('../../../lib/findRemoteAlias', requireStubs),
-        githubRepo = 'foo/bar';
+    const git = sinon.stub();
+    const githubRepo = 'foo/bar';
+    const requireStubs = {
+        'git-promise': git
+    };
+
+    const findRemoteAlias = proxyquire('../../../lib/findRemoteAlias', requireStubs).default;
 
     beforeEach(function () {
         git.resolves('');
@@ -26,15 +28,15 @@ describe('findRemoteAlias', function () {
     });
 
     it('should reject if no alias is found', function () {
-        var expectedGitRemote = 'git://github.com/' + githubRepo + '.git',
-            expectedErrorMessage = 'This local git repository doesn’t have a remote pointing to ' + expectedGitRemote;
+        const expectedGitRemote = `git://github.com/${githubRepo}.git`;
+        const expectedErrorMessage = `This local git repository doesn’t have a remote pointing to ${expectedGitRemote}`;
 
         return expect(findRemoteAlias(githubRepo))
             .to.be.rejectedWith(expectedErrorMessage);
     });
 
     it('should resolve with the correct remote alias', function () {
-        var gitRemotes = [
+        const gitRemotes = [
             'origin git://github.com/fork/bar (fetch)',
             'origin git://github.com/fork/bar (push)',
             'upstream git://github.com/foo/bar (fetch)',
@@ -48,7 +50,7 @@ describe('findRemoteAlias', function () {
     });
 
     it('should work with tab as a separator', function () {
-        var gitRemotes = [
+        const gitRemotes = [
             'origin\tgit://github.com/fork/bar (fetch)',
             'origin\tgit://github.com/fork/bar (push)',
             'upstream\tgit://github.com/foo/bar (fetch)',

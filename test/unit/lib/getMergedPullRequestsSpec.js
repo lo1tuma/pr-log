@@ -1,26 +1,29 @@
-'use strict';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
+import proxyquire from 'proxyquire';
+import 'sinon-as-promised';
 
-var chai = require('chai'),
-    sinon = require('sinon'),
-    proxyquire = require('proxyquire'),
-    expect = chai.expect;
+const expect = chai.expect;
 
-require('sinon-as-promised');
-chai.use(require('sinon-chai'));
-chai.use(require('chai-as-promised'));
+chai.use(sinonChai);
+chai.use(chaiAsPromised);
 
 describe('getMergedPullRequests', function () {
-    var getPullRequestLabel = sinon.stub(),
-        git = sinon.stub(),
-        gitTag,
-        gitLog,
-        requireStubs = {
-            './getPullRequestLabel': getPullRequestLabel,
-            'git-promise': git
-        },
-        getMergedPullRequests = proxyquire('../../../lib/getMergedPullRequests', requireStubs),
-        anyRepo = 'any/repo',
-        latestVersion = '1.2.3';
+    const getPullRequestLabel = sinon.stub();
+    const git = sinon.stub();
+    const anyRepo = 'any/repo';
+    const latestVersion = '1.2.3';
+    const requireStubs = {
+        './getPullRequestLabel': { default: getPullRequestLabel },
+        'git-promise': git
+    };
+
+    const getMergedPullRequests = proxyquire('../../../lib/getMergedPullRequests', requireStubs).default;
+
+    let gitTag;
+    let gitLog;
 
     beforeEach(function () {
         git.resolves('');
@@ -28,7 +31,7 @@ describe('getMergedPullRequests', function () {
         gitTag = git.withArgs('tag --list');
         gitTag.resolves(latestVersion);
 
-        gitLog = git.withArgs('log --no-color --pretty=format:"%s (%b)" --merges ' + latestVersion + '..HEAD');
+        gitLog = git.withArgs(`log --no-color --pretty=format:"%s (%b)" --merges ${latestVersion}..HEAD`);
         gitLog.resolves();
 
         getPullRequestLabel.resolves('bug');
@@ -41,7 +44,7 @@ describe('getMergedPullRequests', function () {
 
     describe('detect fromTag', function () {
         it('should ignore non-semver tag', function () {
-            var expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 0.0.2..HEAD';
+            const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 0.0.2..HEAD';
 
             gitTag.resolves('0.0.1\nfoo\n0.0.2\n0.0.0.0.1');
 
@@ -52,7 +55,7 @@ describe('getMergedPullRequests', function () {
         });
 
         it('should always use the highest version', function () {
-            var expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
+            const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
 
             gitTag.resolves('1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n0.5.0');
 
@@ -64,14 +67,15 @@ describe('getMergedPullRequests', function () {
     });
 
     it('should extract id, title and label for merged pull requests', function () {
-        var gitLogMessages = [
-                'Merge pull request #1 from branch (pr-1 message)',
-                'Merge pull request #2 from other (pr-2 message)'
-            ],
-            expectedPullRequests = [
-                { id: '1', title: 'pr-1 message', label: 'bug' },
-                { id: '2', title: 'pr-2 message', label: 'bug' }
-            ];
+        const gitLogMessages = [
+            'Merge pull request #1 from branch (pr-1 message)',
+            'Merge pull request #2 from other (pr-2 message)'
+        ];
+
+        const expectedPullRequests = [
+            { id: '1', title: 'pr-1 message', label: 'bug' },
+            { id: '2', title: 'pr-2 message', label: 'bug' }
+        ];
 
         gitLog.resolves(gitLogMessages.join('\n'));
 
@@ -86,14 +90,15 @@ describe('getMergedPullRequests', function () {
     });
 
     it('should work with line feeds in commit message body', function () {
-        var gitLogMessages = [
-                'Merge pull request #1 from A (pr-1 message\n)',
-                'Merge pull request #2 from B (pr-2 message)'
-            ],
-            expectedResults = [
-                { id: '1', title: 'pr-1 message', label: 'bug' },
-                { id: '2', title: 'pr-2 message', label: 'bug' }
-            ];
+        const gitLogMessages = [
+            'Merge pull request #1 from A (pr-1 message\n)',
+            'Merge pull request #2 from B (pr-2 message)'
+        ];
+
+        const expectedResults = [
+            { id: '1', title: 'pr-1 message', label: 'bug' },
+            { id: '2', title: 'pr-2 message', label: 'bug' }
+        ];
 
         gitLog.resolves(gitLogMessages.join('\n'));
 

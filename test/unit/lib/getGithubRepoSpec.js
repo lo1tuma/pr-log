@@ -1,7 +1,7 @@
-'use strict';
+import getGithubRepo from '../../../lib/getGithubRepo';
+import chai from 'chai';
 
-var getGithubRepo = require('../../../lib/getGithubRepo'),
-    expect = require('chai').expect;
+const expect = chai.expect;
 
 describe('getGithubRepo', function () {
     it('should extract the repo path of a github URL', function () {

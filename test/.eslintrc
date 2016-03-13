@@ -8,6 +8,7 @@
     "rules": {
         "no-unused-expressions": "off",
         "max-nested-callbacks": [ "error", 5 ],
+        "max-statements": "off",
 
         "mocha/no-exclusive-tests": "error"
     }

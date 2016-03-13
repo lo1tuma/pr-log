@@ -1,32 +1,36 @@
-'use strict';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiAsPromised from 'chai-as-promised';
+import proxyquire from 'proxyquire';
+import 'sinon-as-promised';
 
-var chai = require('chai'),
-    sinon = require('sinon'),
-    proxyquire = require('proxyquire'),
-    expect = chai.expect;
+const expect = chai.expect;
 
-chai.use(require('sinon-chai'));
-chai.use(require('chai-as-promised'));
-require('sinon-as-promised');
+chai.use(sinonChai);
+chai.use(chaiAsPromised);
 
 describe('ensureCleanLocalGitState', function () {
-    var git = sinon.stub().resolves(),
-        findRemoteAlias = sinon.stub(),
-        gitStatus,
-        gitRevParse,
-        gitRevList,
-        requireStubs = {
-            'git-promise': git,
-            './findRemoteAlias': findRemoteAlias
-        },
-        ensureCleanLocalGitState = proxyquire('../../../lib/ensureCleanLocalGitState', requireStubs),
-        githubRepo = 'foo/bar',
-        remoteAlias = 'origin';
+    const git = sinon.stub().resolves();
+    const findRemoteAlias = sinon.stub();
+    const githubRepo = 'foo/bar';
+    const remoteAlias = 'origin';
+    const requireStubs = {
+        'git-promise': git,
+        './findRemoteAlias': { default: findRemoteAlias }
+    };
+
+    const ensureCleanLocalGitState = proxyquire('../../../lib/ensureCleanLocalGitState', requireStubs).default;
+
+    let gitStatus;
+    let gitRevParse;
+    let gitRevList;
 
     beforeEach(function () {
         gitStatus = git.withArgs('status -s').resolves('');
         gitRevParse = git.withArgs('rev-parse --abbrev-ref HEAD').resolves('master');
         gitRevList = git.withArgs('rev-list --left-right master...origin/master').resolves('');
+
         findRemoteAlias.resolves(remoteAlias);
     });
 
