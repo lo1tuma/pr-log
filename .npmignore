@@ -6,5 +6,7 @@
 .gitignore
 .idea/
 .travis.yml
+bin/
 build/
+lib/
 test/

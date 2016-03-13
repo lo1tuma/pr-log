@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 
-'use strict';
-
-var program = require('commander'),
-    config = require('../package.json'),
-    cli = require('../lib/cli');
+import program from 'commander';
+import config from '../../package.json';
+import cli from '../cli';
 
 program
     .version(config.version)
