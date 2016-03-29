@@ -35,7 +35,7 @@
         "chai-as-promised": "5.3.0",
         "coveralls": "2.11.9",
         "eslint": "2.5.3",
-        "eslint-config-holidaycheck": "0.4.0",
+        "eslint-config-holidaycheck": "0.5.0",
         "eslint-plugin-mocha": "2.0.0",
         "istanbul": "1.0.0-alpha.2",
         "istanbul-api": "lo1tuma/istanbul-api#435b30574137852fc778044f2973624aa9c9184d",
