@@ -19,7 +19,7 @@
         "bluebird": "3.3.4",
         "commander": "2.9.0",
         "git-promise": "0.3.0",
-        "ramda": "0.19.1",
+        "ramda": "0.20.0",
         "moment": "2.12.0",
         "git-url-parse": "6.0.1",
         "parse-github-repo-url": "1.0.0",
