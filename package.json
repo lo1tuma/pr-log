@@ -34,7 +34,7 @@
         "chai": "3.5.0",
         "chai-as-promised": "5.3.0",
         "coveralls": "2.11.9",
-        "eslint": "2.8.0",
+        "eslint": "2.10.0",
         "eslint-config-holidaycheck": "0.7.0",
         "eslint-plugin-mocha": "2.2.0",
         "istanbul": "1.0.0-alpha.2",
