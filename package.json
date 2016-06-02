@@ -40,7 +40,7 @@
         "istanbul": "1.0.0-alpha.2",
         "istanbul-api": "lo1tuma/istanbul-api#435b30574137852fc778044f2973624aa9c9184d",
         "mocha": "2.5.3",
-        "proxyquire": "1.7.4",
+        "proxyquire": "1.7.6",
         "sinon": "1.17.3",
         "sinon-as-promised": "4.0.0",
         "sinon-chai": "2.8.0"
