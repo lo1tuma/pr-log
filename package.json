@@ -36,7 +36,7 @@
         "coveralls": "2.11.9",
         "eslint": "2.11.1",
         "eslint-config-holidaycheck": "0.7.0",
-        "eslint-plugin-mocha": "2.2.0",
+        "eslint-plugin-mocha": "3.0.0",
         "istanbul": "1.0.0-alpha.2",
         "istanbul-api": "lo1tuma/istanbul-api#435b30574137852fc778044f2973624aa9c9184d",
         "mocha": "2.5.3",
