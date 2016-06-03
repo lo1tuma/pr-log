@@ -16,7 +16,7 @@
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "bluebird": "3.3.5",
+        "bluebird": "3.4.0",
         "commander": "2.9.0",
         "git-promise": "0.3.0",
         "ramda": "0.21.0",
