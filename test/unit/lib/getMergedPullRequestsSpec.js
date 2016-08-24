@@ -105,4 +105,19 @@ describe('getMergedPullRequests', function () {
         return expect(getMergedPullRequests(anyRepo))
             .to.become(expectedResults);
     });
+
+    it('should work with parentheses in the commit message body', function () {
+        const gitLogMessages = [
+            'Merge pull request #42 from A (pr-42 message (fixes #21))'
+        ];
+
+        const expectedResults = [
+            { id: '42', title: 'pr-42 message (fixes #21)', label: 'bug' }
+        ];
+
+        gitLog.resolves(gitLogMessages.join('\n'));
+
+        return expect(getMergedPullRequests(anyRepo))
+            .to.become(expectedResults);
+    });
 });
