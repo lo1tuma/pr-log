@@ -1,3 +1,9 @@
+## 1.6.0 (August 25, 2016)
+
+### Bug Fixes
+
+* Support parentheses in PR titles (#74)
+
 ## 1.5.0 (June 4, 2016)
 
 ### Bug Fixes
