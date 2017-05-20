@@ -11,7 +11,7 @@
 
 The main features:
 
-* Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag. This works by 
+* Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag. This works by
     * first getting a list of all tags
     * than removing all tags that are not compatible to [semver versioning](http://semver.org/)
     * sort the tags
@@ -39,7 +39,7 @@ You have to follow these steps to use `pr-log` without problems.
 
 ### GitHub
 
-Currently the categories for the changelog are hardcoded in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
+Currently the categories for the changelog are set in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
 
 ```
 bug: 'Bug Fixes',
@@ -49,6 +49,15 @@ feature: 'Features',
 enhancement: 'Enhancements',
 build: 'Build-Related',
 breaking: 'Breaking Changes'
+```
+
+However, you can also create a user-specified mapping by creating a file `pr-log.json` in your project's root directory containing an alternative mapping. For example:
+
+```
+{
+  "core": "Core features",
+  "addon": "Addons"
+}
 ```
 
 To use `pr-log` your GitHub project needs some small configuration:
@@ -70,7 +79,7 @@ As `pr-log` reads repository information from your project you have to add the `
 
 ## Usage
 
-To create or update your changelog run 
+To create or update your changelog run
 
 ```pr-log <version-number>``` where `version-number` is the name of this release
 
