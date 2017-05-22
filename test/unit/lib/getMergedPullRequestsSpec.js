@@ -4,6 +4,7 @@ import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 import proxyquire from 'proxyquire';
 import 'sinon-as-promised';
+import defaultValidLabels from '../../../lib/validLabels';
 
 const expect = chai.expect;
 
@@ -48,7 +49,7 @@ describe('getMergedPullRequests', function () {
 
             gitTag.resolves('0.0.1\nfoo\n0.0.2\n0.0.0.0.1');
 
-            return getMergedPullRequests(anyRepo)
+            return getMergedPullRequests(anyRepo, defaultValidLabels)
                 .then(function () {
                     expect(git).to.have.been.calledWith(expectedGitLogCommand);
                 });
@@ -59,7 +60,18 @@ describe('getMergedPullRequests', function () {
 
             gitTag.resolves('1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n0.5.0');
 
-            return getMergedPullRequests(anyRepo)
+            return getMergedPullRequests(anyRepo, defaultValidLabels)
+                .then(function () {
+                    expect(git).to.have.been.calledWith(expectedGitLogCommand);
+                });
+        });
+
+        it('should ignore prerelease versions', function () {
+            const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
+
+            gitTag.resolves('1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1');
+
+            return getMergedPullRequests(anyRepo, defaultValidLabels)
                 .then(function () {
                     expect(git).to.have.been.calledWith(expectedGitLogCommand);
                 });
@@ -79,11 +91,13 @@ describe('getMergedPullRequests', function () {
 
         gitLog.resolves(gitLogMessages.join('\n'));
 
-        return getMergedPullRequests(anyRepo)
+        return getMergedPullRequests(anyRepo, defaultValidLabels)
             .then(function (pullRequests) {
                 expect(getPullRequestLabel).to.have.been.calledTwice;
-                expect(getPullRequestLabel).to.have.been.calledWithExactly(anyRepo, '1');
-                expect(getPullRequestLabel).to.have.been.calledWithExactly(anyRepo, '2');
+                expect(getPullRequestLabel)
+                    .to.have.been.calledWithExactly(anyRepo, defaultValidLabels, '1');
+                expect(getPullRequestLabel)
+                    .to.have.been.calledWithExactly(anyRepo, defaultValidLabels, '2');
 
                 expect(pullRequests).to.deep.equal(expectedPullRequests);
             });

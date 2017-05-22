@@ -6,6 +6,7 @@ import sinonAsPromised from 'sinon-as-promised';
 import Promise from 'bluebird';
 import rest from 'restling';
 import getPullRequestLabel from '../../../lib/getPullRequestLabel';
+import defaultValidLabels from '../../../lib/validLabels';
 
 const expect = chai.expect;
 
@@ -33,7 +34,7 @@ describe('getPullRequestLabel', function () {
     it('should request the correct URL', function () {
         const expectedUrl = `https://api.github.com/repos/${anyRepo}/issues/${anyPullRequestId}/labels`;
 
-        getPullRequestLabel(anyRepo, anyPullRequestId);
+        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId);
 
         expect(getStub).to.have.been.calledOnce;
         expect(getStub).to.have.been.calledWith(expectedUrl);
@@ -42,7 +43,18 @@ describe('getPullRequestLabel', function () {
     it('should fulfill with the correct label name', function () {
         const expectedLabelName = 'bug';
 
-        return expect(getPullRequestLabel(anyRepo, anyPullRequestId))
+        return expect(getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId))
+            .to.become(expectedLabelName);
+    });
+
+    it('should use custom labels when provided', function () {
+        const expectedLabelName = 'addons';
+        const customValidLabels = {
+            addons: 'Addons'
+        };
+        response.data = [ { name: 'addons' } ];
+
+        return expect(getPullRequestLabel(anyRepo, customValidLabels, anyPullRequestId))
             .to.become(expectedLabelName);
     });
 
@@ -52,7 +64,7 @@ describe('getPullRequestLabel', function () {
 
         response.data = [];
 
-        return expect(getPullRequestLabel(anyRepo, anyPullRequestId))
+        return expect(getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId))
             .to.be.rejectedWith(expectedErrorMessage);
     });
 
@@ -62,7 +74,7 @@ describe('getPullRequestLabel', function () {
 
         response.data = [ { name: 'bug' }, { name: 'documentation' } ];
 
-        return expect(getPullRequestLabel(anyRepo, anyPullRequestId))
+        return expect(getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId))
             .to.be.rejectedWith(expectedErrorMessage);
     });
 });
