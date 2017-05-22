@@ -81,7 +81,7 @@ As `pr-log` reads repository information from your project you have to add the `
 
 To create or update your changelog run
 
-```pr-log <version-number>``` where `version-number` is the name of this release
+```pr-log [options] <version-number>``` where `version-number` is the name of this release
 
 Example:
 
@@ -104,6 +104,12 @@ Given the following setup:
 
 * Fix some spelling mistakes in documentation. (#22)
 ```
+
+### Options
+
+#### --sloppy
+
+The `--sloppy` option defaults to false. When set, it allows `pr-log` to generate a changelog even when you are not on the `master` branch. This should not be used in production!
 
 ### Correct usage makes a clean and complete changelog
 

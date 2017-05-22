@@ -6,7 +6,11 @@ import cli from '../cli';
 
 program
     .version(config.version)
+    .option('--sloppy', 'Skip ensuring clean local git state.')
     .usage('<version-number>')
     .parse(process.argv);
 
-cli.run(program.args[0], program.args[1]).done();
+const options = { sloppy: program.sloppy };
+cli
+    .run(program.args[0], options)
+    .done();
