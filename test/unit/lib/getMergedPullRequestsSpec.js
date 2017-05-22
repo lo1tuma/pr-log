@@ -120,4 +120,18 @@ describe('getMergedPullRequests', function () {
         return expect(getMergedPullRequests(anyRepo))
             .to.become(expectedResults);
     });
+
+    it('should skip with non-matching parenthesis', function () {
+        const gitLogMessages = [
+            'Merge pull request #3 from kadirahq/greenkeeper-update-all'
+        ];
+
+        const expectedResults = [
+        ];
+
+        gitLog.resolves(gitLogMessages.join('\n'));
+
+        return expect(getMergedPullRequests(anyRepo))
+            .to.become(expectedResults);
+    });
 });
