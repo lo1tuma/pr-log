@@ -76,6 +76,17 @@ describe('getMergedPullRequests', function () {
                     expect(git).to.have.been.calledWith(expectedGitLogCommand);
                 });
         });
+
+        it('should ignore prerelease versions', function () {
+            const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
+
+            gitTag.resolves('1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1');
+
+            return getMergedPullRequests(anyRepo)
+                .then(function () {
+                    expect(git).to.have.been.calledWith(expectedGitLogCommand);
+                });
+        });
     });
 
     it('should extract id, title and label for merged pull requests', function () {
@@ -127,6 +138,20 @@ describe('getMergedPullRequests', function () {
 
         const expectedResults = [
             { id: '42', title: 'pr-42 message (fixes #21)', label: 'bug' }
+        ];
+
+        gitLog.resolves(gitLogMessages.join('\n'));
+
+        return expect(getMergedPullRequests(anyRepo))
+            .to.become(expectedResults);
+    });
+
+    it('should skip with non-matching parenthesis', function () {
+        const gitLogMessages = [
+            'Merge pull request #3 from kadirahq/greenkeeper-update-all'
+        ];
+
+        const expectedResults = [
         ];
 
         gitLog.resolves(gitLogMessages.join('\n'));
