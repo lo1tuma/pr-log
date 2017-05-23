@@ -3,7 +3,6 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 import proxyquire from 'proxyquire';
-import 'sinon-as-promised';
 import defaultValidLabels from '../../../lib/validLabels';
 
 const expect = chai.expect;

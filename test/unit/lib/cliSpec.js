@@ -2,7 +2,6 @@ import chai from 'chai';
 import sinon from 'sinon';
 import proxyquireModule from 'proxyquire';
 import sinonChai from 'sinon-chai';
-import 'sinon-as-promised';
 
 const expect = chai.expect;
 const proxyquire = proxyquireModule.noCallThru();
@@ -10,34 +9,34 @@ const proxyquire = proxyquireModule.noCallThru();
 chai.use(sinonChai);
 
 describe('CLI', function () {
-    const ensureCleanLocalGitState = sinon.stub().resolves();
-    const getMergedPullRequests = sinon.stub().resolves([]);
-    const createChangelog = sinon.stub().returns('');
-    const prependFile = sinon.stub().yields();
-    const requireStubs = {
-        './ensureCleanLocalGitState': ensureCleanLocalGitState,
-        './getMergedPullRequests': getMergedPullRequests,
-        './createChangelog': createChangelog,
-        '/foo/package.json': {
-            repository: { url: 'https://github.com/foo/bar.git' }
-        },
-        prepend: prependFile
-    };
+    let ensureCleanLocalGitState;
+    let getMergedPullRequests;
+    let createChangelog;
+    let prependFile;
+    let cli;
+    let requireStubs;
     const options = { sloppy: false };
-
-    const cli = proxyquire('../../../lib/cli', requireStubs).default;
 
     beforeEach(function () {
         sinon.stub(process, 'cwd').returns('/foo');
+
+        ensureCleanLocalGitState = sinon.stub().resolves();
+        getMergedPullRequests = sinon.stub().resolves([]);
+        createChangelog = sinon.stub().returns('');
+        prependFile = sinon.stub().yields();
+        requireStubs = {
+            './ensureCleanLocalGitState': ensureCleanLocalGitState,
+            './getMergedPullRequests': getMergedPullRequests,
+            './createChangelog': createChangelog,
+            '/foo/package.json': { repository: { url: 'https://github.com/foo/bar.git' } },
+            prepend: prependFile
+        };
+
+        cli = proxyquire('../../../lib/cli', requireStubs).default;
     });
 
     afterEach(function () {
-        ensureCleanLocalGitState.resolves();
-        ensureCleanLocalGitState.reset();
-        getMergedPullRequests.reset();
-        createChangelog.reset();
         process.cwd.restore();
-        prependFile.reset();
     });
 
     it('should throw if no version number was specified', function () {
@@ -45,12 +44,13 @@ describe('CLI', function () {
     });
 
     it('should throw if the repository is dirty', function () {
-        ensureCleanLocalGitState.rejects('Local copy is not clean');
-        expect(cli.run('1.0 ', options)).to.be.rejectedWith('Local copy is not clean');
+        ensureCleanLocalGitState.rejects(new Error('Local copy is not clean'));
+
+        return expect(cli.run('1.0 ', options)).to.be.rejectedWith('Local copy is not clean');
     });
 
     it('should not throw if the repository is dirty', function () {
-        ensureCleanLocalGitState.rejects('Local copy is not clean');
+        ensureCleanLocalGitState.rejects(new Error('Local copy is not clean'));
         createChangelog.returns('sloppy changelog');
         return cli.run('1.0 ', { sloppy: true })
             .then(function () {
@@ -63,6 +63,7 @@ describe('CLI', function () {
         beforeEach(function () {
             requireStubs['/foo/package.json']['pr-log'] = { validLabels: { foo: 'Foo', bar: 'Bar' } };
         });
+
         it('should use custom labels if they are provided in package.json', function () {
             const expectedGithubRepo = 'foo/bar';
             createChangelog.returns('generated changelog');
@@ -80,11 +81,6 @@ describe('CLI', function () {
                 expect(prependFile).to.have.been.calledOnce;
                 expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'generated changelog');
             });
-        });
-        afterEach(function () {
-            delete requireStubs['/foo/package.json']['pr-log']; // eslint-disable-line
-            // preferred, but not defined on TravisCI
-            // Reflect.deleteProperty(requireStubs['/foo/package.json'], 'pr-log');
         });
     });
 
