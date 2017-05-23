@@ -53,10 +53,10 @@ describe('CLI', function () {
         ensureCleanLocalGitState.rejects('Local copy is not clean');
         createChangelog.returns('sloppy changelog');
         return cli.run('1.0 ', { sloppy: true })
-          .then(function () {
-              expect(prependFile).to.have.been.calledOnce;
-              expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'sloppy changelog');
-          });
+            .then(function () {
+                expect(prependFile).to.have.been.calledOnce;
+                expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'sloppy changelog');
+            });
     });
 
     describe('custom labels', function () {
@@ -67,8 +67,7 @@ describe('CLI', function () {
             const expectedGithubRepo = 'foo/bar';
             createChangelog.returns('generated changelog');
 
-            return cli.run('1.0.0', options)
-            .then(function () {
+            return cli.run('1.0.0', options).then(function () {
                 expect(ensureCleanLocalGitState).to.have.been.calledOnce;
                 expect(ensureCleanLocalGitState).to.have.been.calledWith(expectedGithubRepo);
 
