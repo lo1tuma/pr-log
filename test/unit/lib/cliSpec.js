@@ -63,6 +63,7 @@ describe('CLI', function () {
         beforeEach(function () {
             requireStubs['/foo/package.json']['pr-log'] = { validLabels: { foo: 'Foo', bar: 'Bar' } };
         });
+
         it('should use custom labels if they are provided in package.json', function () {
             const expectedGithubRepo = 'foo/bar';
             createChangelog.returns('generated changelog');
@@ -80,11 +81,6 @@ describe('CLI', function () {
                 expect(prependFile).to.have.been.calledOnce;
                 expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'generated changelog');
             });
-        });
-        afterEach(function () {
-            delete requireStubs['/foo/package.json']['pr-log']; // eslint-disable-line
-            // preferred, but not defined on TravisCI
-            // Reflect.deleteProperty(requireStubs['/foo/package.json'], 'pr-log');
         });
     });
 
