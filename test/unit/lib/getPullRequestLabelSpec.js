@@ -2,7 +2,6 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
-import sinonAsPromised from 'sinon-as-promised';
 import Promise from 'bluebird';
 import rest from 'restling';
 import getPullRequestLabel from '../../../lib/getPullRequestLabel';
@@ -10,7 +9,6 @@ import defaultValidLabels from '../../../lib/validLabels';
 
 const expect = chai.expect;
 
-sinonAsPromised(Promise);
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 
@@ -24,7 +22,7 @@ describe('getPullRequestLabel', function () {
     beforeEach(function () {
         response.data = [ { name: 'bug' } ];
 
-        getStub = sinon.stub(rest, 'get').resolves(response);
+        getStub = sinon.stub(rest, 'get').usingPromise(Promise).resolves(response);
     });
 
     afterEach(function () {
