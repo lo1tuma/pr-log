@@ -83,7 +83,9 @@ describe('CLI', function () {
             });
         });
         afterEach(function () {
-            Reflect.deleteProperty(requireStubs['/foo/package.json'], 'pr-log');
+            delete requireStubs['/foo/package.json']['pr-log']; // eslint-disable-line
+            // preferred, but not defined on TravisCI
+            // Reflect.deleteProperty(requireStubs['/foo/package.json'], 'pr-log');
         });
     });
 
