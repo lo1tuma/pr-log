@@ -59,6 +59,34 @@ describe('CLI', function () {
           });
     });
 
+    describe('custom labels', function () {
+        beforeEach(function () {
+            requireStubs['/foo/package.json']['pr-log'] = { validLabels: { foo: 'Foo', bar: 'Bar' } };
+        });
+        it('should use custom labels if they are provided in package.json', function () {
+            const expectedGithubRepo = 'foo/bar';
+            createChangelog.returns('generated changelog');
+
+            return cli.run('1.0.0', options)
+            .then(function () {
+                expect(ensureCleanLocalGitState).to.have.been.calledOnce;
+                expect(ensureCleanLocalGitState).to.have.been.calledWith(expectedGithubRepo);
+
+                expect(getMergedPullRequests).to.have.been.calledOnce;
+                expect(getMergedPullRequests).to.have.been.calledWith(expectedGithubRepo, { foo: 'Foo', bar: 'Bar' });
+
+                expect(createChangelog).to.have.been.calledOnce;
+                expect(createChangelog).to.have.been.calledWith('1.0.0', { foo: 'Foo', bar: 'Bar' });
+
+                expect(prependFile).to.have.been.calledOnce;
+                expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'generated changelog');
+            });
+        });
+        afterEach(function () {
+            Reflect.deleteProperty(requireStubs['/foo/package.json'], 'pr-log');
+        });
+    });
+
     it('should report the generated changelog', function () {
         const expectedGithubRepo = 'foo/bar';
 
