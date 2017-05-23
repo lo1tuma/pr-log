@@ -39,7 +39,7 @@ You have to follow these steps to use `pr-log` without problems.
 
 ### GitHub
 
-Currently the categories for the changelog are hardcoded in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
+The default categories for the changelog are set in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
 
 ```
 bug: 'Bug Fixes',
@@ -49,6 +49,19 @@ feature: 'Features',
 enhancement: 'Enhancements',
 build: 'Build-Related',
 breaking: 'Breaking Changes'
+```
+
+However, you can also create a custom mapping by adding a `pr-log.validLabels` section to your `package.json`. For example:
+
+```
+  ...
+  "pr-log": {
+      "validLabels": {
+          "core": "Core features",
+          "addon": "Addons"
+      }
+  }
+  ...
 ```
 
 To use `pr-log` your GitHub project needs some small configuration:
