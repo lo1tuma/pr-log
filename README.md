@@ -1,3 +1,4 @@
+[![Greenkeeper badge](https://badges.greenkeeper.io/lo1tuma/pr-log.svg)](https://greenkeeper.io/)
 [![NPM Version](https://img.shields.io/npm/v/pr-log.svg?style=flat)](https://www.npmjs.org/package/pr-log)
 [![Build Status](https://img.shields.io/travis/lo1tuma/pr-log/master.svg?style=flat)](https://travis-ci.org/lo1tuma/pr-log)
 [![Coverage Status](https://img.shields.io/coveralls/lo1tuma/pr-log.svg?style=flat)](https://coveralls.io/r/lo1tuma/pr-log)
@@ -11,7 +12,7 @@
 
 The main features:
 
-* Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag. This works by 
+* Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag. This works by
     * first getting a list of all tags
     * than removing all tags that are not compatible to [semver versioning](http://semver.org/)
     * sort the tags
@@ -39,7 +40,7 @@ You have to follow these steps to use `pr-log` without problems.
 
 ### GitHub
 
-Currently the categories for the changelog are hardcoded in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
+The default categories for the changelog are set in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
 
 ```
 bug: 'Bug Fixes',
@@ -49,6 +50,19 @@ feature: 'Features',
 enhancement: 'Enhancements',
 build: 'Build-Related',
 breaking: 'Breaking Changes'
+```
+
+However, you can also create a custom mapping by adding a `pr-log.validLabels` section to your `package.json`. For example:
+
+```
+  ...
+  "pr-log": {
+      "validLabels": {
+          "core": "Core features",
+          "addon": "Addons"
+      }
+  }
+  ...
 ```
 
 To use `pr-log` your GitHub project needs some small configuration:
@@ -70,9 +84,9 @@ As `pr-log` reads repository information from your project you have to add the `
 
 ## Usage
 
-To create or update your changelog run 
+To create or update your changelog run
 
-```pr-log <version-number>``` where `version-number` is the name of this release
+```pr-log [options] <version-number>``` where `version-number` is the name of this release
 
 Example:
 
@@ -95,6 +109,12 @@ Given the following setup:
 
 * Fix some spelling mistakes in documentation. (#22)
 ```
+
+### Options
+
+#### --sloppy
+
+The `--sloppy` option defaults to false. When set, it allows `pr-log` to generate a changelog even when you are not on the `master` branch. This should not be used in production!
 
 ### Correct usage makes a clean and complete changelog
 

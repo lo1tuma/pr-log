@@ -1,3 +1,19 @@
+## 2.0.0 (May 23, 2017)
+
+### Breaking Changes
+
+* Drop nodejs 0.x and 5.x support (#79)
+* Skip prerelease tags and upgrade semver (#76)
+
+### Features
+
+* Allow the user to configure PR label to group mapping (#78)
+* Added --sloppy option (#75)
+
+### Enhancements
+
+* Handle PRs that don't match expected merge format (#77)
+
 ## 1.6.0 (August 25, 2016)
 
 ### Bug Fixes
