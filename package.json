@@ -36,7 +36,7 @@
         "eslint": "3.19.0",
         "eslint-config-holidaycheck": "0.11.0",
         "eslint-plugin-mocha": "4.9.0",
-        "mocha": "3.4.1",
+        "mocha": "3.4.2",
         "nyc": "^10.3.2",
         "proxyquire": "1.8.0",
         "sinon": "2.3.1",
