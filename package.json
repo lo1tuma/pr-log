@@ -33,7 +33,7 @@
         "chai": "3.5.0",
         "chai-as-promised": "6.0.0",
         "coveralls": "2.13.1",
-        "eslint": "3.19.0",
+        "eslint": "4.1.0",
         "eslint-config-holidaycheck": "0.11.0",
         "eslint-plugin-mocha": "4.9.0",
         "mocha": "3.4.1",
