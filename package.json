@@ -35,7 +35,7 @@
         "coveralls": "2.13.1",
         "eslint": "3.19.0",
         "eslint-config-holidaycheck": "0.11.0",
-        "eslint-plugin-mocha": "4.9.0",
+        "eslint-plugin-mocha": "4.11.0",
         "mocha": "3.4.1",
         "nyc": "^11.0.1",
         "proxyquire": "1.8.0",
