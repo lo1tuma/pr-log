@@ -3,6 +3,11 @@
     "version": "2.0.0",
     "description": "Changelog generator based on GitHub Pull Requests",
     "bin": "dist/bin/pr-log.js",
+    "files": [
+        "dist/",
+        "LICENSE",
+        "README.md"
+    ],
     "scripts": {
         "build": "babel lib --out-dir dist && babel bin --out-dir dist/bin",
         "pretest": "eslint .",
