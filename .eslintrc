@@ -5,11 +5,9 @@
         "node": true
     },
 
-    "globals": {
-        "Promise": true
-    },
-
-    "ecmaFeatures": {
-        "globalReturn": false
+    "parserOptions": {
+        "ecmaFeatures": {
+            "globalReturn": false
+        }
     }
 }
