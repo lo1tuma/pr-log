@@ -1,5 +1,9 @@
 {
-    "presets": [ "es2015" ],
+    "presets": [
+        [
+            "env", { "targets": { "node": "4" } }
+        ]
+    ],
     "env": {
         "coverage": {
             "sourceMaps": "inline",
