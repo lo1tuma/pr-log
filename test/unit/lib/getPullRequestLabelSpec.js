@@ -2,7 +2,7 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
-import Promise from 'bluebird';
+import bluebird from 'bluebird';
 import rest from 'restling';
 import getPullRequestLabel from '../../../lib/getPullRequestLabel';
 import defaultValidLabels from '../../../lib/validLabels';
@@ -22,7 +22,7 @@ describe('getPullRequestLabel', function () {
     beforeEach(function () {
         response.data = [ { name: 'bug' } ];
 
-        getStub = sinon.stub(rest, 'get').usingPromise(Promise).resolves(response);
+        getStub = sinon.stub(rest, 'get').usingPromise(bluebird).resolves(response);
     });
 
     afterEach(function () {
