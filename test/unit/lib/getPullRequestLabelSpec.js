@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
 import Promise from 'bluebird';
 import rest from 'restling';
-import getPullRequestLabel from '../../../lib/getPullRequestLabel';
+import getPullRequestLabel from '../../../lib/getGithubPullRequest';
 import defaultValidLabels from '../../../lib/validLabels';
 
 const expect = chai.expect;

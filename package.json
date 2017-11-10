@@ -8,7 +8,7 @@
         "pretest": "eslint .",
         "test": "nyc npm run test:unit",
         "prepublish": "npm run build",
-        "test:unit": "mocha test",
+        "test:unit": "mocha --compilers js:babel-core/register test",
         "coveralls": "cat ./build/coverage/lcov.info | coveralls"
     },
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
