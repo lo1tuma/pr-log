@@ -24,7 +24,7 @@
         "git-promise": "0.3.1",
         "git-url-parse": "7.0.0",
         "moment": "2.20.1",
-        "parse-github-repo-url": "1.4.0",
+        "parse-github-repo-url": "1.4.1",
         "prepend": "1.0.2",
         "ramda": "0.25.0",
         "restling": "0.9.1",
