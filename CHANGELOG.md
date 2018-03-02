@@ -1,3 +1,46 @@
+## 2.1.0 (March 3, 2018)
+
+### Dependency Upgrades
+
+* Update chai to version 4.1.2 (#124)
+* Update git-url-parse to version 8.1.0 (#123)
+* chore(package): update coveralls to version 3.0.0 (#122)
+* Update mocha to version 5.0.1 (#121)
+* Update sinon to version 4.4.2 (#120)
+* Update babel-register to the latest version 🚀 (#104)
+* Update babel-cli to the latest version 🚀 (#105)
+* Update parse-github-repo-url to the latest version 🚀 (#106)
+* Update bluebird to the latest version 🚀 (#111)
+* Update ramda to the latest version 🚀 (#112)
+* fix(package): update moment to version 2.20.1 (#119)
+* fix(package): update commander to version 2.14.1 (#118)
+* chore(package): update eslint to version 4.7.0 (#109)
+* Update sinon to the latest version 🚀 (#101)
+* Update sinon to the latest version 🚀 (#88)
+* Update eslint and eslint-config-holidaycheck to the latest version 🚀 (#95)
+* Update eslint-plugin-mocha to the latest version 🚀 (#92)
+* Update chai-as-promised to the latest version 🚀 (#97)
+* Update commander to the latest version 🚀 (#96)
+* Update chai-as-promised to the latest version 🚀 (#90)
+* Update commander to the latest version 🚀 (#93)
+* Update git-url-parse to the latest version 🚀 (#91)
+* Update sinon-chai to the latest version 🚀 (#89)
+* Update nyc to the latest version 🚀 (#85)
+* Update ramda to the latest version 🚀 (#86)
+* Update dependencies to enable Greenkeeper 🌴 (#82)
+* Update eslint (#81)
+
+### Bug Fixes
+
+* Reduce cyclomatic complexity to fix build (#117)
+
+### Build-Related
+
+* Use files whitelist instead of .npmignore (#100)
+* Switch to babel-preset-env (#99)
+* Add node 8 test environment (#98)
+* Move to nyc for code coverage (#80)
+
 ## 2.0.0 (May 23, 2017)
 
 ### Breaking Changes

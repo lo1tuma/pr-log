@@ -1,6 +1,6 @@
 {
     "name": "pr-log",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Changelog generator based on GitHub Pull Requests",
     "bin": "dist/bin/pr-log.js",
     "files": [
