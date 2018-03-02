@@ -37,7 +37,7 @@
         "babel-register": "6.26.0",
         "chai": "3.5.0",
         "chai-as-promised": "7.1.1",
-        "coveralls": "2.13.1",
+        "coveralls": "3.0.0",
         "eslint": "^4.7.0",
         "eslint-config-holidaycheck": "0.12.1",
         "eslint-plugin-mocha": "4.11.0",
