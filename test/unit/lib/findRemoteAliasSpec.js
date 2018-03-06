@@ -2,7 +2,7 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
-import proxyquire from 'proxyquire';
+import findRemoteAliasFactory from '../../../lib/findRemoteAlias';
 
 const expect = chai.expect;
 
@@ -12,11 +12,9 @@ chai.use(chaiAsPromised);
 describe('findRemoteAlias', function () {
     const git = sinon.stub();
     const githubRepo = 'foo/bar';
-    const requireStubs = {
-        'git-promise': git
-    };
+    const dependencies = { git };
 
-    const findRemoteAlias = proxyquire('../../../lib/findRemoteAlias', requireStubs).default;
+    const findRemoteAlias = findRemoteAliasFactory(dependencies);
 
     beforeEach(function () {
         git.resolves('');

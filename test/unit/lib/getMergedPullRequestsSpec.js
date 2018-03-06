@@ -2,8 +2,8 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
-import proxyquire from 'proxyquire';
 import defaultValidLabels from '../../../lib/validLabels';
+import getMergedPullRequestsFactory from '../../../lib/getMergedPullRequests';
 
 const expect = chai.expect;
 
@@ -15,12 +15,9 @@ describe('getMergedPullRequests', function () {
     const git = sinon.stub();
     const anyRepo = 'any/repo';
     const latestVersion = '1.2.3';
-    const requireStubs = {
-        './getPullRequestLabel': { default: getPullRequestLabel },
-        'git-promise': git
-    };
+    const dependencies = { getPullRequestLabel, git };
 
-    const getMergedPullRequests = proxyquire('../../../lib/getMergedPullRequests', requireStubs).default;
+    const getMergedPullRequests = getMergedPullRequestsFactory(dependencies);
 
     let gitTag;
     let gitLog;
@@ -98,7 +95,6 @@ describe('getMergedPullRequests', function () {
             { id: '1', title: 'pr-1 message', label: 'bug' },
             { id: '2', title: 'pr-2 message', label: 'bug' }
         ];
-        const dependencies = {};
 
         gitLog.resolves(gitLogMessages.join('\n'));
 

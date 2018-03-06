@@ -4,6 +4,15 @@ import program from 'commander';
 import createGithubClient from '@octokit/rest';
 import config from '../../package.json';
 import createCliAgent from '../cli';
+import path from 'path';
+import prepend from 'prepend';
+import promisify from 'util.promisify';
+import ensureCleanLocalGitState from '../ensureCleanLocalGitState';
+import getMergedPullRequestsFactory from '../getMergedPullRequests';
+import createChangelog from '../createChangelog';
+import findRemoteAliasFactory from '../findRemoteAlias';
+import git from 'git-promise';
+import getPullRequestLabel from '../getPullRequestLabel';
 
 program
     .version(config.version)
@@ -11,9 +20,18 @@ program
     .usage('<version-number>')
     .parse(process.argv);
 
-const options = { sloppy: program.sloppy };
+const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
+const options = { sloppy: program.sloppy, changelogPath };
+const findRemoteAlias = findRemoteAliasFactory({ git });
+const githubClient = createGithubClient();
+const getMergedPullRequests = getMergedPullRequestsFactory({ githubClient, git, getPullRequestLabel });
 const dependencies = {
-    githubClient: createGithubClient()
+    githubClient,
+    prependFile: promisify(prepend),
+    packageInfo: require(path.join(process.cwd(), 'package.json')),
+    ensureCleanLocalGitState: ensureCleanLocalGitState({ git, findRemoteAlias }),
+    getMergedPullRequests,
+    createChangelog
 };
 const cliAgent = createCliAgent(dependencies);
 
