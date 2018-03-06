@@ -28,7 +28,8 @@
         "prepend": "1.0.2",
         "ramda": "0.25.0",
         "restling": "0.9.1",
-        "semver": "^5.3.0"
+        "semver": "^5.3.0",
+        "util.promisify": "^1.0.0"
     },
     "devDependencies": {
         "babel-cli": "6.26.0",

@@ -13,4 +13,8 @@ program
 const options = { sloppy: program.sloppy };
 cli
     .run(program.args[0], options)
-    .done();
+    .catch((error) => {
+        // eslint-disable-next-line no-console, no-warning-comments
+        console.error(error);
+        process.exitCode = 1;
+    });
