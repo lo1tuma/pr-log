@@ -98,16 +98,17 @@ describe('getMergedPullRequests', function () {
             { id: '1', title: 'pr-1 message', label: 'bug' },
             { id: '2', title: 'pr-2 message', label: 'bug' }
         ];
+        const dependencies = {};
 
         gitLog.resolves(gitLogMessages.join('\n'));
 
-        return getMergedPullRequests(anyRepo, defaultValidLabels)
+        return getMergedPullRequests(anyRepo, defaultValidLabels, dependencies)
             .then(function (pullRequests) {
                 expect(getPullRequestLabel).to.have.been.calledTwice;
                 expect(getPullRequestLabel)
-                    .to.have.been.calledWithExactly(anyRepo, defaultValidLabels, '1');
+                    .to.have.been.calledWithExactly(anyRepo, defaultValidLabels, '1', dependencies);
                 expect(getPullRequestLabel)
-                    .to.have.been.calledWithExactly(anyRepo, defaultValidLabels, '2');
+                    .to.have.been.calledWithExactly(anyRepo, defaultValidLabels, '2', dependencies);
 
                 expect(pullRequests).to.deep.equal(expectedPullRequests);
             });
