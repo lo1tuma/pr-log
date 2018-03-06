@@ -8,10 +8,11 @@ import path from 'path';
 import prepend from 'prepend';
 import promisify from 'util.promisify';
 import ensureCleanLocalGitState from '../ensureCleanLocalGitState';
-import getMergedPullRequests from '../getMergedPullRequests';
+import getMergedPullRequestsFactory from '../getMergedPullRequests';
 import createChangelog from '../createChangelog';
 import findRemoteAliasFactory from '../findRemoteAlias';
-import git from '../git-promise';
+import git from 'git-promise';
+import getPullRequestLabel from '../getPullRequestLabel';
 
 program
     .version(config.version)
@@ -22,8 +23,10 @@ program
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
 const options = { sloppy: program.sloppy, changelogPath };
 const findRemoteAlias = findRemoteAliasFactory({ git });
+const githubClient = createGithubClient();
+const getMergedPullRequests = getMergedPullRequestsFactory({ githubClient, git, getPullRequestLabel });
 const dependencies = {
-    githubClient: createGithubClient(),
+    githubClient,
     prependFile: promisify(prepend),
     packageInfo: require(path.join(process.cwd(), 'package.json')),
     ensureCleanLocalGitState: ensureCleanLocalGitState({ git, findRemoteAlias }),
