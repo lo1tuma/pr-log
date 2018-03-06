@@ -4,6 +4,12 @@ import program from 'commander';
 import createGithubClient from '@octokit/rest';
 import config from '../../package.json';
 import createCliAgent from '../cli';
+import path from 'path';
+import prepend from 'prepend';
+import promisify from 'util.promisify';
+import ensureCleanLocalGitState from '../ensureCleanLocalGitState';
+import getMergedPullRequests from '../getMergedPullRequests';
+import createChangelog from '../createChangelog';
 
 program
     .version(config.version)
@@ -11,9 +17,15 @@ program
     .usage('<version-number>')
     .parse(process.argv);
 
-const options = { sloppy: program.sloppy };
+const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
+const options = { sloppy: program.sloppy, changelogPath };
 const dependencies = {
-    githubClient: createGithubClient()
+    githubClient: createGithubClient(),
+    prependFile: promisify(prepend),
+    packageInfo: require(path.join(process.cwd(), 'package.json')),
+    ensureCleanLocalGitState,
+    getMergedPullRequests,
+    createChangelog
 };
 const cliAgent = createCliAgent(dependencies);
 
