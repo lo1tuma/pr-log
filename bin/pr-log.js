@@ -10,6 +10,8 @@ import promisify from 'util.promisify';
 import ensureCleanLocalGitState from '../ensureCleanLocalGitState';
 import getMergedPullRequests from '../getMergedPullRequests';
 import createChangelog from '../createChangelog';
+import findRemoteAlias from '../findRemoteAlias';
+import git from '../git-promise';
 
 program
     .version(config.version)
@@ -23,7 +25,7 @@ const dependencies = {
     githubClient: createGithubClient(),
     prependFile: promisify(prepend),
     packageInfo: require(path.join(process.cwd(), 'package.json')),
-    ensureCleanLocalGitState,
+    ensureCleanLocalGitState: ensureCleanLocalGitState({ git, findRemoteAlias }),
     getMergedPullRequests,
     createChangelog
 };

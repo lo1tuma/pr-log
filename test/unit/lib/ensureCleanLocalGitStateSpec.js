@@ -2,7 +2,7 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
-import proxyquire from 'proxyquire';
+import ensureCleanLocalGitStateFactory from '../../../lib/ensureCleanLocalGitState';
 
 const expect = chai.expect;
 
@@ -14,12 +14,9 @@ describe('ensureCleanLocalGitState', function () {
     const findRemoteAlias = sinon.stub();
     const githubRepo = 'foo/bar';
     const remoteAlias = 'origin';
-    const requireStubs = {
-        'git-promise': git,
-        './findRemoteAlias': { default: findRemoteAlias }
-    };
+    const dependencies = { git, findRemoteAlias };
 
-    const ensureCleanLocalGitState = proxyquire('../../../lib/ensureCleanLocalGitState', requireStubs).default;
+    const ensureCleanLocalGitState = ensureCleanLocalGitStateFactory(dependencies);
 
     let gitStatus;
     let gitRevParse;
