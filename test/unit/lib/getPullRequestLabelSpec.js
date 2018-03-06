@@ -2,7 +2,6 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiAsPromised from 'chai-as-promised';
-import BluebirdPromise from 'bluebird';
 import rest from 'restling';
 import getPullRequestLabel from '../../../lib/getPullRequestLabel';
 import defaultValidLabels from '../../../lib/validLabels';
@@ -22,17 +21,17 @@ describe('getPullRequestLabel', function () {
     beforeEach(function () {
         response.data = [ { name: 'bug' } ];
 
-        getStub = sinon.stub(rest, 'get').usingPromise(BluebirdPromise).resolves(response);
+        getStub = sinon.stub(rest, 'get').resolves(response);
     });
 
     afterEach(function () {
         getStub.restore();
     });
 
-    it('should request the correct URL', function () {
+    it('should request the correct URL', async function () {
         const expectedUrl = `https://api.github.com/repos/${anyRepo}/issues/${anyPullRequestId}/labels`;
 
-        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId);
+        await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId);
 
         expect(getStub).to.have.been.calledOnce;
         expect(getStub).to.have.been.calledWith(expectedUrl);

@@ -40,7 +40,7 @@ describe('CLI', function () {
     });
 
     it('should throw if no version number was specified', function () {
-        expect(cli.run).to.throw('version-number not specified');
+        expect(cli.run()).to.be.rejectedWith('version-number not specified');
     });
 
     it('should throw if the repository is dirty', function () {
