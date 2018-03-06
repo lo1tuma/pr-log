@@ -32,7 +32,7 @@ describe('CLI', function () {
             prepend: prependFile
         };
 
-        cli = proxyquire('../../../lib/cli', requireStubs).default;
+        cli = proxyquire('../../../lib/cli', requireStubs).default({});
     });
 
     afterEach(function () {

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 import program from 'commander';
+import createGithubClient from '@octokit/rest';
 import config from '../../package.json';
-import cli from '../cli';
+import createCliAgent from '../cli';
 
 program
     .version(config.version)
@@ -11,8 +12,13 @@ program
     .parse(process.argv);
 
 const options = { sloppy: program.sloppy };
-cli
-    .run(program.args[0], options)
+const dependencies = {
+    githubClient: createGithubClient()
+};
+const cliAgent = createCliAgent(dependencies);
+
+cliAgent
+    .run(program.args[0], options, dependencies)
     .catch((error) => {
         // eslint-disable-next-line no-console, no-warning-comments
         console.error(error);
