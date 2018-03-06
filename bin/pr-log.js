@@ -10,7 +10,7 @@ import promisify from 'util.promisify';
 import ensureCleanLocalGitState from '../ensureCleanLocalGitState';
 import getMergedPullRequests from '../getMergedPullRequests';
 import createChangelog from '../createChangelog';
-import findRemoteAlias from '../findRemoteAlias';
+import findRemoteAliasFactory from '../findRemoteAlias';
 import git from '../git-promise';
 
 program
@@ -21,6 +21,7 @@ program
 
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
 const options = { sloppy: program.sloppy, changelogPath };
+const findRemoteAlias = findRemoteAliasFactory({ git });
 const dependencies = {
     githubClient: createGithubClient(),
     prependFile: promisify(prepend),
