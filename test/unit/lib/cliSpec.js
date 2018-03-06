@@ -40,19 +40,23 @@ describe('CLI', function () {
     });
 
     it('should throw if no version number was specified', function () {
-        expect(cli.run()).to.be.rejectedWith('version-number not specified');
+        return expect(cli.run()).to.be.rejectedWith('version-number not specified');
+    });
+
+    it('should throw if an invalid version number was specified', function () {
+        return expect(cli.run('a.b.c')).to.be.rejectedWith('version-number is invalid');
     });
 
     it('should throw if the repository is dirty', function () {
         ensureCleanLocalGitState.rejects(new Error('Local copy is not clean'));
 
-        return expect(cli.run('1.0 ', options)).to.be.rejectedWith('Local copy is not clean');
+        return expect(cli.run('1.0.0', options)).to.be.rejectedWith('Local copy is not clean');
     });
 
     it('should not throw if the repository is dirty', function () {
         ensureCleanLocalGitState.rejects(new Error('Local copy is not clean'));
         createChangelog.returns('sloppy changelog');
-        return cli.run('1.0 ', { sloppy: true })
+        return cli.run('1.0.0', { sloppy: true })
             .then(function () {
                 expect(prependFile).to.have.been.calledOnce;
                 expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'sloppy changelog');
