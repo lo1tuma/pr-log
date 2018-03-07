@@ -19,7 +19,7 @@
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "@octokit/rest": "^14.0.9",
+        "@octokit/rest": "^15.1.7",
         "bluebird": "3.5.1",
         "commander": "2.14.1",
         "git-promise": "0.3.1",
