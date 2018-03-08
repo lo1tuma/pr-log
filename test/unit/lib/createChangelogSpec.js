@@ -1,7 +1,7 @@
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import createChangelog from '../../../lib/createChangelog';
+import createChangelogFactory from '../../../lib/createChangelog';
 import defaultValidLabels from '../../../lib/validLabels';
 
 const expect = chai.expect;
@@ -9,17 +9,8 @@ const expect = chai.expect;
 chai.use(sinonChai);
 
 describe('createChangelog', function () {
-    let clock;
-
-    beforeEach(function () {
-        clock = sinon.useFakeTimers();
-    });
-
-    afterEach(function () {
-        clock.restore();
-    });
-
     it('should have a title with the version number and the formatted date', function () {
+        const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
         const changelog = createChangelog('1.0.0', defaultValidLabels, []);
         const expectedTitle = '## 1.0.0 (January 1, 1970)';
 
@@ -27,6 +18,7 @@ describe('createChangelog', function () {
     });
 
     it('should create a formatted changelog', function () {
+        const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
         const mergedPullRequests = [
             {
                 id: '1',
@@ -63,6 +55,7 @@ describe('createChangelog', function () {
     });
 
     it('should use custom labels when provided', function () {
+        const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
         const customValidLabels = {
             core: 'Core Features',
             addons: 'Addons'
