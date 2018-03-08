@@ -1,14 +1,10 @@
+import test from 'ava';
 import getGithubRepo from '../../../lib/getGithubRepo';
-import chai from 'chai';
 
-const expect = chai.expect;
+test('extracts the repo path of a github URL', (t) => {
+    t.is(getGithubRepo('git://github.com/foo/bar.git#master'), 'foo/bar');
+});
 
-describe('getGithubRepo', function () {
-    it('should extract the repo path of a github URL', function () {
-        expect(getGithubRepo('git://github.com/foo/bar.git#master')).to.equal('foo/bar');
-    });
-
-    it('should throw if the given URL is not a github URL', function () {
-        expect(getGithubRepo.bind(null, 'git://foo.com/bar.git')).to.throw('Invalid GitHub URI git://foo.com/bar.git');
-    });
+test('throws if the given URL is not a github URL', (t) => {
+    t.throws(() => getGithubRepo('git://foo.com/bar.git'), 'Invalid GitHub URI git://foo.com/bar.git');
 });

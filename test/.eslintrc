@@ -1,15 +1,8 @@
 {
-    "env": {
-        "mocha": true
-    },
-
-    "plugins": [ "eslint-plugin-mocha" ],
+    "plugins": [ "ava" ],
 
     "rules": {
-        "no-unused-expressions": "off",
-        "max-nested-callbacks": [ "error", 5 ],
         "max-statements": "off",
-
-        "mocha/no-exclusive-tests": "error"
+        "ava/no-only-test": "error",
     }
 }

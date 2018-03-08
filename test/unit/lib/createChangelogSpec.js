@@ -1,97 +1,89 @@
-import chai from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
+import test from 'ava';
 import createChangelogFactory from '../../../lib/createChangelog';
 import defaultValidLabels from '../../../lib/validLabels';
 
-const expect = chai.expect;
+test('contains a title with the version number and the formatted date', (t) => {
+    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
+    const changelog = createChangelog('1.0.0', defaultValidLabels, []);
+    const expectedTitle = '## 1.0.0 (January 1, 1970)';
 
-chai.use(sinonChai);
+    t.true(changelog.includes(expectedTitle));
+});
 
-describe('createChangelog', function () {
-    it('should have a title with the version number and the formatted date', function () {
-        const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
-        const changelog = createChangelog('1.0.0', defaultValidLabels, []);
-        const expectedTitle = '## 1.0.0 (January 1, 1970)';
+test('creates a formatted changelog', (t) => {
+    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
+    const mergedPullRequests = [
+        {
+            id: '1',
+            title: 'Fixed bug foo',
+            label: 'bug'
+        },
+        {
+            id: '2',
+            title: 'Fixed bug bar',
+            label: 'bug'
+        },
+        {
+            id: '3',
+            title: 'Fix spelling error',
+            label: 'documentation'
+        }
+    ];
 
-        expect(changelog).to.contain(expectedTitle);
-    });
+    const expectedChangelog = [
+        '### Bug Fixes',
+        '',
+        '* Fixed bug foo (#1)',
+        '* Fixed bug bar (#2)',
+        '',
+        '### Documentation',
+        '',
+        '* Fix spelling error (#3)',
+        ''
+    ].join('\n');
 
-    it('should create a formatted changelog', function () {
-        const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
-        const mergedPullRequests = [
-            {
-                id: '1',
-                title: 'Fixed bug foo',
-                label: 'bug'
-            },
-            {
-                id: '2',
-                title: 'Fixed bug bar',
-                label: 'bug'
-            },
-            {
-                id: '3',
-                title: 'Fix spelling error',
-                label: 'documentation'
-            }
-        ];
+    const changelog = createChangelog('1.0.0', defaultValidLabels, mergedPullRequests);
 
-        const expectedChangelog = [
-            '### Bug Fixes',
-            '',
-            '* Fixed bug foo (#1)',
-            '* Fixed bug bar (#2)',
-            '',
-            '### Documentation',
-            '',
-            '* Fix spelling error (#3)',
-            ''
-        ].join('\n');
+    t.true(changelog.includes(expectedChangelog));
+});
 
-        const changelog = createChangelog('1.0.0', defaultValidLabels, mergedPullRequests);
+test('uses custom labels when provided', (t) => {
+    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
+    const customValidLabels = {
+        core: 'Core Features',
+        addons: 'Addons'
+    };
+    const mergedPullRequests = [
+        {
+            id: '1',
+            title: 'Fixed bug foo',
+            label: 'core'
+        },
+        {
+            id: '2',
+            title: 'Fixed bug bar',
+            label: 'addons'
+        },
+        {
+            id: '3',
+            title: 'Fix spelling error',
+            label: 'core'
+        }
+    ];
 
-        expect(changelog).to.contain(expectedChangelog);
-    });
+    const expectedChangelog = [
+        '### Core Features',
+        '',
+        '* Fixed bug foo (#1)',
+        '* Fix spelling error (#3)',
+        '',
+        '### Addons',
+        '',
+        '* Fixed bug bar (#2)',
+        ''
+    ].join('\n');
 
-    it('should use custom labels when provided', function () {
-        const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
-        const customValidLabels = {
-            core: 'Core Features',
-            addons: 'Addons'
-        };
-        const mergedPullRequests = [
-            {
-                id: '1',
-                title: 'Fixed bug foo',
-                label: 'core'
-            },
-            {
-                id: '2',
-                title: 'Fixed bug bar',
-                label: 'addons'
-            },
-            {
-                id: '3',
-                title: 'Fix spelling error',
-                label: 'core'
-            }
-        ];
+    const changelog = createChangelog('1.0.0', customValidLabels, mergedPullRequests);
 
-        const expectedChangelog = [
-            '### Core Features',
-            '',
-            '* Fixed bug foo (#1)',
-            '* Fix spelling error (#3)',
-            '',
-            '### Addons',
-            '',
-            '* Fixed bug bar (#2)',
-            ''
-        ].join('\n');
-
-        const changelog = createChangelog('1.0.0', customValidLabels, mergedPullRequests);
-
-        expect(changelog).to.contain(expectedChangelog);
-    });
+    t.true(changelog.includes(expectedChangelog));
 });

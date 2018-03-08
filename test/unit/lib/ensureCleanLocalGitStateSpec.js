@@ -1,77 +1,63 @@
-import chai from 'chai';
+import test from 'ava';
 import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import chaiAsPromised from 'chai-as-promised';
 import ensureCleanLocalGitStateFactory from '../../../lib/ensureCleanLocalGitState';
 
-const expect = chai.expect;
+const githubRepo = 'foo/bar';
 
-chai.use(sinonChai);
-chai.use(chaiAsPromised);
-
-describe('ensureCleanLocalGitState', function () {
-    const git = sinon.stub().resolves();
+function factory({ status = '', revParse = 'master', revList = '' } = {}, git = sinon.stub()) {
     const findRemoteAlias = sinon.stub();
-    const githubRepo = 'foo/bar';
     const remoteAlias = 'origin';
     const dependencies = { git, findRemoteAlias };
 
-    const ensureCleanLocalGitState = ensureCleanLocalGitStateFactory(dependencies);
+    git.resolves();
+    git.withArgs('status -s').resolves(status);
+    git.withArgs('rev-parse --abbrev-ref HEAD').resolves(revParse);
+    git.withArgs('rev-list --left-right master...origin/master').resolves(revList);
 
-    let gitStatus;
-    let gitRevParse;
-    let gitRevList;
+    findRemoteAlias.resolves(remoteAlias);
 
-    beforeEach(function () {
-        gitStatus = git.withArgs('status -s').resolves('');
-        gitRevParse = git.withArgs('rev-parse --abbrev-ref HEAD').resolves('master');
-        gitRevList = git.withArgs('rev-list --left-right master...origin/master').resolves('');
+    return ensureCleanLocalGitStateFactory(dependencies);
+}
 
-        findRemoteAlias.resolves(remoteAlias);
-    });
+test('rejects if `git status -s` is not empty', async (t) => {
+    const ensureCleanLocalGitState = factory({ status: 'M foobar\n' });
 
-    afterEach(function () {
-        git.reset();
-        findRemoteAlias.reset();
-    });
+    await t.throws(ensureCleanLocalGitState(githubRepo), 'Local copy is not clean');
+});
 
-    it('should reject if `git status -s` is not empty', function () {
-        gitStatus.resolves('M foobar\n');
+test('rejects if current branch is not master', async (t) => {
+    const ensureCleanLocalGitState = factory({ revParse: 'feature-foo\n' });
 
-        return expect(ensureCleanLocalGitState(githubRepo))
-            .to.be.rejectedWith('Local copy is not clean');
-    });
+    await t.throws(ensureCleanLocalGitState(githubRepo), 'Not on master branch');
+});
 
-    it('should reject if current branch is not master', function () {
-        gitRevParse.resolves('feature-foo\n');
+test('rejects if the local branch is ahead of the remote', async (t) => {
+    const ensureCleanLocalGitState = factory({ revList: '<commit-sha1\n' });
+    const expectedMessage = 'Local git master branch is 1 commits ahead and 0 commits behind of origin/master';
 
-        return expect(ensureCleanLocalGitState(githubRepo))
-            .to.be.rejectedWith('Not on master branch');
-    });
+    await t.throws(ensureCleanLocalGitState(githubRepo), expectedMessage);
+});
 
-    it('should reject if the local branch is ahead of the remote', function () {
-        gitRevList.resolves('<commit-sha1\n');
+test('rejects if the local branch is behind the remote', async (t) => {
+    const ensureCleanLocalGitState = factory({ revList: '>commit-sha1\n' });
+    const expectedMessage = 'Local git master branch is 0 commits ahead and 1 commits behind of origin/master';
 
-        return expect(ensureCleanLocalGitState(githubRepo))
-            .to.be.rejectedWith('Local git master branch is 1 commits ahead and 0 commits behind of origin/master');
-    });
+    await t.throws(ensureCleanLocalGitState(githubRepo), expectedMessage);
+});
 
-    it('should reject if the local branch is behind the remote', function () {
-        gitRevList.resolves('>commit-sha1\n');
+test('fetches the remote repository', async (t) => {
+    const git = sinon.stub();
+    const ensureCleanLocalGitState = factory({}, git);
 
-        return expect(ensureCleanLocalGitState(githubRepo))
-            .to.be.rejectedWith('Local git master branch is 0 commits ahead and 1 commits behind of origin/master');
-    });
+    await ensureCleanLocalGitState(githubRepo);
 
-    it('should fetch the remote repository', function () {
-        return ensureCleanLocalGitState(githubRepo)
-            .then(function () {
-                expect(git).to.have.been.calledWithExactly('fetch origin');
-            });
-    });
+    t.true(git.calledWithExactly('fetch origin'));
+});
 
-    it('should fulfill if the local git state is clean', function () {
-        return expect(ensureCleanLocalGitState(githubRepo))
-            .to.be.fulfilled;
-    });
+test('fulfills if the local git state is clean', async (t) => {
+    const ensureCleanLocalGitState = factory();
+
+    await ensureCleanLocalGitState(githubRepo);
+
+    t.pass();
 });
