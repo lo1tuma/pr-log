@@ -54,15 +54,13 @@ breaking: 'Breaking Changes'
 
 However, you can also create a custom mapping by adding a `pr-log.validLabels` section to your `package.json`. For example:
 
-```
-  ...
+```json
   "pr-log": {
       "validLabels": {
           "core": "Core features",
           "addon": "Addons"
       }
   }
-  ...
 ```
 
 To use `pr-log` your GitHub project needs some small configuration:
@@ -75,7 +73,7 @@ To use `pr-log` your GitHub project needs some small configuration:
 
 As `pr-log` reads repository information from your project you have to add the `repository` information in your `package.json`
 
-```
+```json
 "repository": {
     "type": "git",
     "url": "https://github.com/<your username>/<your repository name>.git"
@@ -98,7 +96,7 @@ Given the following setup:
 
 `pr-log 2.4.7` creates a changelog with the following example content:
 
-```
+```markdown
 ## 2.4.7 (January 20, 2015)
 
 ### Breaking Changes
@@ -142,7 +140,7 @@ This project was initially started to solve these problems for [`mongobird`](htt
 
 After working for some time with the tool and having e.g. two releases, the file content could look like this:
 
-```
+```markdown
 ## 2.4.7 (January 20, 2015)
 
 ### Breaking Changes
