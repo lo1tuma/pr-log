@@ -84,7 +84,7 @@ As `pr-log` reads repository information from your project you have to add the `
 
 To create or update your changelog run
 
-```pr-log [options] <version-number>``` where `version-number` is the name of this release
+`pr-log [options] <version-number>` where `version-number` is the name of this release
 
 Example:
 
