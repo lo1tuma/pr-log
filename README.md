@@ -90,14 +90,14 @@ Example:
 
 Given the following setup:
 
-* In GitHub a tag named `2.4.7` exists that is behind `master`
+* In GitHub a tag named `2.0.0` exists that is behind `master`
 * A pull request (#13) was created since the last tag that has the label `breaking`
 * A pull request (#22) was created since the last tag that has the label `documentation`
 
-`pr-log 2.4.7` creates a changelog with the following example content:
+`pr-log 2.0.0` creates a changelog with the following example content:
 
 ```markdown
-## 2.4.7 (January 20, 2015)
+## 2.0.0 (January 20, 2015)
 
 ### Breaking Changes
 
@@ -141,7 +141,7 @@ This project was initially started to solve these problems for [`mongobird`](htt
 After working for some time with the tool and having e.g. two releases, the file content could look like this:
 
 ```markdown
-## 2.4.7 (January 20, 2015)
+## 2.0.0 (January 20, 2015)
 
 ### Breaking Changes
 
@@ -151,7 +151,7 @@ After working for some time with the tool and having e.g. two releases, the file
 
 * Fix some spelling mistakes in documentation. (#22)
 
-## 0.1.0 (November 3, 2014)
+## 1.1.0 (November 3, 2014)
 
 ### Feature
 
