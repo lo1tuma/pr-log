@@ -68,7 +68,7 @@ test('uses custom labels if they are provided in package.json', async (t) => {
     t.deepEqual(getMergedPullRequests.firstCall.args, [ 'foo/bar', { foo: 'Foo', bar: 'Bar' } ]);
 
     t.is(createChangelog.callCount, 1);
-    t.deepEqual(createChangelog.firstCall.args, [ '1.0.0', { foo: 'Foo', bar: 'Bar' }, undefined ]);
+    t.deepEqual(createChangelog.firstCall.args, [ '1.0.0', { foo: 'Foo', bar: 'Bar' }, undefined, 'foo/bar' ]);
 });
 
 test('reports the generated changelog', async (t) => {

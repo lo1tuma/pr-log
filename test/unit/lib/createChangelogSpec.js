@@ -33,16 +33,16 @@ test('creates a formatted changelog', (t) => {
     const expectedChangelog = [
         '### Bug Fixes',
         '',
-        '* Fixed bug foo (#1)',
-        '* Fixed bug bar (#2)',
+        '* Fixed bug foo ([#1](https://github.com/any/repo/pull/1))',
+        '* Fixed bug bar ([#2](https://github.com/any/repo/pull/2))',
         '',
         '### Documentation',
         '',
-        '* Fix spelling error (#3)',
+        '* Fix spelling error ([#3](https://github.com/any/repo/pull/3))',
         ''
     ].join('\n');
 
-    const changelog = createChangelog('1.0.0', defaultValidLabels, mergedPullRequests);
+    const changelog = createChangelog('1.0.0', defaultValidLabels, mergedPullRequests, 'any/repo');
 
     t.true(changelog.includes(expectedChangelog));
 });
@@ -74,16 +74,16 @@ test('uses custom labels when provided', (t) => {
     const expectedChangelog = [
         '### Core Features',
         '',
-        '* Fixed bug foo (#1)',
-        '* Fix spelling error (#3)',
+        '* Fixed bug foo ([#1](https://github.com/any/repo/pull/1))',
+        '* Fix spelling error ([#3](https://github.com/any/repo/pull/3))',
         '',
         '### Addons',
         '',
-        '* Fixed bug bar (#2)',
+        '* Fixed bug bar ([#2](https://github.com/any/repo/pull/2))',
         ''
     ].join('\n');
 
-    const changelog = createChangelog('1.0.0', customValidLabels, mergedPullRequests);
+    const changelog = createChangelog('1.0.0', customValidLabels, mergedPullRequests, 'any/repo');
 
     t.true(changelog.includes(expectedChangelog));
 });
