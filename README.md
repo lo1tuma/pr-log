@@ -85,6 +85,20 @@ As `pr-log` reads repository information from your project you have to add the `
 }
 ```
 
+### Changelog formatting
+
+#### Custom date format
+
+If you want to use a custom date format you can configure `pr-log.dateFormat` in your `package.json`. For example:
+
+```json
+{
+  "pr-log": { "dateFormat": "DD.MM.YYYY" }
+}
+```
+
+Please refer to the [moment.js documentation](https://momentjs.com/docs/#/displaying/format/) for details about the format tokens.
+
 ## Usage
 
 To create or update your changelog run

@@ -3,15 +3,24 @@ import createChangelogFactory from '../../../lib/createChangelog';
 import defaultValidLabels from '../../../lib/validLabels';
 
 test('contains a title with the version number and the formatted date', (t) => {
-    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
+    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
     const changelog = createChangelog('1.0.0', defaultValidLabels, []);
     const expectedTitle = '## 1.0.0 (January 1, 1970)';
 
     t.true(changelog.includes(expectedTitle));
 });
 
+test('format the date with a custom date format', (t) => {
+    const packageInfo = { 'pr-log': { dateFormat: 'DD.MM.YYYY' } };
+    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo });
+    const changelog = createChangelog('1.0.0', defaultValidLabels, []);
+    const expectedTitle = '## 1.0.0 (01.01.1970)';
+
+    t.true(changelog.includes(expectedTitle));
+});
+
 test('creates a formatted changelog', (t) => {
-    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
+    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
     const mergedPullRequests = [
         {
             id: '1',
@@ -48,7 +57,7 @@ test('creates a formatted changelog', (t) => {
 });
 
 test('uses custom labels when provided', (t) => {
-    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0) });
+    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
     const customValidLabels = {
         core: 'Core Features',
         addons: 'Addons'
