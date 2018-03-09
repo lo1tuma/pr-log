@@ -153,8 +153,7 @@ After working for some time with the tool and having e.g. two releases, the file
 
 ## 1.1.0 (November 3, 2014)
 
-### Feature
+### Features
 
 * Add fancy feature (#2)
-
 ```
