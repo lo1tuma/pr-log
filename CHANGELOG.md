@@ -1,3 +1,35 @@
+## 3.0.0 (March 9, 2018)
+
+### Breaking Changes
+
+* Make validLabels an array of pairs to define order of changelog sections ([#144](https://github.com/lo1tuma/pr-log/pull/144))
+* Don’t write stacktraces to stderr per default ([#141](https://github.com/lo1tuma/pr-log/pull/141))
+* Make references to pull requests a link ([#142](https://github.com/lo1tuma/pr-log/pull/142))
+* Remove support for nodejs 4 and 7 ([#125](https://github.com/lo1tuma/pr-log/pull/125))
+
+### Enhancements
+
+* Add support for custom date format configuration ([#143](https://github.com/lo1tuma/pr-log/pull/143))
+* Validate CLI argument to be a valid semver version number ([#133](https://github.com/lo1tuma/pr-log/pull/133))
+* Add refactor label ([#132](https://github.com/lo1tuma/pr-log/pull/132))
+
+### Documentation
+
+* Small README.md improvements ([#140](https://github.com/lo1tuma/pr-log/pull/140))
+
+### Dependency Upgrades
+
+* Update commander to the latest version 🚀 ([#137](https://github.com/lo1tuma/pr-log/pull/137))
+* Update @octokit/rest to the latest version 🚀 ([#135](https://github.com/lo1tuma/pr-log/pull/135))
+* Update mocha to the latest version 🚀 ([#128](https://github.com/lo1tuma/pr-log/pull/128))
+
+### Code Refactoring
+
+* Use ava instead of mocha/chai ([#138](https://github.com/lo1tuma/pr-log/pull/138))
+* Remove proxyquire dependency ([#134](https://github.com/lo1tuma/pr-log/pull/134))
+* Use octokit instead of restling ([#131](https://github.com/lo1tuma/pr-log/pull/131))
+* Use async/await instead of bluebird ([#130](https://github.com/lo1tuma/pr-log/pull/130))
+
 ## 2.1.0 (March 3, 2018)
 
 ### Dependency Upgrades
