@@ -40,18 +40,18 @@ You have to follow these steps to use `pr-log` without problems.
 
 ### GitHub
 
-The default categories for the changelog are set in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
+The following categories are defined by default:
 
-```
-bug: 'Bug Fixes',
-upgrade: 'Dependency Upgrades',
-documentation: 'Documentation',
-feature: 'Features',
-enhancement: 'Enhancements',
-build: 'Build-Related',
-breaking: 'Breaking Changes',
-refactor: 'Code Refactoring'
-```
+| GitHub label | Human friendly name | Description |
+| -------------:|:------------- | ------ |
+| `bug` | Bug Fixes | Changes that only fix a bug |
+| `upgrade` | Dependency Upgrades | Any kind of dependency updates |
+| `documentation` | Documentation | Changes to documentation and/or README |
+| `feature` | Features | New features |
+| `enhancement` | Enhancements | Non-breaking improvements of existing features |
+| `build` | Build-Related | Changes related to the build process and/or CI/CD pipeline |
+| `breaking` | Breaking Changes | Backwards-incompatible changes |
+| `refactor` | Code Refactoring | Changes that don’t affect the behavior but improve the code quality |
 
 However, you can also create a custom mapping by adding a `pr-log.validLabels` section to your `package.json`. For example:
 
