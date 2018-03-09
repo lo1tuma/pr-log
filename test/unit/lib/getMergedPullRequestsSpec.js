@@ -1,158 +1,111 @@
-import chai from 'chai';
+import test from 'ava';
 import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import chaiAsPromised from 'chai-as-promised';
 import defaultValidLabels from '../../../lib/validLabels';
 import getMergedPullRequestsFactory from '../../../lib/getMergedPullRequests';
 
-const expect = chai.expect;
+const anyRepo = 'any/repo';
+const latestVersion = '1.2.3';
 
-chai.use(sinonChai);
-chai.use(chaiAsPromised);
+function factory({ tag = latestVersion, log } = {}, git = sinon.stub(), getPullRequestLabel = sinon.stub()) {
+    getPullRequestLabel.resolves('bug');
 
-describe('getMergedPullRequests', function () {
-    const getPullRequestLabel = sinon.stub();
-    const git = sinon.stub();
-    const anyRepo = 'any/repo';
-    const latestVersion = '1.2.3';
+    git.resolves('');
+    git.withArgs('tag --list').resolves(tag);
+    git.withArgs(`log --no-color --pretty=format:"%s (%b)" --merges ${latestVersion}..HEAD`).resolves(log);
+
     const dependencies = { getPullRequestLabel, git };
 
-    const getMergedPullRequests = getMergedPullRequestsFactory(dependencies);
+    return getMergedPullRequestsFactory(dependencies);
+}
 
-    let gitTag;
-    let gitLog;
+test('ignores non-semver tag', async (t) => {
+    const git = sinon.stub();
+    const getMergedPullRequests = factory({ tag: '0.0.1\nfoo\n0.0.2\n0.0.0.0.1' }, git);
+    const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 0.0.2..HEAD';
 
-    beforeEach(function () {
-        git.resolves('');
+    await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-        gitTag = git.withArgs('tag --list');
-        gitTag.resolves(latestVersion);
+    t.true(git.calledWith(expectedGitLogCommand));
+});
 
-        gitLog = git.withArgs(`log --no-color --pretty=format:"%s (%b)" --merges ${latestVersion}..HEAD`);
-        gitLog.resolves();
+test('always usees the highest version', async (t) => {
+    const git = sinon.stub();
+    const getMergedPullRequests = factory({ tag: '1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n0.5.0' }, git);
+    const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
 
-        getPullRequestLabel.resolves('bug');
-    });
+    await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-    afterEach(function () {
-        getPullRequestLabel.reset();
-        git.reset();
-    });
+    t.true(git.calledWith(expectedGitLogCommand));
+});
 
-    describe('detect fromTag', function () {
-        it('should ignore non-semver tag', function () {
-            const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 0.0.2..HEAD';
+test('ignores prerelease versions', async (t) => {
+    const git = sinon.stub();
+    const getMergedPullRequests = factory({ tag: '1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1' }, git);
+    const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
 
-            gitTag.resolves('0.0.1\nfoo\n0.0.2\n0.0.0.0.1');
+    await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-            return getMergedPullRequests(anyRepo, defaultValidLabels)
-                .then(function () {
-                    expect(git).to.have.been.calledWith(expectedGitLogCommand);
-                });
-        });
+    t.true(git.calledWith(expectedGitLogCommand));
+});
 
-        it('should always use the highest version', function () {
-            const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
+test('ignores prerelease versions', async (t) => {
+    const git = sinon.stub();
+    const getMergedPullRequests = factory({ tag: '1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1' }, git);
+    const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
 
-            gitTag.resolves('1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n0.5.0');
+    await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-            return getMergedPullRequests(anyRepo, defaultValidLabels)
-                .then(function () {
-                    expect(git).to.have.been.calledWith(expectedGitLogCommand);
-                });
-        });
+    t.true(git.calledWith(expectedGitLogCommand));
+});
 
-        it('should ignore prerelease versions', function () {
-            const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
+test('extracts id, title and label for merged pull requests', async (t) => {
+    const gitLogMessages = [
+        'Merge pull request #1 from branch (pr-1 message)',
+        'Merge pull request #2 from other (pr-2 message)'
+    ];
+    const expectedPullRequests = [
+        { id: '1', title: 'pr-1 message', label: 'bug' },
+        { id: '2', title: 'pr-2 message', label: 'bug' }
+    ];
+    const getPullRequestLabel = sinon.stub();
+    const git = sinon.stub();
+    const getMergedPullRequests = factory({ log: gitLogMessages.join('\n') }, git, getPullRequestLabel);
 
-            gitTag.resolves('1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1');
+    const pullRequests = await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-            return getMergedPullRequests(anyRepo, defaultValidLabels)
-                .then(function () {
-                    expect(git).to.have.been.calledWith(expectedGitLogCommand);
-                });
-        });
+    t.is(getPullRequestLabel.callCount, 2);
+    t.is(getPullRequestLabel.firstCall.args[2], '1');
+    t.is(getPullRequestLabel.secondCall.args[2], '2');
 
-        it('should ignore prerelease versions', function () {
-            const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
+    t.deepEqual(pullRequests, expectedPullRequests);
+});
 
-            gitTag.resolves('1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1');
+test('works with line feeds in commit message body', async (t) => {
+    const gitLogMessages = [
+        'Merge pull request #1 from A (pr-1 message\n)',
+        'Merge pull request #2 from B (pr-2 message)'
+    ];
+    const expectedResults = [
+        { id: '1', title: 'pr-1 message', label: 'bug' },
+        { id: '2', title: 'pr-2 message', label: 'bug' }
+    ];
+    const getMergedPullRequests = factory({ log: gitLogMessages.join('\n') });
 
-            return getMergedPullRequests(anyRepo)
-                .then(function () {
-                    expect(git).to.have.been.calledWith(expectedGitLogCommand);
-                });
-        });
-    });
+    t.deepEqual(await getMergedPullRequests(anyRepo), expectedResults);
+});
 
-    it('should extract id, title and label for merged pull requests', function () {
-        const gitLogMessages = [
-            'Merge pull request #1 from branch (pr-1 message)',
-            'Merge pull request #2 from other (pr-2 message)'
-        ];
+test('works with parentheses in the commit message body', async (t) => {
+    const gitLogMessages = [ 'Merge pull request #42 from A (pr-42 message (fixes #21))' ];
+    const expectedResults = [ { id: '42', title: 'pr-42 message (fixes #21)', label: 'bug' } ];
+    const getMergedPullRequests = factory({ log: gitLogMessages.join('\n') });
 
-        const expectedPullRequests = [
-            { id: '1', title: 'pr-1 message', label: 'bug' },
-            { id: '2', title: 'pr-2 message', label: 'bug' }
-        ];
+    t.deepEqual(await getMergedPullRequests(anyRepo), expectedResults);
+});
 
-        gitLog.resolves(gitLogMessages.join('\n'));
+test('skips with non-matching parenthesis', async (t) => {
+    const gitLogMessages = [ 'Merge pull request #3 from kadirahq/greenkeeper-update-all' ];
+    const expectedResults = [];
+    const getMergedPullRequests = factory({ log: gitLogMessages.join('\n') });
 
-        return getMergedPullRequests(anyRepo, defaultValidLabels, dependencies)
-            .then(function (pullRequests) {
-                expect(getPullRequestLabel).to.have.been.calledTwice;
-                expect(getPullRequestLabel)
-                    .to.have.been.calledWithExactly(anyRepo, defaultValidLabels, '1', dependencies);
-                expect(getPullRequestLabel)
-                    .to.have.been.calledWithExactly(anyRepo, defaultValidLabels, '2', dependencies);
-
-                expect(pullRequests).to.deep.equal(expectedPullRequests);
-            });
-    });
-
-    it('should work with line feeds in commit message body', function () {
-        const gitLogMessages = [
-            'Merge pull request #1 from A (pr-1 message\n)',
-            'Merge pull request #2 from B (pr-2 message)'
-        ];
-
-        const expectedResults = [
-            { id: '1', title: 'pr-1 message', label: 'bug' },
-            { id: '2', title: 'pr-2 message', label: 'bug' }
-        ];
-
-        gitLog.resolves(gitLogMessages.join('\n'));
-
-        return expect(getMergedPullRequests(anyRepo))
-            .to.become(expectedResults);
-    });
-
-    it('should work with parentheses in the commit message body', function () {
-        const gitLogMessages = [
-            'Merge pull request #42 from A (pr-42 message (fixes #21))'
-        ];
-
-        const expectedResults = [
-            { id: '42', title: 'pr-42 message (fixes #21)', label: 'bug' }
-        ];
-
-        gitLog.resolves(gitLogMessages.join('\n'));
-
-        return expect(getMergedPullRequests(anyRepo))
-            .to.become(expectedResults);
-    });
-
-    it('should skip with non-matching parenthesis', function () {
-        const gitLogMessages = [
-            'Merge pull request #3 from kadirahq/greenkeeper-update-all'
-        ];
-
-        const expectedResults = [
-        ];
-
-        gitLog.resolves(gitLogMessages.join('\n'));
-
-        return expect(getMergedPullRequests(anyRepo))
-            .to.become(expectedResults);
-    });
+    t.deepEqual(await getMergedPullRequests(anyRepo), expectedResults);
 });

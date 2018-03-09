@@ -1,11 +1,6 @@
-import chai from 'chai';
 import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
+import test from 'ava';
 import createCliAgent from '../../../lib/cli';
-
-const expect = chai.expect;
-
-chai.use(sinonChai);
 
 function createCli(dependencies = {}) {
     const {
@@ -25,99 +20,94 @@ function createCli(dependencies = {}) {
     });
 }
 
-describe('CLI', function () {
-    const options = { sloppy: false, changelogPath: '/foo/CHANGELOG.md' };
+const options = { sloppy: false, changelogPath: '/foo/CHANGELOG.md' };
 
-    it('should throw if no version number was specified', function () {
-        const cli = createCli();
-        return expect(cli.run()).to.be.rejectedWith('version-number not specified');
+test('throws if no version number was specified', async (t) => {
+    const cli = createCli();
+
+    await t.throws(cli.run(), 'version-number not specified');
+});
+
+test('throws if an invalid version number was specified', async (t) => {
+    const cli = createCli();
+
+    await t.throws(cli.run('a.b.c'), 'version-number is invalid');
+});
+
+test('throws if the repository is dirty', async (t) => {
+    const ensureCleanLocalGitState = sinon.stub().rejects(new Error('Local copy is not clean'));
+    const cli = createCli({ ensureCleanLocalGitState });
+
+    await t.throws(cli.run('1.0.0'), 'Local copy is not clean');
+});
+
+test('does not throw if the repository is dirty', async (t) => {
+    const ensureCleanLocalGitState = sinon.stub().rejects(new Error('Local copy is not clean'));
+    const createChangelog = sinon.stub().returns('sloppy changelog');
+    const prependFile = sinon.stub().resolves();
+    const cli = createCli({ prependFile, ensureCleanLocalGitState, createChangelog });
+
+    await cli.run('1.0.0', { sloppy: true, changelogPath: '/foo/CHANGELOG.md' });
+
+    t.is(prependFile.callCount, 1);
+    t.deepEqual(prependFile.firstCall.args, [ '/foo/CHANGELOG.md', 'sloppy changelog' ]);
+});
+
+test('uses custom labels if they are provided in package.json', async (t) => {
+    const packageInfo = {
+        repository: { url: 'https://github.com/foo/bar.git' },
+        'pr-log': { validLabels: { foo: 'Foo', bar: 'Bar' } }
+    };
+    const createChangelog = sinon.stub().returns('generated changelog');
+    const getMergedPullRequests = sinon.stub().resolves();
+    const cli = createCli({ packageInfo, createChangelog, getMergedPullRequests });
+
+    await cli.run('1.0.0', options);
+
+    t.is(getMergedPullRequests.callCount, 1);
+    t.deepEqual(getMergedPullRequests.firstCall.args, [ 'foo/bar', { foo: 'Foo', bar: 'Bar' } ]);
+
+    t.is(createChangelog.callCount, 1);
+    t.deepEqual(createChangelog.firstCall.args, [ '1.0.0', { foo: 'Foo', bar: 'Bar' }, undefined ]);
+});
+
+test('reports the generated changelog', async (t) => {
+    const createChangelog = sinon.stub().returns('generated changelog');
+    const getMergedPullRequests = sinon.stub().resolves();
+    const ensureCleanLocalGitState = sinon.stub().resolves();
+    const prependFile = sinon.stub().resolves();
+
+    const cli = createCli({
+        createChangelog, getMergedPullRequests, ensureCleanLocalGitState, prependFile
     });
 
-    it('should throw if an invalid version number was specified', function () {
-        const cli = createCli();
-        return expect(cli.run('a.b.c')).to.be.rejectedWith('version-number is invalid');
-    });
+    const expectedGithubRepo = 'foo/bar';
 
-    it('should throw if the repository is dirty', function () {
-        const ensureCleanLocalGitState = sinon.stub().rejects(new Error('Local copy is not clean'));
-        const cli = createCli({ ensureCleanLocalGitState });
+    await cli.run('1.0.0', options);
 
-        return expect(cli.run('1.0.0', options)).to.be.rejectedWith('Local copy is not clean');
-    });
+    t.is(ensureCleanLocalGitState.callCount, 1);
+    t.deepEqual(ensureCleanLocalGitState.firstCall.args, [ expectedGithubRepo ]);
 
-    it('should not throw if the repository is dirty', function () {
-        const ensureCleanLocalGitState = sinon.stub().rejects(new Error('Local copy is not clean'));
-        const createChangelog = sinon.stub().returns('sloppy changelog');
-        const prependFile = sinon.stub().resolves();
-        const cli = createCli({ prependFile, ensureCleanLocalGitState, createChangelog });
+    t.is(getMergedPullRequests.callCount, 1);
+    t.is(getMergedPullRequests.firstCall.args[0], expectedGithubRepo);
 
-        return cli.run('1.0.0', { sloppy: true, changelogPath: '/foo/CHANGELOG.md' })
-            .then(function () {
-                expect(prependFile).to.have.been.calledOnce;
-                expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'sloppy changelog');
-            });
-    });
+    t.is(createChangelog.callCount, 1);
+    t.is(createChangelog.firstCall.args[0], '1.0.0');
 
-    describe('custom labels', function () {
-        it('should use custom labels if they are provided in package.json', function () {
-            const packageInfo = {
-                repository: { url: 'https://github.com/foo/bar.git' },
-                'pr-log': { validLabels: { foo: 'Foo', bar: 'Bar' } }
-            };
-            const createChangelog = sinon.stub().returns('generated changelog');
-            const getMergedPullRequests = sinon.stub().resolves();
-            const cli = createCli({ packageInfo, createChangelog, getMergedPullRequests });
+    t.is(prependFile.callCount, 1);
+    t.deepEqual(prependFile.firstCall.args, [ '/foo/CHANGELOG.md', 'generated changelog' ]);
+});
 
-            const expectedGithubRepo = 'foo/bar';
+test('strips trailing empty lines from the generated changelog', async (t) => {
+    const createChangelog = sinon.stub().returns('generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n');
+    const prependFile = sinon.stub().resolves();
 
-            return cli.run('1.0.0', options).then(function () {
-                expect(getMergedPullRequests).to.have.been.calledOnce;
-                expect(getMergedPullRequests).to.have.been.calledWith(expectedGithubRepo, { foo: 'Foo', bar: 'Bar' });
+    const cli = createCli({ createChangelog, prependFile });
 
-                expect(createChangelog).to.have.been.calledOnce;
-                expect(createChangelog).to.have.been.calledWith('1.0.0', { foo: 'Foo', bar: 'Bar' });
-            });
-        });
-    });
+    await cli.run('1.0.0', options);
 
-    it('should report the generated changelog', function () {
-        const createChangelog = sinon.stub().returns('generated changelog');
-        const getMergedPullRequests = sinon.stub().resolves();
-        const ensureCleanLocalGitState = sinon.stub().resolves();
-        const prependFile = sinon.stub().resolves();
-
-        const cli = createCli({
-            createChangelog, getMergedPullRequests, ensureCleanLocalGitState, prependFile
-        });
-
-        const expectedGithubRepo = 'foo/bar';
-
-        return cli.run('1.0.0', options)
-            .then(function () {
-                expect(ensureCleanLocalGitState).to.have.been.calledOnce;
-                expect(ensureCleanLocalGitState).to.have.been.calledWith(expectedGithubRepo);
-
-                expect(getMergedPullRequests).to.have.been.calledOnce;
-                expect(getMergedPullRequests).to.have.been.calledWith(expectedGithubRepo);
-
-                expect(createChangelog).to.have.been.calledOnce;
-                expect(createChangelog).to.have.been.calledWith('1.0.0');
-
-                expect(prependFile).to.have.been.calledOnce;
-                expect(prependFile).to.have.been.calledWith('/foo/CHANGELOG.md', 'generated changelog');
-            });
-    });
-
-    it('should strip trailing empty lines from the generated changelog', function () {
-        const createChangelog = sinon.stub().returns('generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n');
-        const prependFile = sinon.stub().resolves();
-
-        const cli = createCli({ createChangelog, prependFile });
-
-        return cli.run('1.0.0', options)
-            .then(function () {
-                expect(prependFile).to.have.been
-                    .calledWith('/foo/CHANGELOG.md', 'generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n');
-            });
-    });
+    t.deepEqual(prependFile.firstCall.args, [
+        '/foo/CHANGELOG.md',
+        'generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n'
+    ]);
 });

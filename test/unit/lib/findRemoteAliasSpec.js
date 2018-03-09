@@ -1,69 +1,50 @@
-import chai from 'chai';
+import test from 'ava';
 import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import chaiAsPromised from 'chai-as-promised';
 import findRemoteAliasFactory from '../../../lib/findRemoteAlias';
 
-const expect = chai.expect;
+const githubRepo = 'foo/bar';
 
-chai.use(sinonChai);
-chai.use(chaiAsPromised);
-
-describe('findRemoteAlias', function () {
-    const git = sinon.stub();
-    const githubRepo = 'foo/bar';
+function factory(result = '') {
+    const git = sinon.stub().resolves(result);
     const dependencies = { git };
 
-    const findRemoteAlias = findRemoteAliasFactory(dependencies);
+    return findRemoteAliasFactory(dependencies);
+}
 
-    beforeEach(function () {
-        git.resolves('');
-    });
+test('rejects if no alias is found', async (t) => {
+    const expectedGitRemote = `git://github.com/${githubRepo}.git`;
+    const expectedErrorMessage = `This local git repository doesn’t have a remote pointing to ${expectedGitRemote}`;
+    const findRemoteAlias = factory();
 
-    afterEach(function () {
-        git.reset();
-    });
+    await t.throws(findRemoteAlias(githubRepo), expectedErrorMessage);
+});
 
-    it('should reject if no alias is found', function () {
-        const expectedGitRemote = `git://github.com/${githubRepo}.git`;
-        const expectedErrorMessage = `This local git repository doesn’t have a remote pointing to ${expectedGitRemote}`;
+test('resolves with the correct remote alias', async (t) => {
+    const gitRemotes = [
+        'origin git://github.com/fork/bar (fetch)',
+        'origin git://github.com/fork/bar (push)',
+        'upstream git://github.com/foo/bar (fetch)',
+        'upstream git://github.com/foo/bar (push)'
+    ];
+    const findRemoteAlias = factory(gitRemotes.join('\n'));
 
-        return expect(findRemoteAlias(githubRepo))
-            .to.be.rejectedWith(expectedErrorMessage);
-    });
+    t.is(await findRemoteAlias(githubRepo), 'upstream');
+});
 
-    it('should resolve with the correct remote alias', function () {
-        const gitRemotes = [
-            'origin git://github.com/fork/bar (fetch)',
-            'origin git://github.com/fork/bar (push)',
-            'upstream git://github.com/foo/bar (fetch)',
-            'upstream git://github.com/foo/bar (push)'
-        ];
+test('works with tab as a separator', async (t) => {
+    const gitRemotes = [
+        'origin\tgit://github.com/fork/bar (fetch)',
+        'origin\tgit://github.com/fork/bar (push)',
+        'upstream\tgit://github.com/foo/bar (fetch)',
+        'upstream\tgit://github.com/foo/bar (push)'
+    ];
+    const findRemoteAlias = factory(gitRemotes.join('\n'));
 
-        git.resolves(gitRemotes.join('\n'));
+    t.is(await findRemoteAlias(githubRepo), 'upstream');
+});
 
-        return expect(findRemoteAlias(githubRepo))
-            .to.become('upstream');
-    });
+test('works with different forms of the same URL', async (t) => {
+    const findRemoteAlias = factory('origin git+ssh://git@github.com/foo/bar (fetch)');
 
-    it('should work with tab as a separator', function () {
-        const gitRemotes = [
-            'origin\tgit://github.com/fork/bar (fetch)',
-            'origin\tgit://github.com/fork/bar (push)',
-            'upstream\tgit://github.com/foo/bar (fetch)',
-            'upstream\tgit://github.com/foo/bar (push)'
-        ];
-
-        git.resolves(gitRemotes.join('\n'));
-
-        return expect(findRemoteAlias(githubRepo))
-            .to.become('upstream');
-    });
-
-    it('should work with different forms of the same URL', function () {
-        git.resolves('origin git+ssh://git@github.com/foo/bar (fetch)');
-
-        return expect(findRemoteAlias(githubRepo))
-            .to.become('origin');
-    });
+    t.is(await findRemoteAlias(githubRepo), 'origin');
 });

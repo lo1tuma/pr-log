@@ -9,7 +9,7 @@ import prepend from 'prepend';
 import promisify from 'util.promisify';
 import ensureCleanLocalGitState from '../ensureCleanLocalGitState';
 import getMergedPullRequestsFactory from '../getMergedPullRequests';
-import createChangelog from '../createChangelog';
+import createChangelogFactory from '../createChangelog';
 import findRemoteAliasFactory from '../findRemoteAlias';
 import git from 'git-promise';
 import getPullRequestLabel from '../getPullRequestLabel';
@@ -25,13 +25,14 @@ const options = { sloppy: program.sloppy, changelogPath };
 const findRemoteAlias = findRemoteAliasFactory({ git });
 const githubClient = createGithubClient();
 const getMergedPullRequests = getMergedPullRequestsFactory({ githubClient, git, getPullRequestLabel });
+const getCurrentDate = () => new Date();
 const dependencies = {
     githubClient,
     prependFile: promisify(prepend),
     packageInfo: require(path.join(process.cwd(), 'package.json')),
     ensureCleanLocalGitState: ensureCleanLocalGitState({ git, findRemoteAlias }),
     getMergedPullRequests,
-    createChangelog
+    createChangelog: createChangelogFactory({ getCurrentDate })
 };
 const cliAgent = createCliAgent(dependencies);
 
