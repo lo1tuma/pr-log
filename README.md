@@ -122,7 +122,7 @@ If you want your changelog to be complete and clean you have to follow these rul
 2. Use pull requests for your features that you want to be in your changelog
 3. Use the correct categories for your pull request: If you introduce a new feature that will be a breaking change, give it the according label `breaking` (which will later result in this feature being listed under the `Breaking Changes` point in your changelog)
 
-## Advanced reading: Reason for this project
+## Reason for this project
 
 Many projects have problems with their changelogs. Most of them try one of the following ways
 
