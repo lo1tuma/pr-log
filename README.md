@@ -44,24 +44,26 @@ The following categories are defined by default:
 
 | GitHub label | Human friendly name | Description |
 | -------------:|:------------- | ------ |
+| `breaking` | Breaking Changes | Backwards-incompatible changes |
 | `bug` | Bug Fixes | Changes that only fix a bug |
-| `upgrade` | Dependency Upgrades | Any kind of dependency updates |
-| `documentation` | Documentation | Changes to documentation and/or README |
 | `feature` | Features | New features |
 | `enhancement` | Enhancements | Non-breaking improvements of existing features |
-| `build` | Build-Related | Changes related to the build process and/or CI/CD pipeline |
-| `breaking` | Breaking Changes | Backwards-incompatible changes |
+| `documentation` | Documentation | Changes to documentation and/or README |
+| `upgrade` | Dependency Upgrades | Any kind of dependency updates |
 | `refactor` | Code Refactoring | Changes that don’t affect the behavior but improve the code quality |
+| `build` | Build-Related | Changes related to the build process and/or CI/CD pipeline |
 
-However, you can also create a custom mapping by adding a `pr-log.validLabels` section to your `package.json`. For example:
+However, you can also create a custom mapping by adding a `pr-log.validLabels` section to your `package.json`.
+`validLabels` must be specified as an array of key, value pairs. The same order will be used to format the changelog sections.
+For example:
 
 ```json
 {
   "pr-log": {
-    "validLabels": {
-      "core": "Core features",
-      "addon": "Addons"
-    }
+    "validLabels": [
+      [ "core", "Core features" ],
+      [ "addon", "Addons" ]
+    ]
   }
 }
 ```
@@ -168,13 +170,13 @@ After working for some time with the tool and having e.g. two releases, the file
 
 * Use new (backwards incompatible) version of module XYZ (#13)
 
+### Features
+
+* Add fancy feature (#2)
+*
 ### Documentation
 
 * Fix some spelling mistakes in documentation. (#22)
 
 ## 1.1.0 (November 3, 2014)
-
-### Features
-
-* Add fancy feature (#2)
 ```

@@ -56,8 +56,9 @@ test('does not throw if the repository is dirty', async (t) => {
 test('uses custom labels if they are provided in package.json', async (t) => {
     const packageInfo = {
         repository: { url: 'https://github.com/foo/bar.git' },
-        'pr-log': { validLabels: { foo: 'Foo', bar: 'Bar' } }
+        'pr-log': { validLabels: [ [ 'foo', 'Foo' ], [ 'bar', 'Bar' ] ] }
     };
+    const expectedLabels = new Map([ [ 'foo', 'Foo' ], [ 'bar', 'Bar' ] ]);
     const createChangelog = sinon.stub().returns('generated changelog');
     const getMergedPullRequests = sinon.stub().resolves();
     const cli = createCli({ packageInfo, createChangelog, getMergedPullRequests });
@@ -65,10 +66,10 @@ test('uses custom labels if they are provided in package.json', async (t) => {
     await cli.run('1.0.0', options);
 
     t.is(getMergedPullRequests.callCount, 1);
-    t.deepEqual(getMergedPullRequests.firstCall.args, [ 'foo/bar', { foo: 'Foo', bar: 'Bar' } ]);
+    t.deepEqual(getMergedPullRequests.firstCall.args, [ 'foo/bar', expectedLabels ]);
 
     t.is(createChangelog.callCount, 1);
-    t.deepEqual(createChangelog.firstCall.args, [ '1.0.0', { foo: 'Foo', bar: 'Bar' }, undefined, 'foo/bar' ]);
+    t.deepEqual(createChangelog.firstCall.args, [ '1.0.0', expectedLabels, undefined, 'foo/bar' ]);
 });
 
 test('reports the generated changelog', async (t) => {
