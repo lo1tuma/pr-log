@@ -26,13 +26,14 @@ const findRemoteAlias = findRemoteAliasFactory({ git });
 const githubClient = createGithubClient();
 const getMergedPullRequests = getMergedPullRequestsFactory({ githubClient, git, getPullRequestLabel });
 const getCurrentDate = () => new Date();
+const packageInfo = require(path.join(process.cwd(), 'package.json'));
 const dependencies = {
     githubClient,
     prependFile: promisify(prepend),
-    packageInfo: require(path.join(process.cwd(), 'package.json')),
+    packageInfo,
     ensureCleanLocalGitState: ensureCleanLocalGitState({ git, findRemoteAlias }),
     getMergedPullRequests,
-    createChangelog: createChangelogFactory({ getCurrentDate })
+    createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
 };
 const cliAgent = createCliAgent(dependencies);
 
