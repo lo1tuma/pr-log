@@ -135,8 +135,6 @@ Other challenges for good changelogs:
 * Different categories (e.g. breaking changes)
 * Only include changes starting from a certain tag
 
-This project was initially started to solve these problems for [`mongobird`](https://github.com/lxanders/mongobird).
-
 ### More complete example `CHANGELOG.md`
 
 After working for some time with the tool and having e.g. two releases, the file content could look like this:
