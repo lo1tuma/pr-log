@@ -49,7 +49,8 @@ documentation: 'Documentation',
 feature: 'Features',
 enhancement: 'Enhancements',
 build: 'Build-Related',
-breaking: 'Breaking Changes'
+breaking: 'Breaking Changes',
+refactor: 'Code Refactoring'
 ```
 
 However, you can also create a custom mapping by adding a `pr-log.validLabels` section to your `package.json`. For example:
