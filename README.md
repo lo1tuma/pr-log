@@ -40,29 +40,30 @@ You have to follow these steps to use `pr-log` without problems.
 
 ### GitHub
 
-The default categories for the changelog are set in `lib/validLabels.js`. The following categories are predefined (`<label name>: <human friendly name>`):
+The following categories are defined by default:
 
-```
-bug: 'Bug Fixes',
-upgrade: 'Dependency Upgrades',
-documentation: 'Documentation',
-feature: 'Features',
-enhancement: 'Enhancements',
-build: 'Build-Related',
-breaking: 'Breaking Changes'
-```
+| GitHub label | Human friendly name | Description |
+| -------------:|:------------- | ------ |
+| `bug` | Bug Fixes | Changes that only fix a bug |
+| `upgrade` | Dependency Upgrades | Any kind of dependency updates |
+| `documentation` | Documentation | Changes to documentation and/or README |
+| `feature` | Features | New features |
+| `enhancement` | Enhancements | Non-breaking improvements of existing features |
+| `build` | Build-Related | Changes related to the build process and/or CI/CD pipeline |
+| `breaking` | Breaking Changes | Backwards-incompatible changes |
+| `refactor` | Code Refactoring | Changes that don’t affect the behavior but improve the code quality |
 
 However, you can also create a custom mapping by adding a `pr-log.validLabels` section to your `package.json`. For example:
 
-```
-  ...
+```json
+{
   "pr-log": {
-      "validLabels": {
-          "core": "Core features",
-          "addon": "Addons"
-      }
+    "validLabels": {
+      "core": "Core features",
+      "addon": "Addons"
+    }
   }
-  ...
+}
 ```
 
 To use `pr-log` your GitHub project needs some small configuration:
@@ -75,10 +76,12 @@ To use `pr-log` your GitHub project needs some small configuration:
 
 As `pr-log` reads repository information from your project you have to add the `repository` information in your `package.json`
 
-```
-"repository": {
+```json
+{
+  "repository": {
     "type": "git",
     "url": "https://github.com/<your username>/<your repository name>.git"
+  }
 }
 ```
 
@@ -86,20 +89,20 @@ As `pr-log` reads repository information from your project you have to add the `
 
 To create or update your changelog run
 
-```pr-log [options] <version-number>``` where `version-number` is the name of this release
+`pr-log [options] <version-number>` where `version-number` is the name of this release
 
 Example:
 
 Given the following setup:
 
-* In GitHub a tag named `2.4.7` exists that is behind `master`
+* In GitHub a tag named `2.0.0` exists that is behind `master`
 * A pull request (#13) was created since the last tag that has the label `breaking`
 * A pull request (#22) was created since the last tag that has the label `documentation`
 
-`pr-log 2.4.7` creates a changelog with the following example content:
+`pr-log 2.0.0` creates a changelog with the following example content:
 
-```
-## 2.4.7 (January 20, 2015)
+```markdown
+## 2.0.0 (January 20, 2015)
 
 ### Breaking Changes
 
@@ -124,7 +127,7 @@ If you want your changelog to be complete and clean you have to follow these rul
 2. Use pull requests for your features that you want to be in your changelog
 3. Use the correct categories for your pull request: If you introduce a new feature that will be a breaking change, give it the according label `breaking` (which will later result in this feature being listed under the `Breaking Changes` point in your changelog)
 
-## Advanced reading: Reason for this project
+## Reason for this project
 
 Many projects have problems with their changelogs. Most of them try one of the following ways
 
@@ -136,14 +139,12 @@ Other challenges for good changelogs:
 * Different categories (e.g. breaking changes)
 * Only include changes starting from a certain tag
 
-This project was initially started to solve these problems for [`mongobird`](https://github.com/lxanders/mongobird).
-
 ### More complete example `CHANGELOG.md`
 
 After working for some time with the tool and having e.g. two releases, the file content could look like this:
 
-```
-## 2.4.7 (January 20, 2015)
+```markdown
+## 2.0.0 (January 20, 2015)
 
 ### Breaking Changes
 
@@ -153,10 +154,9 @@ After working for some time with the tool and having e.g. two releases, the file
 
 * Fix some spelling mistakes in documentation. (#22)
 
-## 0.1.0 (November 3, 2014)
+## 1.1.0 (November 3, 2014)
 
-### Feature
+### Features
 
 * Add fancy feature (#2)
-
 ```
