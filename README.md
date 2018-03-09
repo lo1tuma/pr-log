@@ -116,6 +116,10 @@ Given the following setup:
 
 The `--sloppy` option defaults to false. When set, it allows `pr-log` to generate a changelog even when you are not on the `master` branch. This should not be used in production!
 
+#### --trace
+
+When enabled this option outputs the stacktrace of an error additionally to the error message to `stderr`.
+
 ### Correct usage makes a clean and complete changelog
 
 If you want your changelog to be complete and clean you have to follow these rules:

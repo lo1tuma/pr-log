@@ -17,6 +17,7 @@ import getPullRequestLabel from '../getPullRequestLabel';
 program
     .version(config.version)
     .option('--sloppy', 'Skip ensuring clean local git state.')
+    .option('--trace', 'Show stack traces for any error.')
     .usage('<version-number>')
     .parse(process.argv);
 
@@ -39,7 +40,13 @@ const cliAgent = createCliAgent(dependencies);
 cliAgent
     .run(program.args[0], options, dependencies)
     .catch((error) => {
+        let message = `Error: ${error.message}`;
+
+        if (program.trace) {
+            message = error.stack;
+        }
+
         // eslint-disable-next-line no-console, no-warning-comments
-        console.error(error);
+        console.error(message);
         process.exitCode = 1;
     });
