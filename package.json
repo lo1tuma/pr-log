@@ -10,7 +10,7 @@
         "prepublish": "npm run build",
         "test:unit": "mocha --compilers js:babel-core/register test",
         "coveralls": "cat ./build/coverage/lcov.info | coveralls",
-        "prepare": "npm run build"
+        "preinstall": "npm run build"
     },
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
