@@ -138,6 +138,10 @@ The `--sloppy` option defaults to false. When set, it allows `pr-log` to generat
 
 When enabled this option outputs the stacktrace of an error additionally to the error message to `stderr`.
 
+#### --cherry-pick
+
+When enabled this option lists out cherry-picks to the log instead of PR merges. This can be useful for publishing flows where you are simultaneously maintaining stable and pre-release branches and want to generate changelogs of cherry picks in one direction or another.
+
 ### Correct usage makes a clean and complete changelog
 
 If you want your changelog to be complete and clean you have to follow these rules:
