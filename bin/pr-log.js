@@ -23,7 +23,7 @@ program
     .parse(process.argv);
 
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
-const { sloppy, cherryPick } = program
+const { sloppy, cherryPick } = program;
 const options = { sloppy, cherryPick, changelogPath };
 const findRemoteAlias = findRemoteAliasFactory({ git });
 const githubClient = createGithubClient();
