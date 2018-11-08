@@ -21,6 +21,7 @@ program
     .usage('<version-number>')
     .parse(process.argv);
 
+// eslint-disable-next-line no-process-env
 const { GH_TOKEN } = process.env;
 
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
