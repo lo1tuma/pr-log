@@ -25,20 +25,20 @@ const options = { sloppy: false, changelogPath: '/foo/CHANGELOG.md' };
 test('throws if no version number was specified', async (t) => {
     const cli = createCli();
 
-    await t.throws(cli.run(), 'version-number not specified');
+    await t.throwsAsync(cli.run(), 'version-number not specified');
 });
 
 test('throws if an invalid version number was specified', async (t) => {
     const cli = createCli();
 
-    await t.throws(cli.run('a.b.c'), 'version-number is invalid');
+    await t.throwsAsync(cli.run('a.b.c'), 'version-number is invalid');
 });
 
 test('throws if the repository is dirty', async (t) => {
     const ensureCleanLocalGitState = sinon.stub().rejects(new Error('Local copy is not clean'));
     const cli = createCli({ ensureCleanLocalGitState });
 
-    await t.throws(cli.run('1.0.0'), 'Local copy is not clean');
+    await t.throwsAsync(cli.run('1.0.0'), 'Local copy is not clean');
 });
 
 test('does not throw if the repository is dirty', async (t) => {

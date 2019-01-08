@@ -54,7 +54,7 @@ test('rejects if the pull request doesn’t have one valid label', async (t) => 
     // eslint-disable-next-line max-len
     const expectedErrorMessage = 'Pull Request #123 has no label of breaking, bug, feature, enhancement, documentation, upgrade, refactor, build';
 
-    await t.throws(
+    await t.throwsAsync(
         getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }),
         expectedErrorMessage
     );
@@ -65,7 +65,7 @@ test('rejects if the pull request has more than one valid label', async (t) => {
     // eslint-disable-next-line max-len
     const expectedErrorMessage = 'Pull Request #123 has multiple labels of breaking, bug, feature, enhancement, documentation, upgrade, refactor, build';
 
-    await t.throws(
+    await t.throwsAsync(
         getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }),
         expectedErrorMessage
     );
