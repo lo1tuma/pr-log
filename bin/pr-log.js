@@ -21,10 +21,16 @@ program
     .usage('<version-number>')
     .parse(process.argv);
 
+// eslint-disable-next-line no-process-env
+const { GH_TOKEN } = process.env;
+
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
 const options = { sloppy: program.sloppy, changelogPath };
 const findRemoteAlias = findRemoteAliasFactory({ git });
 const githubClient = createGithubClient();
+if (GH_TOKEN) {
+    githubClient.authenticate({ type: 'token', token: GH_TOKEN });
+}
 const getMergedPullRequests = getMergedPullRequestsFactory({ githubClient, git, getPullRequestLabel });
 const getCurrentDate = () => new Date();
 const packageInfo = require(path.join(process.cwd(), 'package.json'));
