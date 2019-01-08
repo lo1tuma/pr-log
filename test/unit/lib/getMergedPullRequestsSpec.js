@@ -48,16 +48,6 @@ test('ignores prerelease versions', async (t) => {
     t.true(git.calledWith(expectedGitLogCommand));
 });
 
-test('ignores prerelease versions', async (t) => {
-    const git = sinon.stub();
-    const getMergedPullRequests = factory({ tag: '1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1' }, git);
-    const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
-
-    await getMergedPullRequests(anyRepo, defaultValidLabels);
-
-    t.true(git.calledWith(expectedGitLogCommand));
-});
-
 test('extracts id, title and label for merged pull requests', async (t) => {
     const gitLogMessages = [
         'Merge pull request #1 from branch (pr-1 message)',
