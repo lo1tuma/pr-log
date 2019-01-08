@@ -22,27 +22,27 @@ function factory({ status = '', revParse = 'master', revList = '' } = {}, git = 
 test('rejects if `git status -s` is not empty', async (t) => {
     const ensureCleanLocalGitState = factory({ status: 'M foobar\n' });
 
-    await t.throws(ensureCleanLocalGitState(githubRepo), 'Local copy is not clean');
+    await t.throwsAsync(ensureCleanLocalGitState(githubRepo), 'Local copy is not clean');
 });
 
 test('rejects if current branch is not master', async (t) => {
     const ensureCleanLocalGitState = factory({ revParse: 'feature-foo\n' });
 
-    await t.throws(ensureCleanLocalGitState(githubRepo), 'Not on master branch');
+    await t.throwsAsync(ensureCleanLocalGitState(githubRepo), 'Not on master branch');
 });
 
 test('rejects if the local branch is ahead of the remote', async (t) => {
     const ensureCleanLocalGitState = factory({ revList: '<commit-sha1\n' });
     const expectedMessage = 'Local git master branch is 1 commits ahead and 0 commits behind of origin/master';
 
-    await t.throws(ensureCleanLocalGitState(githubRepo), expectedMessage);
+    await t.throwsAsync(ensureCleanLocalGitState(githubRepo), expectedMessage);
 });
 
 test('rejects if the local branch is behind the remote', async (t) => {
     const ensureCleanLocalGitState = factory({ revList: '>commit-sha1\n' });
     const expectedMessage = 'Local git master branch is 0 commits ahead and 1 commits behind of origin/master';
 
-    await t.throws(ensureCleanLocalGitState(githubRepo), expectedMessage);
+    await t.throwsAsync(ensureCleanLocalGitState(githubRepo), expectedMessage);
 });
 
 test('fetches the remote repository', async (t) => {

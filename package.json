@@ -31,7 +31,7 @@
         "util.promisify": "1.0.0"
     },
     "devDependencies": {
-        "ava": "0.25.0",
+        "ava": "1.0.1",
         "babel-cli": "6.26.0",
         "babel-plugin-istanbul": "5.1.0",
         "babel-preset-env": "1.7.0",
