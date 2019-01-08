@@ -44,7 +44,7 @@ test('works with tab as a separator', async (t) => {
 });
 
 test('works with different forms of the same URL', async (t) => {
-    const findRemoteAlias = factory('origin git@github.com/foo/bar (fetch)');
+    const findRemoteAlias = factory('origin git+ssh://git@github.com/foo/bar (fetch)');
 
     t.is(await findRemoteAlias(githubRepo), 'origin');
 });

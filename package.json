@@ -22,7 +22,7 @@
         "@octokit/rest": "16.6.1",
         "commander": "2.19.0",
         "git-promise": "0.3.1",
-        "git-url-parse": "10.1.0",
+        "git-url-parse": "11.1.2",
         "moment": "2.23.0",
         "parse-github-repo-url": "1.4.1",
         "prepend": "1.0.2",
