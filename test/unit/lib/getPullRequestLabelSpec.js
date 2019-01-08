@@ -6,7 +6,7 @@ import defaultValidLabels from '../../../lib/validLabels';
 function createGithubClient(labels = []) {
     return {
         issues: {
-            getIssueLabels: sinon.stub().resolves({ data: labels })
+            listLabelsOnIssue: sinon.stub().resolves({ data: labels })
         }
     };
 }
@@ -19,8 +19,8 @@ test('requests the labels for the correct repo and pull request', async (t) => {
 
     await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient });
 
-    t.is(githubClient.issues.getIssueLabels.callCount, 1);
-    t.deepEqual(githubClient.issues.getIssueLabels.firstCall.args, [
+    t.is(githubClient.issues.listLabelsOnIssue.callCount, 1);
+    t.deepEqual(githubClient.issues.listLabelsOnIssue.firstCall.args, [
         { owner: 'any', repo: 'repo', number: 123 }
     ]);
 });
