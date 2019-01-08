@@ -1,3 +1,52 @@
+## 3.1.0 (January 8, 2019)
+
+### Bug Fixes
+
+* Fix octokit usage ([#186](https://github.com/lo1tuma/pr-log/pull/186))
+* Fix incorrect git URL in test case ([#161](https://github.com/lo1tuma/pr-log/pull/161))
+
+### Features
+
+* Support github token-based authentication ([#179](https://github.com/lo1tuma/pr-log/pull/179))
+
+### Documentation
+
+* Remove greenkeeper badge ([#160](https://github.com/lo1tuma/pr-log/pull/160))
+
+### Dependency Upgrades
+
+* ⬆️ Update dependency git-url-parse to v11 ([#176](https://github.com/lo1tuma/pr-log/pull/176))
+* ⬆️ Update dependency eslint to v5.12.0 ([#181](https://github.com/lo1tuma/pr-log/pull/181))
+* ⬆️ Update dependency sinon to v7.2.2 ([#177](https://github.com/lo1tuma/pr-log/pull/177))
+* ⬆️ Update dependency ramda to v0.26.1 ([#182](https://github.com/lo1tuma/pr-log/pull/182))
+* ⬆️ Update dependency @octokit/rest to v16 ([#183](https://github.com/lo1tuma/pr-log/pull/183))
+* ⬆️ Update dependency ava to v1 ([#185](https://github.com/lo1tuma/pr-log/pull/185))
+* ⬆️ Update dependency moment to v2.23.0 ([#184](https://github.com/lo1tuma/pr-log/pull/184))
+* ⬆️ Update dependency eslint-plugin-ava to v5 ([#174](https://github.com/lo1tuma/pr-log/pull/174))
+* ⬆️ Update dependency sinon to v7 ([#171](https://github.com/lo1tuma/pr-log/pull/171))
+* ⬆️ Update dependency eslint to v5 ([#173](https://github.com/lo1tuma/pr-log/pull/173))
+* ⬆️ Update dependency git-url-parse to v10 ([#170](https://github.com/lo1tuma/pr-log/pull/170))
+* ⬆️ Update dependency nyc to v13 ([#175](https://github.com/lo1tuma/pr-log/pull/175))
+* ⬆️ Update dependency babel-plugin-istanbul to v5 ([#172](https://github.com/lo1tuma/pr-log/pull/172))
+* ⬆️ Update dependency sinon to v4.5.0 ([#169](https://github.com/lo1tuma/pr-log/pull/169))
+* ⬆️ Update dependency moment to v2.22.2 ([#168](https://github.com/lo1tuma/pr-log/pull/168))
+* ⬆️ Update dependency coveralls to v3.0.2 ([#165](https://github.com/lo1tuma/pr-log/pull/165))
+* ⬆️ Update dependency eslint-config-holidaycheck to v0.13.1 ([#166](https://github.com/lo1tuma/pr-log/pull/166))
+* ⬆️ Update dependency git-url-parse to v8.3.1 ([#167](https://github.com/lo1tuma/pr-log/pull/167))
+* ⬆️ Update dependency commander to v2.19.0 ([#164](https://github.com/lo1tuma/pr-log/pull/164))
+* Update sinon to the latest version 🚀 ([#147](https://github.com/lo1tuma/pr-log/pull/147))
+* Update sinon to the latest version 🚀 ([#146](https://github.com/lo1tuma/pr-log/pull/146))
+
+### Code Refactoring
+
+* ⬆️ Pin dependencies ([#163](https://github.com/lo1tuma/pr-log/pull/163))
+* Remove bluebird dependency ([#145](https://github.com/lo1tuma/pr-log/pull/145))
+
+### Build-Related
+
+* Configure Renovate ([#162](https://github.com/lo1tuma/pr-log/pull/162))
+* Update to node 10 in .travis.yml ([#158](https://github.com/lo1tuma/pr-log/pull/158))
+
 ## 3.0.0 (March 9, 2018)
 
 ### Breaking Changes
