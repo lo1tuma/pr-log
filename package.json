@@ -20,7 +20,7 @@
     "license": "MIT",
     "dependencies": {
         "@octokit/rest": "16.6.1",
-        "commander": "2.19.0",
+        "commander": "3.0.2",
         "git-promise": "0.3.1",
         "git-url-parse": "11.1.2",
         "moment": "2.23.0",
