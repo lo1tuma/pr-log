@@ -21,7 +21,7 @@ test('requests the labels for the correct repo and pull request', async (t) => {
 
     t.is(githubClient.issues.listLabelsOnIssue.callCount, 1);
     t.deepEqual(githubClient.issues.listLabelsOnIssue.firstCall.args, [
-        { owner: 'any', repo: 'repo', number: 123 }
+        { owner: 'any', repo: 'repo', issue_number: 123 }
     ]);
 });
 
