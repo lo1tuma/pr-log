@@ -34,7 +34,7 @@
         "@babel/cli": "7.7.5",
         "@babel/preset-env": "7.7.5",
         "@babel/register": "7.7.4",
-        "ava": "1.0.1",
+        "ava": "2.4.0",
         "babel-plugin-istanbul": "5.1.0",
         "coveralls": "3.0.2",
         "eslint": "6.7.2",
