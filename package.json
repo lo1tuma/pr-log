@@ -40,7 +40,7 @@
         "eslint": "5.12.0",
         "eslint-config-holidaycheck": "0.13.1",
         "eslint-plugin-ava": "6.0.0",
-        "nyc": "14.0.0",
+        "nyc": "14.1.1",
         "sinon": "7.2.2"
     },
     "nyc": {
