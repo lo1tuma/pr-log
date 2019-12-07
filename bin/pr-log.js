@@ -6,7 +6,7 @@ import config from '../../package.json';
 import createCliAgent from '../cli';
 import path from 'path';
 import prepend from 'prepend';
-import promisify from 'util.promisify';
+import { promisify } from 'util';
 import ensureCleanLocalGitState from '../ensureCleanLocalGitState';
 import getMergedPullRequestsFactory from '../getMergedPullRequests';
 import createChangelogFactory from '../createChangelog';
