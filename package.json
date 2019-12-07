@@ -13,7 +13,7 @@
         "pretest": "eslint .",
         "test": "nyc npm run test:unit",
         "prepublish": "npm run build",
-        "test:unit": "ava 'test/**/*Spec.js'",
+        "test:unit": "ava",
         "coveralls": "cat ./build/coverage/lcov.info | coveralls"
     },
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
@@ -33,7 +33,7 @@
         "@babel/cli": "7.7.5",
         "@babel/preset-env": "7.7.5",
         "@babel/register": "7.7.4",
-        "ava": "1.0.1",
+        "ava": "2.4.0",
         "babel-plugin-istanbul": "5.1.0",
         "coveralls": "3.0.9",
         "eslint": "6.7.2",
@@ -41,6 +41,10 @@
         "eslint-plugin-ava": "9.0.0",
         "nyc": "14.1.1",
         "sinon": "7.5.0"
+    },
+    "ava": {
+        "files": [ "./test/**/*Spec.js" ],
+        "sources": [ "./lib/**/*.js" ]
     },
     "nyc": {
         "lines": 100,
