@@ -1,0 +1,25 @@
+{
+    "extends": "holidaycheck/es2015",
+
+    "env": {
+        "node": true
+    },
+
+    "parserOptions": {
+        "ecmaVersion": "2017",
+        "ecmaFeatures": {
+            "globalReturn": false
+        }
+    },
+
+    "overrides": [
+        {
+            "files": [ "test/**/*.js" ],
+            "plugins": [ "ava" ],
+            "rules": {
+                "max-statements": "off",
+                "ava/no-only-test": "error"
+            }
+        }
+    ]
+}

@@ -1,8 +1,0 @@
-{
-    "plugins": [ "ava" ],
-
-    "rules": {
-        "max-statements": "off",
-        "ava/no-only-test": "error",
-    }
-}
