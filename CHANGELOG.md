@@ -1,3 +1,36 @@
+## 4.0.0 (December 7, 2019)
+
+### Breaking Changes
+
+* Drop support for nodejs 6 and 8 ([#208](https://github.com/lo1tuma/pr-log/pull/208))
+
+### Dependency Upgrades
+
+* ⬆️ Update dependency babel-plugin-istanbul to v5.2.0 ([#193](https://github.com/lo1tuma/pr-log/pull/193))
+* ⬆️ Update dependency ava to v2 ([#201](https://github.com/lo1tuma/pr-log/pull/201))
+* ⬆️ Update dependency sinon to v7.5.0 ([#190](https://github.com/lo1tuma/pr-log/pull/190))
+* ⬆️ Update dependency moment to v2.24.0 ([#191](https://github.com/lo1tuma/pr-log/pull/191))
+* ⬆️ Update dependency coveralls to v3.0.9 ([#194](https://github.com/lo1tuma/pr-log/pull/194))
+* ⬆️ Update dependency @octokit/rest to v16.35.0 ([#187](https://github.com/lo1tuma/pr-log/pull/187))
+* ⬆️ Update dependency eslint to v6 ([#203](https://github.com/lo1tuma/pr-log/pull/203))
+* ⬆️ Update dependency eslint-plugin-ava to v9 ([#206](https://github.com/lo1tuma/pr-log/pull/206))
+* Update to babel 7 ([#209](https://github.com/lo1tuma/pr-log/pull/209))
+* ⬆️ Update dependency semver to v6 ([#197](https://github.com/lo1tuma/pr-log/pull/197))
+* ⬆️ Update dependency nyc to v14.1.1 ([#200](https://github.com/lo1tuma/pr-log/pull/200))
+* ⬆️ Update dependency commander to v4 ([#207](https://github.com/lo1tuma/pr-log/pull/207))
+* ⬆️ Update dependency nyc to v14 ([#199](https://github.com/lo1tuma/pr-log/pull/199))
+* ⬆️ Update dependency eslint-plugin-ava to v6 ([#195](https://github.com/lo1tuma/pr-log/pull/195))
+
+### Code Refactoring
+
+* Fix deprecation warnings from octokit ([#213](https://github.com/lo1tuma/pr-log/pull/213))
+* Refactor ESLint config/setup ([#211](https://github.com/lo1tuma/pr-log/pull/211))
+* Use builtin promisify instead of separate package ([#212](https://github.com/lo1tuma/pr-log/pull/212))
+
+### Build-Related
+
+* Add .editorconfig ([#210](https://github.com/lo1tuma/pr-log/pull/210))
+
 ## 3.1.0 (January 8, 2019)
 
 ### Bug Fixes
