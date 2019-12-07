@@ -12,6 +12,10 @@
         }
     },
 
+    "rules": {
+        "camelcase": "off"
+    },
+
     "overrides": [
         {
             "files": [ "test/**/*.js" ],
