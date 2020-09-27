@@ -56,7 +56,7 @@ test('rejects if the pull request doesn’t have one valid label', async (t) => 
 
     await t.throwsAsync(
         getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }),
-        expectedErrorMessage
+        { message: expectedErrorMessage }
     );
 });
 
@@ -67,6 +67,6 @@ test('rejects if the pull request has more than one valid label', async (t) => {
 
     await t.throwsAsync(
         getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }),
-        expectedErrorMessage
+        { message: expectedErrorMessage }
     );
 });
