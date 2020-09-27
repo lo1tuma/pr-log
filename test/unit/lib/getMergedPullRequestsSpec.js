@@ -85,15 +85,15 @@ test('works with line feeds in commit message body', async (t) => {
 });
 
 test('works with parentheses in the commit message body', async (t) => {
-    const gitLogMessages = [ 'Merge pull request #42 from A (pr-42 message (fixes #21))' ];
-    const expectedResults = [ { id: '42', title: 'pr-42 message (fixes #21)', label: 'bug' } ];
+    const gitLogMessages = ['Merge pull request #42 from A (pr-42 message (fixes #21))'];
+    const expectedResults = [{ id: '42', title: 'pr-42 message (fixes #21)', label: 'bug' }];
     const getMergedPullRequests = factory({ log: gitLogMessages.join('\n') });
 
     t.deepEqual(await getMergedPullRequests(anyRepo), expectedResults);
 });
 
 test('skips with non-matching parenthesis', async (t) => {
-    const gitLogMessages = [ 'Merge pull request #3 from kadirahq/greenkeeper-update-all' ];
+    const gitLogMessages = ['Merge pull request #3 from kadirahq/greenkeeper-update-all'];
     const expectedResults = [];
     const getMergedPullRequests = factory({ log: gitLogMessages.join('\n') });
 

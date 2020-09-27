@@ -10,7 +10,11 @@
     ],
     "scripts": {
         "build": "babel lib --out-dir dist && babel bin --out-dir dist/bin",
-        "pretest": "eslint .",
+        "prettier": "prettier '**/*.(yml|json|yaml|md)'",
+        "eslint": "eslint .",
+        "lint": "npm run eslint && npm run prettier -- --check",
+        "lint:fix": "npm run eslint -- --fix && npm run prettier -- --write",
+        "pretest": "npm run lint",
         "test": "nyc npm run test:unit",
         "prepublish": "npm run build",
         "test:unit": "ava"
@@ -35,14 +39,24 @@
         "ava": "3.12.1",
         "babel-plugin-istanbul": "6.0.0",
         "eslint": "7.10.0",
-        "eslint-config-holidaycheck": "0.13.1",
+        "eslint-config-joyn": "^0.8.0",
+        "eslint-plugin-array-func": "^3.1.7",
         "eslint-plugin-ava": "11.0.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.22.0",
+        "eslint-plugin-no-secrets": "^0.6.8",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-optimize-regex": "^1.2.0",
+        "eslint-plugin-prettier": "^3.1.4",
+        "eslint-plugin-promise": "^4.2.1",
+        "eslint-plugin-unicorn": "^22.0.0",
         "nyc": "15.1.0",
+        "prettier": "^2.1.2",
         "sinon": "9.0.3"
     },
     "ava": {
         "files": [
-            "./test/**/*Spec.js"
+            "./test/unit/**/*Spec.js"
         ]
     },
     "nyc": {
@@ -65,7 +79,8 @@
         ],
         "sourceMap": true,
         "instrumment": false,
-        "report-dir": "./build/coverage"
+        "report-dir": "./target/coverage",
+        "tempDir": "./target/nyc_output"
     },
     "repository": {
         "type": "git",
@@ -81,5 +96,8 @@
     ],
     "contributors": [
         "Alexander Schmidt <alexanderschmidt1@gmail.com>"
-    ]
+    ],
+    "engines": {
+        "node": "^12"
+    }
 }

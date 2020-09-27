@@ -50,15 +50,23 @@ test('does not throw if the repository is dirty', async (t) => {
     await cli.run('1.0.0', { sloppy: true, changelogPath: '/foo/CHANGELOG.md' });
 
     t.is(prependFile.callCount, 1);
-    t.deepEqual(prependFile.firstCall.args, [ '/foo/CHANGELOG.md', 'sloppy changelog' ]);
+    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'sloppy changelog']);
 });
 
 test('uses custom labels if they are provided in package.json', async (t) => {
     const packageInfo = {
         repository: { url: 'https://github.com/foo/bar.git' },
-        'pr-log': { validLabels: [ [ 'foo', 'Foo' ], [ 'bar', 'Bar' ] ] }
+        'pr-log': {
+            validLabels: [
+                ['foo', 'Foo'],
+                ['bar', 'Bar']
+            ]
+        }
     };
-    const expectedLabels = new Map([ [ 'foo', 'Foo' ], [ 'bar', 'Bar' ] ]);
+    const expectedLabels = new Map([
+        ['foo', 'Foo'],
+        ['bar', 'Bar']
+    ]);
     const createChangelog = sinon.stub().returns('generated changelog');
     const getMergedPullRequests = sinon.stub().resolves();
     const cli = createCli({ packageInfo, createChangelog, getMergedPullRequests });
@@ -66,10 +74,10 @@ test('uses custom labels if they are provided in package.json', async (t) => {
     await cli.run('1.0.0', options);
 
     t.is(getMergedPullRequests.callCount, 1);
-    t.deepEqual(getMergedPullRequests.firstCall.args, [ 'foo/bar', expectedLabels ]);
+    t.deepEqual(getMergedPullRequests.firstCall.args, ['foo/bar', expectedLabels]);
 
     t.is(createChangelog.callCount, 1);
-    t.deepEqual(createChangelog.firstCall.args, [ '1.0.0', expectedLabels, undefined, 'foo/bar' ]);
+    t.deepEqual(createChangelog.firstCall.args, ['1.0.0', expectedLabels, undefined, 'foo/bar']);
 });
 
 test('reports the generated changelog', async (t) => {
@@ -79,7 +87,10 @@ test('reports the generated changelog', async (t) => {
     const prependFile = sinon.stub().resolves();
 
     const cli = createCli({
-        createChangelog, getMergedPullRequests, ensureCleanLocalGitState, prependFile
+        createChangelog,
+        getMergedPullRequests,
+        ensureCleanLocalGitState,
+        prependFile
     });
 
     const expectedGithubRepo = 'foo/bar';
@@ -87,7 +98,7 @@ test('reports the generated changelog', async (t) => {
     await cli.run('1.0.0', options);
 
     t.is(ensureCleanLocalGitState.callCount, 1);
-    t.deepEqual(ensureCleanLocalGitState.firstCall.args, [ expectedGithubRepo ]);
+    t.deepEqual(ensureCleanLocalGitState.firstCall.args, [expectedGithubRepo]);
 
     t.is(getMergedPullRequests.callCount, 1);
     t.is(getMergedPullRequests.firstCall.args[0], expectedGithubRepo);
@@ -96,7 +107,7 @@ test('reports the generated changelog', async (t) => {
     t.is(createChangelog.firstCall.args[0], '1.0.0');
 
     t.is(prependFile.callCount, 1);
-    t.deepEqual(prependFile.firstCall.args, [ '/foo/CHANGELOG.md', 'generated changelog' ]);
+    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'generated changelog']);
 });
 
 test('strips trailing empty lines from the generated changelog', async (t) => {

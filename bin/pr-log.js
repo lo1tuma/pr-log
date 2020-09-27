@@ -1,18 +1,23 @@
 #!/usr/bin/env node
 
+import path from 'path';
+import { promisify } from 'util';
 import program from 'commander';
 import createGithubClient from '@octokit/rest';
-import config from '../../package.json';
-import createCliAgent from '../cli';
-import path from 'path';
 import prepend from 'prepend';
-import { promisify } from 'util';
-import ensureCleanLocalGitState from '../ensureCleanLocalGitState';
-import getMergedPullRequestsFactory from '../getMergedPullRequests';
-import createChangelogFactory from '../createChangelog';
-import findRemoteAliasFactory from '../findRemoteAlias';
 import git from 'git-promise';
-import getPullRequestLabel from '../getPullRequestLabel';
+import config from '../../package.json'; // eslint-disable-line import/no-unresolved
+import createCliAgent from '../cli'; // eslint-disable-line import/no-unresolved
+
+import ensureCleanLocalGitState from '../ensureCleanLocalGitState'; // eslint-disable-line import/no-unresolved
+
+import getMergedPullRequestsFactory from '../getMergedPullRequests'; // eslint-disable-line import/no-unresolved
+
+import createChangelogFactory from '../createChangelog'; // eslint-disable-line import/no-unresolved
+
+import findRemoteAliasFactory from '../findRemoteAlias'; // eslint-disable-line import/no-unresolved
+
+import getPullRequestLabel from '../getPullRequestLabel'; // eslint-disable-line import/no-unresolved
 
 program
     .version(config.version)
@@ -21,7 +26,7 @@ program
     .usage('<version-number>')
     .parse(process.argv);
 
-// eslint-disable-next-line no-process-env
+// eslint-disable-next-line node/no-process-env
 const { GH_TOKEN } = process.env;
 
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
@@ -44,16 +49,14 @@ const dependencies = {
 };
 const cliAgent = createCliAgent(dependencies);
 
-cliAgent
-    .run(program.args[0], options, dependencies)
-    .catch((error) => {
-        let message = `Error: ${error.message}`;
+cliAgent.run(program.args[0], options, dependencies).catch((error) => {
+    let message = `Error: ${error.message}`;
 
-        if (program.trace) {
-            message = error.stack;
-        }
+    if (program.trace) {
+        message = error.stack;
+    }
 
-        // eslint-disable-next-line no-console, no-warning-comments
-        console.error(message);
-        process.exitCode = 1;
-    });
+    // eslint-disable-next-line no-console
+    console.error(message);
+    process.exitCode = 1;
+});
