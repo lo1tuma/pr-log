@@ -1,16 +1,5 @@
 {
-    "extends": "holidaycheck/es2015",
-
-    "env": {
-        "node": true
-    },
-
-    "parserOptions": {
-        "ecmaVersion": "2017",
-        "ecmaFeatures": {
-            "globalReturn": false
-        }
-    },
+    "extends": ["joyn", "joyn/presets/node"],
 
     "rules": {
         "camelcase": "off"
@@ -18,8 +7,16 @@
 
     "overrides": [
         {
-            "files": [ "test/**/*.js" ],
-            "plugins": [ "ava" ],
+            "files": ["prettier.config.js"],
+            "extends": ["joyn/presets/commonjs"]
+        },
+        {
+            "files": ["bin/**/*.js", "lib/**/*.js", "test/**/*.js"],
+            "extends": ["joyn/presets/esm"]
+        },
+        {
+            "files": ["test/**/*.js"],
+            "plugins": ["ava"],
             "rules": {
                 "max-statements": "off",
                 "ava/no-only-test": "error"

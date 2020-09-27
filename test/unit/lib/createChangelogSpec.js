@@ -59,8 +59,8 @@ test('creates a formatted changelog', (t) => {
 test('uses custom labels when provided', (t) => {
     const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
     const customValidLabels = [
-        [ 'core', 'Core Features' ],
-        [ 'addons', 'Addons' ]
+        ['core', 'Core Features'],
+        ['addons', 'Addons']
     ];
     const mergedPullRequests = [
         {
@@ -100,8 +100,8 @@ test('uses custom labels when provided', (t) => {
 test('uses the same order for the changelog sections as in validLabels', (t) => {
     const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
     const customValidLabels = [
-        [ 'first', 'First Section' ],
-        [ 'second', 'Second Section' ]
+        ['first', 'First Section'],
+        ['second', 'Second Section']
     ];
     const mergedPullRequests = [
         {
