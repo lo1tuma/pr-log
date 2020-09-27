@@ -16,7 +16,7 @@ test('rejects if no alias is found', async (t) => {
     const expectedErrorMessage = `This local git repository doesn’t have a remote pointing to ${expectedGitRemote}`;
     const findRemoteAlias = factory();
 
-    await t.throwsAsync(findRemoteAlias(githubRepo), expectedErrorMessage);
+    await t.throwsAsync(findRemoteAlias(githubRepo), { message: expectedErrorMessage });
 });
 
 test('resolves with the correct remote alias', async (t) => {

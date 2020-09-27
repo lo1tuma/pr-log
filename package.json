@@ -32,7 +32,7 @@
         "@babel/cli": "7.11.6",
         "@babel/preset-env": "7.11.5",
         "@babel/register": "7.11.5",
-        "ava": "2.4.0",
+        "ava": "3.12.1",
         "babel-plugin-istanbul": "6.0.0",
         "eslint": "7.10.0",
         "eslint-config-holidaycheck": "0.13.1",
@@ -43,9 +43,6 @@
     "ava": {
         "files": [
             "./test/**/*Spec.js"
-        ],
-        "sources": [
-            "./lib/**/*.js"
         ]
     },
     "nyc": {
