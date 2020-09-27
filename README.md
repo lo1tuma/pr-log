@@ -94,11 +94,11 @@ If you want to use a custom date format you can configure `pr-log.dateFormat` in
 
 ```json
 {
-  "pr-log": { "dateFormat": "DD.MM.YYYY" }
+  "pr-log": { "dateFormat": "dd.MM.yyyy" }
 }
 ```
 
-Please refer to the [moment.js documentation](https://momentjs.com/docs/#/displaying/format/) for details about the format tokens.
+Please refer to the [`dates-fn` documentation](https://date-fns.org/docs/format) for details about the format expressions.
 
 ## Usage
 

@@ -11,7 +11,7 @@ test('contains a title with the version number and the formatted date', (t) => {
 });
 
 test('format the date with a custom date format', (t) => {
-    const packageInfo = { 'pr-log': { dateFormat: 'DD.MM.YYYY' } };
+    const packageInfo = { 'pr-log': { dateFormat: 'dd.MM.yyyy' } };
     const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo });
     const changelog = createChangelog('1.0.0', defaultValidLabels, []);
     const expectedTitle = '## 1.0.0 (01.01.1970)';
