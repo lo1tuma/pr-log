@@ -20,7 +20,7 @@
     "dependencies": {
         "@octokit/rest": "18.0.6",
         "commander": "6.1.0",
-        "date-fns": "^2.16.1",
+        "date-fns": "2.16.1",
         "git-promise": "1.0.0",
         "git-url-parse": "11.2.0",
         "parse-github-repo-url": "1.4.1",
