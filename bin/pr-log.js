@@ -8,6 +8,7 @@ program
     .version(config.version)
     .option('--sloppy', 'Skip ensuring clean local git state.')
     .option('--cherry-pick', 'Use cherry-picks instead of PR merges.')
+    .option('--since-prerelease', 'Use the latest prerelease as base.')
     .usage('<version-number>')
     .parse(process.argv);
 
