@@ -1,11 +1,11 @@
 import test from 'ava';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import ensureCleanLocalGitStateFactory from '../../../lib/ensureCleanLocalGitState';
 
 const githubRepo = 'foo/bar';
 
-function factory({ status = '', revParse = 'master', revList = '' } = {}, git = sinon.stub()) {
-    const findRemoteAlias = sinon.stub();
+function factory({ status = '', revParse = 'master', revList = '' } = {}, git = stub()) {
+    const findRemoteAlias = stub();
     const remoteAlias = 'origin';
     const dependencies = { git, findRemoteAlias };
 
@@ -46,7 +46,7 @@ test('rejects if the local branch is behind the remote', async (t) => {
 });
 
 test('fetches the remote repository', async (t) => {
-    const git = sinon.stub();
+    const git = stub();
     const ensureCleanLocalGitState = factory({}, git);
 
     await ensureCleanLocalGitState(githubRepo);

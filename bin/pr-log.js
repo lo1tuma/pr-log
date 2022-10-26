@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import path from 'path';
-import { promisify } from 'util';
+import path from 'node:path';
+import { promisify } from 'node:util';
 import program from 'commander';
-import createGithubClient from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
 import prepend from 'prepend';
 import git from 'git-promise';
 import config from '../../package.json'; // eslint-disable-line import/no-unresolved
@@ -32,9 +32,9 @@ const { GH_TOKEN } = process.env;
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
 const options = { sloppy: program.sloppy, changelogPath };
 const findRemoteAlias = findRemoteAliasFactory({ git });
-const githubClient = createGithubClient();
+const githubClient = new Octokit();
 if (GH_TOKEN) {
-    githubClient.authenticate({ type: 'token', token: GH_TOKEN });
+    githubClient.auth({ type: 'token', token: GH_TOKEN });
 }
 const getMergedPullRequests = getMergedPullRequestsFactory({ githubClient, git, getPullRequestLabel });
 const getCurrentDate = () => new Date();

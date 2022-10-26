@@ -1,11 +1,11 @@
 import test from 'ava';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import findRemoteAliasFactory from '../../../lib/findRemoteAlias';
 
 const githubRepo = 'foo/bar';
 
 function factory(result = '') {
-    const git = sinon.stub().resolves(result);
+    const git = stub().resolves(result);
     const dependencies = { git };
 
     return findRemoteAliasFactory(dependencies);
