@@ -1,12 +1,12 @@
 import test from 'ava';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import getPullRequestLabel from '../../../lib/getPullRequestLabel';
 import defaultValidLabels from '../../../lib/validLabels';
 
 function createGithubClient(labels = []) {
     return {
         issues: {
-            listLabelsOnIssue: sinon.stub().resolves({ data: labels })
+            listLabelsOnIssue: stub().resolves({ data: labels })
         }
     };
 }

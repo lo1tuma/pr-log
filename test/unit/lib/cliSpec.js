@@ -1,13 +1,13 @@
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import test from 'ava';
 import createCliAgent from '../../../lib/cli';
 
 function createCli(dependencies = {}) {
     const {
-        ensureCleanLocalGitState = sinon.stub().resolves(),
-        getMergedPullRequests = sinon.stub().resolves([]),
-        createChangelog = sinon.stub().returns(''),
-        prependFile = sinon.stub().resolves(),
+        ensureCleanLocalGitState = stub().resolves(),
+        getMergedPullRequests = stub().resolves([]),
+        createChangelog = stub().returns(''),
+        prependFile = stub().resolves(),
         packageInfo = { repository: { url: 'https://github.com/foo/bar.git' } }
     } = dependencies;
 
@@ -35,16 +35,16 @@ test('throws if an invalid version number was specified', async (t) => {
 });
 
 test('throws if the repository is dirty', async (t) => {
-    const ensureCleanLocalGitState = sinon.stub().rejects(new Error('Local copy is not clean'));
+    const ensureCleanLocalGitState = stub().rejects(new Error('Local copy is not clean'));
     const cli = createCli({ ensureCleanLocalGitState });
 
     await t.throwsAsync(cli.run('1.0.0'), { message: 'Local copy is not clean' });
 });
 
 test('does not throw if the repository is dirty', async (t) => {
-    const ensureCleanLocalGitState = sinon.stub().rejects(new Error('Local copy is not clean'));
-    const createChangelog = sinon.stub().returns('sloppy changelog');
-    const prependFile = sinon.stub().resolves();
+    const ensureCleanLocalGitState = stub().rejects(new Error('Local copy is not clean'));
+    const createChangelog = stub().returns('sloppy changelog');
+    const prependFile = stub().resolves();
     const cli = createCli({ prependFile, ensureCleanLocalGitState, createChangelog });
 
     await cli.run('1.0.0', { sloppy: true, changelogPath: '/foo/CHANGELOG.md' });
@@ -67,8 +67,8 @@ test('uses custom labels if they are provided in package.json', async (t) => {
         ['foo', 'Foo'],
         ['bar', 'Bar']
     ]);
-    const createChangelog = sinon.stub().returns('generated changelog');
-    const getMergedPullRequests = sinon.stub().resolves();
+    const createChangelog = stub().returns('generated changelog');
+    const getMergedPullRequests = stub().resolves();
     const cli = createCli({ packageInfo, createChangelog, getMergedPullRequests });
 
     await cli.run('1.0.0', options);
@@ -81,10 +81,10 @@ test('uses custom labels if they are provided in package.json', async (t) => {
 });
 
 test('reports the generated changelog', async (t) => {
-    const createChangelog = sinon.stub().returns('generated changelog');
-    const getMergedPullRequests = sinon.stub().resolves();
-    const ensureCleanLocalGitState = sinon.stub().resolves();
-    const prependFile = sinon.stub().resolves();
+    const createChangelog = stub().returns('generated changelog');
+    const getMergedPullRequests = stub().resolves();
+    const ensureCleanLocalGitState = stub().resolves();
+    const prependFile = stub().resolves();
 
     const cli = createCli({
         createChangelog,
@@ -111,8 +111,8 @@ test('reports the generated changelog', async (t) => {
 });
 
 test('strips trailing empty lines from the generated changelog', async (t) => {
-    const createChangelog = sinon.stub().returns('generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n');
-    const prependFile = sinon.stub().resolves();
+    const createChangelog = stub().returns('generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n');
+    const prependFile = stub().resolves();
 
     const cli = createCli({ createChangelog, prependFile });
 

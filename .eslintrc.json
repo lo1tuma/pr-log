@@ -1,8 +1,13 @@
 {
     "extends": ["joyn", "joyn/presets/node"],
 
+    "settings": {
+        "import/ignore": ["ramda"]
+    },
+
     "rules": {
-        "camelcase": "off"
+        "camelcase": "off",
+        "import/no-unresolved": ["error", { "ignore": ["ava", "ramda"] }]
     },
 
     "overrides": [

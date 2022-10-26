@@ -1,12 +1,12 @@
 import test from 'ava';
-import sinon from 'sinon';
+import { stub } from 'sinon';
 import defaultValidLabels from '../../../lib/validLabels';
 import getMergedPullRequestsFactory from '../../../lib/getMergedPullRequests';
 
 const anyRepo = 'any/repo';
 const latestVersion = '1.2.3';
 
-function factory({ tag = latestVersion, log } = {}, git = sinon.stub(), getPullRequestLabel = sinon.stub()) {
+function factory({ tag = latestVersion, log } = {}, git = stub(), getPullRequestLabel = stub()) {
     getPullRequestLabel.resolves('bug');
 
     git.resolves('');
@@ -19,7 +19,7 @@ function factory({ tag = latestVersion, log } = {}, git = sinon.stub(), getPullR
 }
 
 test('ignores non-semver tag', async (t) => {
-    const git = sinon.stub();
+    const git = stub();
     const getMergedPullRequests = factory({ tag: '0.0.1\nfoo\n0.0.2\n0.0.0.0.1' }, git);
     const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 0.0.2..HEAD';
 
@@ -29,7 +29,7 @@ test('ignores non-semver tag', async (t) => {
 });
 
 test('always usees the highest version', async (t) => {
-    const git = sinon.stub();
+    const git = stub();
     const getMergedPullRequests = factory({ tag: '1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n0.5.0' }, git);
     const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
 
@@ -39,7 +39,7 @@ test('always usees the highest version', async (t) => {
 });
 
 test('ignores prerelease versions', async (t) => {
-    const git = sinon.stub();
+    const git = stub();
     const getMergedPullRequests = factory({ tag: '1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1' }, git);
     const expectedGitLogCommand = 'log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
 
@@ -57,8 +57,8 @@ test('extracts id, title and label for merged pull requests', async (t) => {
         { id: '1', title: 'pr-1 message', label: 'bug' },
         { id: '2', title: 'pr-2 message', label: 'bug' }
     ];
-    const getPullRequestLabel = sinon.stub();
-    const git = sinon.stub();
+    const getPullRequestLabel = stub();
+    const git = stub();
     const getMergedPullRequests = factory({ log: gitLogMessages.join('\n') }, git, getPullRequestLabel);
 
     const pullRequests = await getMergedPullRequests(anyRepo, defaultValidLabels);
