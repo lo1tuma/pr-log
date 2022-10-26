@@ -98,6 +98,6 @@
         "Alexander Schmidt <alexanderschmidt1@gmail.com>"
     ],
     "engines": {
-        "node": "^12"
+        "node": "^18"
     }
 }
