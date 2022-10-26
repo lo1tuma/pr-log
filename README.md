@@ -1,7 +1,6 @@
 [![NPM Version](https://img.shields.io/npm/v/pr-log.svg?style=flat)](https://www.npmjs.org/package/pr-log)
 [![GitHub Actions status](https://github.com/lo1tuma/pr-log/workflows/CI/badge.svg)](https://github.com/lo1tuma/pr-log/actions)
 [![Coverage Status](https://img.shields.io/coveralls/lo1tuma/pr-log/master.svg?style=flat)](https://coveralls.io/r/lo1tuma/pr-log)
-[![Dependencies](https://img.shields.io/david/lo1tuma/pr-log.svg?style=flat)](https://david-dm.org/lo1tuma/pr-log)
 
 ---
 
