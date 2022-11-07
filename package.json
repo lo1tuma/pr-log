@@ -52,7 +52,7 @@
         "eslint-plugin-unicorn": "44.0.2",
         "nyc": "15.1.0",
         "prettier": "2.7.1",
-        "sinon": "14.0.1"
+        "sinon": "14.0.2"
     },
     "ava": {
         "files": [
