@@ -49,7 +49,7 @@
         "eslint-plugin-optimize-regex": "1.2.1",
         "eslint-plugin-prettier": "4.2.1",
         "eslint-plugin-promise": "6.1.1",
-        "eslint-plugin-unicorn": "44.0.2",
+        "eslint-plugin-unicorn": "45.0.2",
         "nyc": "15.1.0",
         "prettier": "2.7.1",
         "sinon": "14.0.1"
