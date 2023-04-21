@@ -1,13 +1,12 @@
 import parseGithubUrl from 'parse-github-repo-url';
+import { Repo } from './repo';
 
-function getGithubRepo(githubUrl) {
+export function getGithubRepo(githubUrl: string): Repo {
     const result = parseGithubUrl(githubUrl);
 
     if (!result) {
         throw new Error(`Invalid GitHub URI ${githubUrl}`);
     }
 
-    return `${result[0]}/${result[1]}`;
+    return new Repo(result[0], result[1]);
 }
-
-export default getGithubRepo;

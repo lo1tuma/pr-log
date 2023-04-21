@@ -1,7 +1,8 @@
+import Git from 'git-promise';
 import parseGitUrl from 'git-url-parse';
-import R from 'ramda';
+import { Repo } from './repo';
 
-function isSameGitUrl(gitUrlA, gitUrlB) {
+function isSameGitUrl(gitUrlA: string, gitUrlB: string) {
     const parsedUrlA = parseGitUrl(gitUrlA);
     const parsedUrlB = parseGitUrl(gitUrlB);
     const pathA = parsedUrlA.pathname.replace(/\.git$/, '');
@@ -10,12 +11,12 @@ function isSameGitUrl(gitUrlA, gitUrlB) {
     return parsedUrlA.resource === parsedUrlB.resource && pathA === pathB;
 }
 
-function getGitUrl(githubRepo) {
-    return `git://github.com/${githubRepo}.git`;
+function getGitUrl(githubRepo: Repo) {
+    return `git://github.com/${githubRepo.path}.git`;
 }
 
-export default function createModule({ git }) {
-    return async function findRemoteAlias(githubRepo) {
+export function findRemoteAliasFactory({ git }: { git: typeof Git }) {
+    return async function findRemoteAlias(githubRepo: Repo) {
         const gitRemote = getGitUrl(githubRepo);
 
         const output = await git('remote -v');
@@ -28,11 +29,9 @@ export default function createModule({ git }) {
             };
         });
 
-        const matchedRemote = R.find((remote) => {
-            return remote.url && isSameGitUrl(gitRemote, remote.url);
-        }, remotes); // eslint-disable-line array-func/no-unnecessary-this-arg
+        const matchedRemote = remotes.find((remote) => remote.url && isSameGitUrl(gitRemote, remote.url));
 
-        if (!matchedRemote) {
+        if (!matchedRemote || !matchedRemote.alias) {
             throw new Error(`This local git repository doesn’t have a remote pointing to ${gitRemote}`);
         }
 

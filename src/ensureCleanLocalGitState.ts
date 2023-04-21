@@ -1,4 +1,12 @@
-export default function createModule(dependencies) {
+import Git from 'git-promise';
+import { Repo } from './repo';
+
+export type CleanLocalGitStateFactoryParams = {
+    git: typeof Git;
+    findRemoteAlias: (githubRepo: Repo) => Promise<string>;
+};
+
+export function ensureCleanLocalGitStateFactory(dependencies: CleanLocalGitStateFactoryParams) {
     const { git, findRemoteAlias } = dependencies;
 
     async function ensureCleanLocalCopy() {
@@ -15,11 +23,11 @@ export default function createModule(dependencies) {
         }
     }
 
-    function fetchRemote(remoteAlias) {
+    function fetchRemote(remoteAlias: string) {
         return git(`fetch ${remoteAlias}`);
     }
 
-    async function ensureLocalIsEqualToRemote(remoteAlias) {
+    async function ensureLocalIsEqualToRemote(remoteAlias: string) {
         const remoteBranch = `${remoteAlias}/master`;
 
         const result = await git(`rev-list --left-right master...${remoteBranch}`);
@@ -45,7 +53,7 @@ export default function createModule(dependencies) {
         }
     }
 
-    return async function ensureCleanLocalGitState(githubRepo) {
+    return async function ensureCleanLocalGitState(githubRepo: Repo) {
         await ensureCleanLocalCopy();
         await ensureMasterBranch();
 

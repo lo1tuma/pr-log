@@ -1,15 +1,10 @@
 {
-    "name": "pr-log",
+    "name": "pr-changelog-gen",
     "version": "4.0.0",
     "description": "Changelog generator based on GitHub Pull Requests",
-    "bin": "dist/bin/pr-log.js",
-    "files": [
-        "dist/",
-        "LICENSE",
-        "README.md"
-    ],
+    "bin": "dist/bin/pr-changelog-gen.js",
     "scripts": {
-        "build": "babel lib --out-dir dist && babel bin --out-dir dist/bin",
+        "build": "./scripts/build.mjs",
         "prettier": "prettier '**/*.(yml|json|yaml|md)'",
         "eslint": "eslint .",
         "lint": "npm run eslint && npm run prettier -- --check",
@@ -22,37 +17,42 @@
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "@octokit/rest": "19.0.5",
-        "commander": "9.4.1",
-        "date-fns": "2.29.3",
-        "git-promise": "1.0.0",
-        "git-url-parse": "13.1.0",
-        "parse-github-repo-url": "1.4.1",
-        "prepend": "1.0.2",
-        "ramda": "0.28.0",
-        "semver": "7.3.8"
+        "@octokit/rest": "^19.0.5",
+        "clify": "ncpa0cpl/clify.js#0.0.4",
+        "commander": "^9.4.1",
+        "date-fns": "^2.29.3",
+        "git-promise": "^1.0.0",
+        "git-url-parse": "^13.1.0",
+        "parse-github-repo-url": "^1.4.1",
+        "prepend": "^1.0.2",
+        "ramda": "^0.28.0",
+        "semver": "^7.3.8"
     },
     "devDependencies": {
-        "@babel/cli": "7.19.3",
-        "@babel/preset-env": "7.19.4",
-        "@babel/register": "7.18.9",
-        "ava": "5.0.1",
-        "babel-plugin-istanbul": "6.1.1",
-        "eslint": "8.26.0",
-        "eslint-config-joyn": "0.39.0",
-        "eslint-plugin-array-func": "3.1.7",
-        "eslint-plugin-ava": "13.2.0",
-        "eslint-plugin-eslint-comments": "3.2.0",
-        "eslint-plugin-import": "2.26.0",
-        "eslint-plugin-no-secrets": "0.8.9",
-        "eslint-plugin-node": "11.1.0",
-        "eslint-plugin-optimize-regex": "1.2.1",
-        "eslint-plugin-prettier": "4.2.1",
-        "eslint-plugin-promise": "6.1.1",
-        "eslint-plugin-unicorn": "44.0.2",
-        "nyc": "15.1.0",
-        "prettier": "2.7.1",
-        "sinon": "14.0.1"
+        "@ncpa0cpl/nodepack": "^2.1.2",
+        "@types/git-url-parse": "^9.0.1",
+        "@types/node": "^18.15.13",
+        "@types/parse-github-repo-url": "^1.4.0",
+        "@types/ramda": "^0.29.0",
+        "@types/semver": "^7.3.13",
+        "ava": "^5.0.1",
+        "esbuild": "^0.17.17",
+        "eslint": "^8.26.0",
+        "eslint-config-joyn": "^0.39.0",
+        "eslint-plugin-array-func": "^3.1.7",
+        "eslint-plugin-ava": "^13.2.0",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-no-secrets": "^0.8.9",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-optimize-regex": "^1.2.1",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-promise": "^6.1.1",
+        "eslint-plugin-unicorn": "^44.0.2",
+        "nyc": "^15.1.0",
+        "prettier": "^2.7.1",
+        "sinon": "^14.0.1",
+        "typescript": "^5.0.4"
     },
     "ava": {
         "files": [
@@ -84,7 +84,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/lo1tuma/pr-log.git"
+        "url": "https://github.com/ncpa0cpl/pr-changelog-gen.git"
     },
     "keywords": [
         "pr-log",
@@ -95,9 +95,11 @@
         "history.md"
     ],
     "contributors": [
-        "Alexander Schmidt <alexanderschmidt1@gmail.com>"
+        "Alexander Schmidt <alexanderschmidt1@gmail.com>",
+        "Szymon Bretner <szymonb21@gmail.com"
     ],
     "engines": {
         "node": "^18"
-    }
+    },
+    "packageManager": "yarn@3.5.0"
 }
