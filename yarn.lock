@@ -1801,7 +1801,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dilswer@npm:2.0.2":
+"dilswer@npm:2.0.2, dilswer@npm:^2.0.2":
   version: 2.0.2
   resolution: "dilswer@npm:2.0.2"
   dependencies:
@@ -4653,6 +4653,7 @@ __metadata:
     clify: "ncpa0cpl/clify.js#0.0.4"
     commander: ^9.4.1
     date-fns: ^2.29.3
+    dilswer: ^2.0.2
     esbuild: ^0.17.17
     eslint: ^8.26.0
     eslint-config-joyn: ^0.39.0

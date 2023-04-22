@@ -1,11 +1,7 @@
 import semver from 'semver';
+import { ConfigFacade } from './config';
 import { Repo } from './repo';
 import { GithubClient, PullRequest } from './shared-types';
-
-export type GetMergedPullRequestsFactoryParams = {
-    git: (command: string | string[]) => Promise<string>;
-    githubClient: GithubClient;
-};
 
 function parseTagDateTime(gitTagInfo: string, tagName: string) {
     const tagLineRegexp = new RegExp(`\\(tag:.+?${tagName}.+?\\)`);
@@ -37,8 +33,14 @@ function parseTagDateTime(gitTagInfo: string, tagName: string) {
     return new Date(ts);
 }
 
+export type GetMergedPullRequestsFactoryParams = {
+    git: (command: string | string[]) => Promise<string>;
+    githubClient: GithubClient;
+    config: ConfigFacade;
+};
+
 export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequestsFactoryParams) {
-    const { git, githubClient } = dependencies;
+    const { git, githubClient, config } = dependencies;
 
     async function getLatestVersionTag() {
         const result = await git('tag --list');
@@ -71,9 +73,17 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
             per_page: 100
         });
 
-        if (tagName) {
-            const tagDate = await git(['log', '--no-color', '--pretty=format:%ai (%d)', tagName]);
-            const dateTime = parseTagDateTime(tagDate, tagName);
+        const sinceDateTime = config.get('onlySince');
+
+        if (tagName || sinceDateTime) {
+            let dateTime: Date;
+
+            if (sinceDateTime) {
+                dateTime = new Date(sinceDateTime);
+            } else {
+                const tagDate = await git(['log', '--no-color', '--pretty=format:%ai (%d)', tagName!]);
+                dateTime = parseTagDateTime(tagDate, tagName!);
+            }
 
             return issues.data
                 .filter((issue) => {

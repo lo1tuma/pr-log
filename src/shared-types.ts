@@ -15,10 +15,7 @@ export type PackageJson = {
         url?: string;
         type?: string;
     };
-    'pr-log'?: {
-        dateFormat?: string;
-        validLabels?: Array<[string, string]>;
-    };
+    'pr-log'?: unknown;
 };
 
 export type GenerateChangelogOptions = {
