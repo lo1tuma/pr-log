@@ -1,9 +1,9 @@
 import path from 'path';
 import semver from 'semver';
+import { ConfigFacade } from './config';
 import { getGithubRepo } from './getGithubRepo';
 import { Repo } from './repo';
-import { GenerateChangelogOptions, GithubClient, PackageJson, PullRequest, SemverNumber } from './shared-types';
-import defaultValidLabels from './validLabels';
+import { GithubClient, PackageJson, PullRequest, SemverNumber } from './shared-types';
 
 function stripTrailingEmptyLine(text: string) {
     if (text.lastIndexOf('\n\n') === text.length - 2) {
@@ -11,14 +11,6 @@ function stripTrailingEmptyLine(text: string) {
     }
 
     return text;
-}
-
-function getValidLabels(prLogConfig?: { validLabels?: Array<[string, string]> }): Map<string, string> {
-    if (prLogConfig && prLogConfig.validLabels) {
-        return new Map(prLogConfig.validLabels);
-    }
-
-    return defaultValidLabels;
 }
 
 function validateVersionnumber(versionNumber?: SemverNumber) {
@@ -30,13 +22,22 @@ function validateVersionnumber(versionNumber?: SemverNumber) {
     }
 }
 
+function getOutputPath(config: ConfigFacade) {
+    const o = config.get('outputFile');
+
+    if (o) {
+        return path.resolve(process.cwd(), o);
+    }
+
+    return path.resolve(process.cwd(), 'CHANGELOG.md');
+}
+
 export type CliAgentParams = {
     githubClient: GithubClient;
     ensureCleanLocalGitState: (githubRepo: Repo) => Promise<void>;
-    getMergedPullRequests: (githubRepo: Repo, validLabels: Map<string, string>) => Promise<Array<PullRequest>>;
+    getMergedPullRequests: (githubRepo: Repo) => Promise<Array<PullRequest>>;
     createChangelog: (
         newVersionNumber: SemverNumber,
-        validLabels: Map<string, string>,
         pullRequests: Array<PullRequest>,
         githubRepo: Repo
     ) => Promise<string>;
@@ -47,37 +48,30 @@ export type CliAgentParams = {
 export function createCliAgent(dependencies: CliAgentParams) {
     const { ensureCleanLocalGitState, getMergedPullRequests, createChangelog, packageInfo, prependFile } = dependencies;
 
-    async function generateChangelog(
-        options: GenerateChangelogOptions,
-        githubRepo: Repo,
-        validLabels: Map<string, string>,
-        newVersionNumber: SemverNumber
-    ) {
-        if (!options.sloppy) {
+    async function generateChangelog(config: ConfigFacade, githubRepo: Repo, newVersionNumber: SemverNumber) {
+        if (!config.get('sloppy', false)) {
             await ensureCleanLocalGitState(githubRepo);
         }
 
-        const pullRequests = await getMergedPullRequests(githubRepo, validLabels);
-        const changelog = await createChangelog(newVersionNumber, validLabels, pullRequests, githubRepo);
+        const pullRequests = await getMergedPullRequests(githubRepo);
+        const changelog = await createChangelog(newVersionNumber, pullRequests, githubRepo);
 
         return stripTrailingEmptyLine(changelog);
     }
 
     return {
-        run: async (newVersionNumber: SemverNumber, options: GenerateChangelogOptions = {}) => {
+        run: async (newVersionNumber: SemverNumber, config: ConfigFacade) => {
             if (!packageInfo.repository?.url) {
                 throw new Error('No repository url specified in package.json');
             }
 
             const githubRepo = getGithubRepo(packageInfo.repository?.url);
-            const prLogConfig = packageInfo['pr-log'];
-            const validLabels = getValidLabels(prLogConfig);
 
             validateVersionnumber(newVersionNumber);
 
-            const changelog = await generateChangelog(options, githubRepo, validLabels, newVersionNumber);
+            const changelog = await generateChangelog(config, githubRepo, newVersionNumber);
 
-            const changelogPath = options.changelogPath || path.resolve(process.cwd(), 'CHANGELOG.md');
+            const changelogPath = getOutputPath(config);
 
             await prependFile(changelogPath, changelog);
         }

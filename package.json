@@ -21,6 +21,7 @@
         "clify": "ncpa0cpl/clify.js#0.0.4",
         "commander": "^9.4.1",
         "date-fns": "^2.29.3",
+        "dilswer": "^2.0.2",
         "git-promise": "^1.0.0",
         "git-url-parse": "^13.1.0",
         "parse-github-repo-url": "^1.4.1",
