@@ -11,7 +11,7 @@ function formatLinkToPullRequest(pullRequestId: string | number, repo: Repo) {
 
 function formatPullRequest(pullRequest: PullRequest, repo: Repo, body?: string | null) {
     if (body)
-        return `* ${pullRequest.title} (${formatLinkToPullRequest(pullRequest.id, repo)})\n${padAllLines(body, 2)}\n`;
+        return `* ${pullRequest.title} (${formatLinkToPullRequest(pullRequest.id, repo)})\n\n${padAllLines(body, 2)}\n`;
     return `* ${pullRequest.title} (${formatLinkToPullRequest(pullRequest.id, repo)})\n`;
 }
 
