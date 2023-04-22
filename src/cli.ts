@@ -2,8 +2,8 @@ import path from 'path';
 import semver from 'semver';
 import { ConfigFacade } from './config';
 import { getGithubRepo } from './getGithubRepo';
-import { Repo } from './repo';
 import { GithubClient, PackageJson, PullRequest, SemverNumber } from './shared-types';
+import { Repo } from './utils/repo';
 
 function stripTrailingEmptyLine(text: string) {
     if (text.lastIndexOf('\n\n') === text.length - 2) {

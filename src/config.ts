@@ -4,7 +4,8 @@ const StringRegexp = Type.OneOf(
     Type.String,
     Type.RecordOf({
         regexp: Type.String,
-        flags: OptionalField(Type.String)
+        flags: OptionalField(Type.String),
+        label: OptionalField(Type.String)
     })
 );
 
@@ -14,7 +15,9 @@ export const ConfigSchema = Type.RecordOf({
     validLabels: OptionalField(Type.ArrayOf(Type.String)),
     prTitleMatcher: OptionalField(Type.OneOf(StringRegexp, Type.ArrayOf(StringRegexp))),
     outputFile: OptionalField(Type.String),
-    onlySince: OptionalField(Type.String)
+    onlySince: OptionalField(Type.String),
+    groupByLabels: OptionalField(Type.Boolean),
+    groupByMatchers: OptionalField(Type.Boolean)
 });
 
 export type Config = GetDataType<typeof ConfigSchema>;

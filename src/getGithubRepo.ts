@@ -1,5 +1,5 @@
 import parseGithubUrl from 'parse-github-repo-url';
-import { Repo } from './repo';
+import { Repo } from './utils/repo';
 
 export function getGithubRepo(githubUrl: string): Repo {
     const result = parseGithubUrl(githubUrl);
