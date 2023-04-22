@@ -1,6 +1,6 @@
 import Git from 'git-promise';
 import parseGitUrl from 'git-url-parse';
-import { Repo } from './repo';
+import { Repo } from './utils/repo';
 
 function isSameGitUrl(gitUrlA: string, gitUrlB: string) {
     const parsedUrlA = parseGitUrl(gitUrlA);

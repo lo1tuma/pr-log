@@ -61,6 +61,20 @@ const ArgOnlySince = Argument.define({
         'Only include PRs merged since the given date. This option overrides the default behavior of only including PRs merged since the last tag was created.'
 });
 
+const ArgGroupByLabels = Argument.define({
+    keyword: '--group-by-labels',
+    flagChar: '-gl',
+    dataType: 'boolean',
+    description: 'Group PRs in the changelog by labels. Default: false.'
+});
+
+const ArgGroupByMatchers = Argument.define({
+    keyword: '--group-by-matchers',
+    flagChar: '-gm',
+    dataType: 'boolean',
+    description: 'Group PRs in the changelog by PR matchers. Default: true.'
+});
+
 const ArgSloppy = Argument.define({
     keyword: '--sloppy',
     flagChar: '-s',
@@ -95,6 +109,8 @@ export const MainAction: MainCommandInitializeCallback = () => {
     const validLabels = new ArgValidLabels();
     const outputFile = new ArgOutputFile();
     const onlySince = new ArgOnlySince();
+    const groupByLabels = new ArgGroupByLabels();
+    const groupByMatchers = new ArgGroupByMatchers();
 
     return {
         run() {
@@ -110,7 +126,9 @@ export const MainAction: MainCommandInitializeCallback = () => {
                 validLabels: validLabels.value?.split(','),
                 sloppy: sloppy.value,
                 outputFile: outputFile.value,
-                onlySince: onlySince.value
+                onlySince: onlySince.value,
+                groupByLabels: groupByLabels.value,
+                groupByMatchers: groupByMatchers.value
             });
 
             const findRemoteAlias = findRemoteAliasFactory({ git });

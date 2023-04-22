@@ -1,7 +1,7 @@
 import semver from 'semver';
 import { ConfigFacade } from './config';
-import { Repo } from './repo';
 import { GithubClient, PullRequest } from './shared-types';
+import { Repo } from './utils/repo';
 
 function parseTagDateTime(gitTagInfo: string, tagName: string) {
     const tagLineRegexp = new RegExp(`\\(tag:.+?${tagName}.+?\\)`);
@@ -94,7 +94,8 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
                         id: issue.number,
                         title: issue.title,
                         labels: issue.labels.map((l) => (typeof l === 'string' ? l : l.name)),
-                        body: issue.body
+                        body: issue.body,
+                        mergedAt: new Date(issue.merged_at!)
                     };
                 });
         }
@@ -108,7 +109,8 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
                     id: issue.number,
                     title: issue.title,
                     labels: issue.labels.map((l) => (typeof l === 'string' ? l : l.name)),
-                    body: issue.body
+                    body: issue.body,
+                    mergedAt: new Date(issue.merged_at!)
                 };
             });
     }

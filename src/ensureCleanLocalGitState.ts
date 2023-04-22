@@ -1,5 +1,5 @@
 import Git from 'git-promise';
-import { Repo } from './repo';
+import { Repo } from './utils/repo';
 
 export type CleanLocalGitStateFactoryParams = {
     git: typeof Git;

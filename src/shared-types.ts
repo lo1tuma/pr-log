@@ -8,6 +8,7 @@ export type PullRequest = {
     title: string;
     labels?: string[];
     body?: string;
+    mergedAt: Date;
 };
 
 export type PackageJson = {
