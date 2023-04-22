@@ -120,7 +120,7 @@ export const MainAction: MainCommandInitializeCallback = () => {
                 fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8')
             ) as PackageJson;
 
-            const config = new ConfigFacade(packageInfo['pr-log'], {
+            const config = new ConfigFacade(packageInfo['pr-changelog-gen'], {
                 prTitleMatcher: prTitleMatcher.value,
                 dateFormat: dateFormat.value,
                 validLabels: validLabels.value?.split(','),

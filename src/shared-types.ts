@@ -16,7 +16,7 @@ export type PackageJson = {
         url?: string;
         type?: string;
     };
-    'pr-log'?: unknown;
+    'pr-changelog-gen'?: unknown;
 };
 
 export type GenerateChangelogOptions = {
