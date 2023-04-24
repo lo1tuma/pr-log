@@ -5,6 +5,7 @@ import { PullRequest, SemverNumber } from './shared-types';
 import { capitalize } from './utils/capitalize';
 import { padAllLines } from './utils/pad-all-lines';
 import { Repo } from './utils/repo';
+import { DefaultValidLabels } from './validLabels';
 
 type ParsedPR = {
     id: number;
@@ -29,9 +30,9 @@ function formatPullRequest(pullRequest: ParsedPR, repo: Repo, body?: string | nu
 }
 
 function getPrLabelsAndMatchers(pr: PullRequest, config: ConfigFacade) {
-    const validLabels = config.get('validLabels', []);
+    const validLabels = config.get('validLabels', DefaultValidLabels);
 
-    const matchingLabels = validLabels.filter((label) => pr.labels?.includes(label)).map(capitalize);
+    const matchingLabels = validLabels.filter((label) => pr.labels?.includes(label));
 
     const regexp = config.get('prTitleMatcher', [
         {
@@ -70,7 +71,7 @@ function getPrLabelsAndMatchers(pr: PullRequest, config: ConfigFacade) {
     return {
         label: matchingLabels[0],
         matcher: matchingRegex?.label,
-        isMatched: matchingRegex != null
+        isMatched: matchingRegex != null || matchingLabels.length > 0
     };
 }
 
@@ -95,19 +96,24 @@ function mapToParsed(pullRequests: PullRequest[], config: ConfigFacade) {
     return parsed;
 }
 
+type PrGroup = {
+    groupName?: string;
+    pullRequests: ParsedPR[];
+};
+
 function applyGrouping(pullRequests: ParsedPR[], config: ConfigFacade) {
     pullRequests = pullRequests.slice();
 
     const groupByLabels = config.get('groupByLabels', false);
     const groupByMatchers = config.get('groupByMatchers', true);
+    const validaLabels = config.get('validLabels', DefaultValidLabels);
 
-    const result: Array<{
-        groupName?: string;
-        pullRequests: ParsedPR[];
-    }> = [];
+    const labelGroups: Array<PrGroup> = [];
 
-    const getGroup = (name: string) => {
-        let g = result.find((r) => r.groupName === name);
+    const matcherGroups: Array<PrGroup> = [];
+
+    const getLabelGroup = (name: string) => {
+        let g = labelGroups.find((r) => r.groupName === name);
 
         if (!g) {
             g = {
@@ -115,7 +121,22 @@ function applyGrouping(pullRequests: ParsedPR[], config: ConfigFacade) {
                 pullRequests: []
             };
 
-            result.push(g);
+            labelGroups.push(g);
+        }
+
+        return g;
+    };
+
+    const getMatcherGroup = (name: string) => {
+        let g = matcherGroups.find((r) => r.groupName === name);
+
+        if (!g) {
+            g = {
+                groupName: name,
+                pullRequests: []
+            };
+
+            matcherGroups.push(g);
         }
 
         return g;
@@ -125,7 +146,7 @@ function applyGrouping(pullRequests: ParsedPR[], config: ConfigFacade) {
         let offset = 0;
         for (const [index, pr] of pullRequests.slice().entries()) {
             if (pr.label) {
-                const group = getGroup(pr.label);
+                const group = getLabelGroup(pr.label);
                 group.pullRequests.push(pr);
                 pullRequests.splice(index - offset++, 1);
             }
@@ -136,24 +157,49 @@ function applyGrouping(pullRequests: ParsedPR[], config: ConfigFacade) {
         let offset = 0;
         for (const [index, pr] of pullRequests.slice().entries()) {
             if (pr.matcher) {
-                const group = getGroup(pr.matcher);
+                const group = getMatcherGroup(pr.matcher);
                 group.pullRequests.push(pr);
                 pullRequests.splice(index - offset++, 1);
             }
         }
     }
 
-    const hasGroups = result.length > 0;
+    const hasGroups = labelGroups.length > 0 || matcherGroups.length > 0;
+
+    let otherGroup: PrGroup | undefined = undefined;
 
     if (hasGroups) {
-        const group = getGroup('Other');
+        otherGroup = {
+            groupName: 'Other',
+            pullRequests: []
+        };
+
         for (const pr of pullRequests) {
-            group.pullRequests.push(pr);
+            otherGroup.pullRequests.push(pr);
         }
     } else {
-        result.push({
+        otherGroup = {
             pullRequests: pullRequests
-        });
+        };
+    }
+
+    labelGroups.sort((a, b) => {
+        const aIndex = validaLabels.indexOf(a.groupName!);
+        const bIndex = validaLabels.indexOf(b.groupName!);
+        return aIndex < bIndex ? -1 : 1;
+    });
+
+    const result = labelGroups
+        .map((g): PrGroup => {
+            return {
+                pullRequests: g.pullRequests,
+                groupName: capitalize(g.groupName!)
+            };
+        })
+        .concat(matcherGroups);
+
+    if (otherGroup) {
+        result.push(otherGroup);
     }
 
     for (const group of result) {
@@ -166,10 +212,9 @@ function applyGrouping(pullRequests: ParsedPR[], config: ConfigFacade) {
 type ChangelogGeneratorFactoryParams = {
     getCurrentDate: () => Date;
     config: ConfigFacade;
-    prDescription: boolean;
 };
 
-export function createChangelogFactory({ getCurrentDate, config, prDescription }: ChangelogGeneratorFactoryParams) {
+export function createChangelogFactory({ getCurrentDate, config }: ChangelogGeneratorFactoryParams) {
     const dateFormat = config.get('dateFormat', 'MMMM d, yyyy');
 
     return async function createChangelog(
@@ -190,7 +235,7 @@ export function createChangelogFactory({ getCurrentDate, config, prDescription }
             }
 
             for (const pr of prGroup.pullRequests) {
-                changelog += formatPullRequest(pr, repo, prDescription ? pr.body : null);
+                changelog += formatPullRequest(pr, repo, config.get('includePrBody', true) ? pr.body : null);
             }
         }
 
