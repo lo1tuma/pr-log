@@ -19,7 +19,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@octokit/rest": "^19.0.5",
+    "@octokit/rest": "^19.0.7",
     "clify": "ncpa0cpl/clify.js#0.0.4",
     "date-fns": "^2.29.3",
     "dilswer": "^2.0.2",
@@ -28,7 +28,7 @@
     "parse-github-repo-url": "^1.4.1",
     "prepend": "^1.0.2",
     "reflect-metadata": "^0.1.13",
-    "semver": "^7.3.8"
+    "semver": "^7.5.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
@@ -38,7 +38,6 @@
     "@types/git-url-parse": "^9.0.1",
     "@types/node": "^18.15.13",
     "@types/parse-github-repo-url": "^1.4.0",
-    "@types/ramda": "^0.29.0",
     "@types/semver": "^7.3.13",
     "@typescript-eslint/eslint-plugin": "^5.59.0",
     "@typescript-eslint/parser": "^5.59.0",
