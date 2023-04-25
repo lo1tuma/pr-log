@@ -128,7 +128,8 @@ export const MainAction: MainCommandInitializeCallback = () => {
                 outputFile: outputFile.value,
                 onlySince: onlySince.value,
                 groupByLabels: groupByLabels.value,
-                groupByMatchers: groupByMatchers.value
+                groupByMatchers: groupByMatchers.value,
+                includePrBody: includePrDescription.value
             });
 
             const findRemoteAlias = findRemoteAliasFactory({ git });
@@ -140,20 +141,19 @@ export const MainAction: MainCommandInitializeCallback = () => {
             const getCurrentDate = () => new Date();
 
             const dependencies: CliAgentParams = {
-                githubClient,
+                config,
                 prependFile: promisify(prepend),
                 packageInfo,
                 ensureCleanLocalGitState: ensureCleanLocalGitStateFactory({ git, findRemoteAlias }),
                 getMergedPullRequests,
                 createChangelog: createChangelogFactory({
                     getCurrentDate,
-                    prDescription: includePrDescription.value,
                     config
                 })
             };
             const cliAgent = createCliAgent(dependencies);
 
-            cliAgent.run(version.value, config).catch((error) => {
+            cliAgent.run(version.value).catch((error) => {
                 let message = `Error: ${error.message}`;
 
                 if (trace.value) {

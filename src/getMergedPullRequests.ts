@@ -3,6 +3,20 @@ import { ConfigFacade } from './config';
 import { GithubClient, PullRequest } from './shared-types';
 import { Repo } from './utils/repo';
 
+export type PullResponse = {
+    data: {
+        number: number;
+        state: 'closed' | 'open';
+        title: string;
+        body: string;
+        created_at: string;
+        updated_at: string;
+        closed_at?: string;
+        merged_at?: string;
+        labels: Array<string | { name: string }>;
+    }[];
+};
+
 function parseTagDateTime(gitTagInfo: string, tagName: string) {
     const tagLineRegexp = new RegExp(`\\(tag:.+?${tagName}.+?\\)`);
 
@@ -52,20 +66,6 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
     }
 
     async function getPullRequests(githubRepo: Repo, tagName?: string): Promise<PullRequest[]> {
-        type PullResponse = {
-            data: {
-                number: number;
-                state: 'closed' | 'open';
-                title: string;
-                body: string;
-                created_at: string;
-                updated_at: string;
-                closed_at?: string;
-                merged_at?: string;
-                labels: Array<string | { name: string }>;
-            }[];
-        };
-
         const issues: PullResponse = await githubClient.request(`GET /repos/${githubRepo.path}/pulls`, {
             state: 'closed',
             base: 'master',

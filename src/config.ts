@@ -14,6 +14,7 @@ export const ConfigSchema = Type.RecordOf({
     dateFormat: OptionalField(Type.String),
     validLabels: OptionalField(Type.ArrayOf(Type.String)),
     prTitleMatcher: OptionalField(Type.OneOf(StringRegexp, Type.ArrayOf(StringRegexp))),
+    includePrBody: OptionalField(Type.Boolean),
     outputFile: OptionalField(Type.String),
     onlySince: OptionalField(Type.String),
     groupByLabels: OptionalField(Type.Boolean),

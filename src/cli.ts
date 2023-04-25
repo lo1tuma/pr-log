@@ -2,7 +2,7 @@ import path from 'path';
 import semver from 'semver';
 import { ConfigFacade } from './config';
 import { getGithubRepo } from './getGithubRepo';
-import { GithubClient, PackageJson, PullRequest, SemverNumber } from './shared-types';
+import { PackageJson, PullRequest, SemverNumber } from './shared-types';
 import { Repo } from './utils/repo';
 
 function stripTrailingEmptyLine(text: string) {
@@ -33,7 +33,6 @@ function getOutputPath(config: ConfigFacade) {
 }
 
 export type CliAgentParams = {
-    githubClient: GithubClient;
     ensureCleanLocalGitState: (githubRepo: Repo) => Promise<void>;
     getMergedPullRequests: (githubRepo: Repo) => Promise<Array<PullRequest>>;
     createChangelog: (
@@ -43,12 +42,14 @@ export type CliAgentParams = {
     ) => Promise<string>;
     packageInfo: PackageJson;
     prependFile: (filePath: string, content: string) => Promise<void>;
+    config: ConfigFacade;
 };
 
 export function createCliAgent(dependencies: CliAgentParams) {
-    const { ensureCleanLocalGitState, getMergedPullRequests, createChangelog, packageInfo, prependFile } = dependencies;
+    const { ensureCleanLocalGitState, getMergedPullRequests, createChangelog, packageInfo, prependFile, config } =
+        dependencies;
 
-    async function generateChangelog(config: ConfigFacade, githubRepo: Repo, newVersionNumber: SemverNumber) {
+    async function generateChangelog(githubRepo: Repo, newVersionNumber: SemverNumber) {
         if (!config.get('sloppy', false)) {
             await ensureCleanLocalGitState(githubRepo);
         }
@@ -60,7 +61,7 @@ export function createCliAgent(dependencies: CliAgentParams) {
     }
 
     return {
-        run: async (newVersionNumber: SemverNumber, config: ConfigFacade) => {
+        run: async (newVersionNumber: SemverNumber) => {
             if (!packageInfo.repository?.url) {
                 throw new Error('No repository url specified in package.json');
             }
@@ -69,7 +70,7 @@ export function createCliAgent(dependencies: CliAgentParams) {
 
             validateVersionnumber(newVersionNumber);
 
-            const changelog = await generateChangelog(config, githubRepo, newVersionNumber);
+            const changelog = await generateChangelog(githubRepo, newVersionNumber);
 
             const changelogPath = getOutputPath(config);
 
