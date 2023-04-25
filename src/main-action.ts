@@ -171,7 +171,7 @@ export class MainAction extends Service {
         let message = `Error: ${error.message}`;
 
         if (this.trace.value) {
-          message += "\n" + error.stack;
+          message += `\n${error.stack ?? ""}`;
         }
 
         console.error(message);

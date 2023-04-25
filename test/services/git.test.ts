@@ -6,7 +6,7 @@ import { Repo } from "../../src/utils/repo";
 const githubRepo = new Repo("foo", "bar");
 
 class GS extends GitService {
-  async _findRemoteAlias(githubRepo: Repo): Promise<string> {
+  async _findRemoteAlias(): Promise<string> {
     return "origin";
   }
 }

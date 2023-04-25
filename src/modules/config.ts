@@ -1,4 +1,5 @@
-import { GetDataType, OptionalField, Type, assertDataType } from "dilswer";
+import type { GetDataType } from "dilswer";
+import { OptionalField, Type, assertDataType } from "dilswer";
 
 const StringRegexp = Type.OneOf(
   Type.String,
@@ -63,7 +64,10 @@ export class ConfigFacade {
   }
 
   get<K extends keyof Config>(key: K): Config[K];
-  get<K extends keyof Config>(key: K, defaultValue: Defined<Config[K]>): Defined<Config[K]>;
+  get<K extends keyof Config>(
+    key: K,
+    defaultValue: Defined<Config[K]>
+  ): Defined<Config[K]>;
   get(key: keyof Config, defaultValue?: any): any {
     return this.config[key] ?? defaultValue;
   }

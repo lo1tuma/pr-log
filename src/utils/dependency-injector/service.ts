@@ -1,4 +1,4 @@
-import { Constructor } from "./inject";
+import type { Constructor } from "./inject";
 import { ServiceMetadata } from "./metadata";
 
 export interface Injectable {

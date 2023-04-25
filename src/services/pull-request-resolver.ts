@@ -2,10 +2,10 @@ import { Octokit } from "@octokit/rest";
 import semver from "semver";
 import { ConfigFacade } from "../modules/config";
 import { Git } from "../modules/git-client";
-import { PullRequest } from "../shared-types";
+import type { PullRequest } from "../shared-types";
 import { Inject } from "../utils/dependency-injector/inject";
 import { Service } from "../utils/dependency-injector/service";
-import { Repo } from "../utils/repo";
+import type { Repo } from "../utils/repo";
 
 export type PullResponse = {
   data: {
@@ -64,7 +64,9 @@ export class PullRequestResolverService extends Service {
   async _getLatestVersionTag() {
     const result = await this.git.run("tag --list");
     const tags = result.split("\n");
-    const versionTags = tags.filter((tag) => semver.valid(tag) && !semver.prerelease(tag));
+    const versionTags = tags.filter(
+      (tag) => semver.valid(tag) && !semver.prerelease(tag)
+    );
     const orderedVersionTags = versionTags.sort(semver.compare);
 
     return orderedVersionTags[orderedVersionTags.length - 1];
@@ -101,7 +103,9 @@ export class PullRequestResolverService extends Service {
       return issues.data
         .filter((issue) => {
           return (
-            issue.state === "closed" && issue.merged_at && new Date(issue.merged_at) > dateTime
+            issue.state === "closed" &&
+            issue.merged_at &&
+            new Date(issue.merged_at) > dateTime
           );
         })
         .map((issue) => {

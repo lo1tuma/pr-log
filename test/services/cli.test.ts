@@ -7,7 +7,7 @@ import { GitService } from "../../src/services/git";
 import { PullRequestResolverService } from "../../src/services/pull-request-resolver";
 import { Repo } from "../../src/utils/repo";
 import { mockConfig } from "../shared";
-import { PullRequest, SemverNumber } from "../shared-types";
+import type { PullRequest, SemverNumber } from "../shared-types";
 
 export type CliFactoryParams = {
   ensureCleanLocalGitState: (githubRepo: Repo) => Promise<void>;

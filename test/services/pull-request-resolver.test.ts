@@ -2,7 +2,8 @@ import { describe, expect, it, jest } from "@jest/globals";
 import { Octokit } from "@octokit/rest";
 import { ConfigFacade } from "../../src/modules/config";
 import { Git } from "../../src/modules/git-client";
-import { PullRequestResolverService, PullResponse } from "../../src/services/pull-request-resolver";
+import type { PullResponse } from "../../src/services/pull-request-resolver";
+import { PullRequestResolverService } from "../../src/services/pull-request-resolver";
 import { Repo } from "../../src/utils/repo";
 import { mockConfig, mockGithubClient } from "../shared";
 
@@ -66,7 +67,12 @@ describe("PullRequestResolverService", () => {
 
     await resolver.getMerged(anyRepo);
 
-    expect(git).toHaveBeenCalledWith(["log", "--no-color", "--pretty=format:%ai (%d)", "0.0.2"]);
+    expect(git).toHaveBeenCalledWith([
+      "log",
+      "--no-color",
+      "--pretty=format:%ai (%d)",
+      "0.0.2",
+    ]);
   });
 
   it("always usees the highest version", async () => {
@@ -90,7 +96,12 @@ describe("PullRequestResolverService", () => {
 
     await resolver.getMerged(anyRepo);
 
-    expect(git).toHaveBeenCalledWith(["log", "--no-color", "--pretty=format:%ai (%d)", "2.0.0"]);
+    expect(git).toHaveBeenCalledWith([
+      "log",
+      "--no-color",
+      "--pretty=format:%ai (%d)",
+      "2.0.0",
+    ]);
   });
 
   it("ignores prerelease versions", async () => {
@@ -114,7 +125,12 @@ describe("PullRequestResolverService", () => {
 
     await resolver.getMerged(anyRepo);
 
-    expect(git).toHaveBeenCalledWith(["log", "--no-color", "--pretty=format:%ai (%d)", "2.0.0"]);
+    expect(git).toHaveBeenCalledWith([
+      "log",
+      "--no-color",
+      "--pretty=format:%ai (%d)",
+      "2.0.0",
+    ]);
   });
 
   it("extracts id, title and label for merged pull requests", async () => {
@@ -231,7 +247,9 @@ describe("PullRequestResolverService", () => {
       ],
     });
 
-    const expectedPullRequests = [{ id: 2, title: "pr-2 message", labels: ["bug"] }] as const;
+    const expectedPullRequests = [
+      { id: 2, title: "pr-2 message", labels: ["bug"] },
+    ] as const;
 
     const pullRequests = await resolver.getMerged(anyRepo);
 

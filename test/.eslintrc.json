@@ -1,0 +1,7 @@
+{
+  "extends": ["../.eslintrc.json"],
+  "parserOptions": {
+    "project": "./test/tsconfig.json",
+    "sourceType": "module"
+  }
+}

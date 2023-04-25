@@ -2,12 +2,12 @@ import { format as formatDate } from "date-fns";
 import enLocale from "date-fns/locale/en-US/index.js";
 import { ConfigFacade } from "../modules/config";
 import { DateResolver } from "../modules/date-resolver";
-import { PullRequest, SemverNumber } from "../shared-types";
+import type { PullRequest, SemverNumber } from "../shared-types";
 import { capitalize } from "../utils/capitalize";
 import { Inject } from "../utils/dependency-injector/inject";
 import { Service } from "../utils/dependency-injector/service";
 import { padAllLines } from "../utils/pad-all-lines";
-import { Repo } from "../utils/repo";
+import type { Repo } from "../utils/repo";
 import { DefaultValidLabels } from "../utils/valid-labels";
 
 type ParsedPR = {

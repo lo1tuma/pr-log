@@ -14,12 +14,15 @@ import {
   ArgVersion,
   MainAction,
 } from "../src/main-action";
-import { Config, ConfigFacade } from "../src/modules/config";
+import type { Config } from "../src/modules/config";
+import { ConfigFacade } from "../src/modules/config";
 import { ConfigLoader } from "../src/modules/config-loader";
 import { EnvvarReader } from "../src/modules/envvar-reader";
 import { CliService } from "../src/services/cli";
-import { Constructor, Inject } from "../src/utils/dependency-injector/inject";
-import { Dependencies, Service } from "../src/utils/dependency-injector/service";
+import type { Constructor } from "../src/utils/dependency-injector/inject";
+import { Inject } from "../src/utils/dependency-injector/inject";
+import type { Dependencies } from "../src/utils/dependency-injector/service";
+import { Service } from "../src/utils/dependency-injector/service";
 
 const ALL_ARGS = {
   sloppy: ArgSloppy as Constructor,

@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "node:path";
-import { PackageJson } from "../shared-types";
+import type { PackageJson } from "../shared-types";
 
 export class ConfigLoader {
   private packageJson: PackageJson | null = null;

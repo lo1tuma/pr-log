@@ -4,7 +4,7 @@ import { DateResolver } from "../../src/modules/date-resolver";
 import { ChangelogGeneratorService } from "../../src/services/changelog-generator";
 import { Repo } from "../../src/utils/repo";
 import { mockConfig } from "../shared";
-import { PullRequest } from "../shared-types";
+import type { PullRequest } from "../shared-types";
 
 const repository = new Repo("foo", "bar");
 
