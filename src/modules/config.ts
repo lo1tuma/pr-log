@@ -1,5 +1,5 @@
 import type { GetDataType } from "dilswer";
-import { OptionalField, Type, assertDataType } from "dilswer";
+import { OptionalField, Type, ValidationError, assertDataType } from "dilswer";
 
 const LabeledRegex = Type.RecordOf({
   regexp: Type.String,
@@ -31,7 +31,7 @@ export class ConfigFacade {
   private readonly config: Readonly<Config>;
 
   constructor(config: any = {}, overrides: Config = {}) {
-    assertDataType(ConfigSchema, config);
+    this.assertConfigType(config);
 
     const conf = { ...config };
 
@@ -46,6 +46,22 @@ export class ConfigFacade {
     this.config = Object.freeze(conf);
 
     this.validateOnlySince();
+  }
+
+  private assertConfigType(config: any): asserts config is Config {
+    try {
+      assertDataType(ConfigSchema, config);
+    } catch (err) {
+      if (ValidationError.isValidationError(err)) {
+        throw new Error(
+          `Invalid config property: '${
+            err.receivedValue
+          }' at [config.${err.fieldPath.substring(2)}]`
+        );
+      } else {
+        throw err;
+      }
+    }
   }
 
   private validateOnlySince() {

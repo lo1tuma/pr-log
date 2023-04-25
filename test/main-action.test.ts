@@ -1,4 +1,12 @@
-import { describe, expect, it, jest } from "@jest/globals";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  jest,
+} from "@jest/globals";
 import { Octokit } from "@octokit/rest";
 import {
   ArgDateFormat,
@@ -119,7 +127,24 @@ const createCliForConfigTesting = async (
   return cli;
 };
 
+const programExitSpy = jest.spyOn(process, "exit");
+const consoleErrorSpy = jest.spyOn(console, "error");
+
 describe("MainAction", () => {
+  beforeAll(() => {
+    // @ts-expect-error
+    programExitSpy.mockImplementation((): any => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockClear();
+    programExitSpy.mockClear();
+  });
+
+  afterAll(() => {
+    programExitSpy.mockRestore();
+  });
+
   it("should properly initialize without optional arguments", () => {
     expect(
       (() => {
@@ -129,6 +154,9 @@ describe("MainAction", () => {
         return action.run();
       })()
     ).resolves.toBe(undefined);
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    expect(programExitSpy).not.toHaveBeenCalled();
   });
 
   it("should run() the cli service", async () => {
@@ -172,6 +200,65 @@ describe("MainAction", () => {
     await action.run();
 
     expect(ghClient.auth).toHaveBeenCalledTimes(0);
+  });
+
+  describe("should fail when the config values are invalid", () => {
+    it("dateFormat", async () => {
+      const action = factory({
+        argMocks: { version: "1.0.0" },
+        config: {
+          // @ts-expect-error
+          dateFormat: true,
+        },
+      });
+
+      await action.run();
+
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+      expect(programExitSpy).toHaveBeenCalledTimes(1);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error: Invalid config property: 'true' at [config.dateFormat]"
+      );
+    });
+
+    it("sloppy", async () => {
+      const action = factory({
+        argMocks: { version: "1.0.0" },
+        config: {
+          // @ts-expect-error
+          sloppy: "",
+        },
+      });
+
+      await action.run();
+
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+      expect(programExitSpy).toHaveBeenCalledTimes(1);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error: Invalid config property: '' at [config.sloppy]"
+      );
+    });
+
+    it("prTitleMatcher", async () => {
+      const action = factory({
+        argMocks: { version: "1.0.0" },
+        config: {
+          // @ts-expect-error
+          prTitleMatcher: ["abc", {}],
+        },
+      });
+
+      await action.run();
+
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+      expect(programExitSpy).toHaveBeenCalledTimes(1);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Error: Invalid config property: 'abc,[object Object]' at [config.prTitleMatcher]"
+      );
+    });
   });
 
   describe("should properly parse config and arguments, and provide the config to the nested services", () => {
