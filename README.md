@@ -8,43 +8,43 @@
 
 ## Table of Contents
 
--   [Main Features](#main-features)
--   [Install](#install)
--   [Setup and configuration](#setup-and-configuration)
-    -   [GitHub](#github)
-    -   [Project](#project)
-    -   [Changelog formatting](#changelog-formatting)
-        -   [Custom date format](#custom-date-format)
--   [Usage](#usage)
-    -   [Options](#options)
-        -   [-v --target-version](#v---target-version)
-        -   [-n --include-pr-description](#n---include-pr-description)
-        -   [-p --pr-title-matcher](#p---pr-title-matcher)
-        -   [-d --date-format](#d---date-format)
-        -   [-l --valid-labels](#l---valid-labels)
-        -   [-o --output-file](#o---output-file)
-        -   [-c --only-since](#c---only-since)
-        -   [-gl --group-by-labels](#gl---group-by-labels)
-        -   [-gm --group-by-matchers](#gm---group-by-matchers)
-        -   [-s --sloppy](#s---sloppy)
-        -   [-t --trace](#t---trace)
--   [Correct usage makes a clean and complete changelog](#correct-usage-makes-a-clean-and-complete-changelog)
--   [Github Authentication](#github-authentication)
+- [Main Features](#main-features)
+- [Install](#install)
+- [Setup and configuration](#setup-and-configuration)
+  - [GitHub](#github)
+  - [Project](#project)
+  - [Changelog formatting](#changelog-formatting)
+    - [Custom date format](#custom-date-format)
+- [Usage](#usage)
+  - [Options](#options)
+    - [-v --target-version](#v---target-version)
+    - [-n --include-pr-description](#n---include-pr-description)
+    - [-p --pr-title-matcher](#p---pr-title-matcher)
+    - [-d --date-format](#d---date-format)
+    - [-l --valid-labels](#l---valid-labels)
+    - [-o --output-file](#o---output-file)
+    - [-c --only-since](#c---only-since)
+    - [-gl --group-by-labels](#gl---group-by-labels)
+    - [-gm --group-by-matchers](#gm---group-by-matchers)
+    - [-s --sloppy](#s---sloppy)
+    - [-t --trace](#t---trace)
+- [Correct usage makes a clean and complete changelog](#correct-usage-makes-a-clean-and-complete-changelog)
+- [Github Authentication](#github-authentication)
 
 ## Main features
 
--   Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag. This works by
-    -   first getting a list of all tags
-    -   than removing all tags that are not compatible to [semver versioning](http://semver.org/)
-    -   sort the tags
-    -   getting the git log from the last tag until now
-    -   If no `CHANGELOG.md` existed, it will create the file else it will write prepending to it
--   Friendly CLI
-    -   Get usage by running `pr-changelog-gen --help`
-    -   Error messages that help correcting usage mistakes. E.g.
-        -   Missing first command line argument: `Error: version-number not specified`
-        -   Local branch is outdated compared to the remote branch: `Error: Local git master branch is 0 commits ahead and 2 commits behind of origin/master`
-        -   The current working directory is not clean (e.g. contains files that are modified): `Error: Local copy is not clean`
+- Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag. This works by
+  - first getting a list of all tags
+  - than removing all tags that are not compatible to [semver versioning](http://semver.org/)
+  - sort the tags
+  - getting the git log from the last tag until now
+  - If no `CHANGELOG.md` existed, it will create the file else it will write prepending to it
+- Friendly CLI
+  - Get usage by running `pr-changelog-gen --help`
+  - Error messages that help correcting usage mistakes. E.g.
+    - Missing first command line argument: `Error: version-number not specified`
+    - Local branch is outdated compared to the remote branch: `Error: Local git master branch is 0 commits ahead and 2 commits behind of origin/master`
+    - The current working directory is not clean (e.g. contains files that are modified): `Error: Local copy is not clean`
 
 ## Install
 
@@ -66,20 +66,20 @@ If you don't want to follow the Angular commit message convention you can config
 
 ```json
 {
-    "pr-changelog-gen": {
-        "prTitleMatcher": [
-            {
-                "label": "Breaking Changes",
-                "regexp": "^(BREAKING CHANGE:|BREAKING CHANGES:)",
-                "flags": "iu"
-            },
-            {
-                "label": "Documentation",
-                "regexp": "^docs:",
-                "flags": "iu"
-            }
-        ]
-    }
+  "pr-changelog-gen": {
+    "prTitleMatcher": [
+      {
+        "label": "Breaking Changes",
+        "regexp": "^(BREAKING CHANGE:|BREAKING CHANGES:)",
+        "flags": "iu"
+      },
+      {
+        "label": "Documentation",
+        "regexp": "^docs:",
+        "flags": "iu"
+      }
+    ]
+  }
 }
 ```
 
@@ -100,10 +100,10 @@ For example:
 
 ```json
 {
-    "pr-changelog-gen": {
-        "prTitleMatcher": [],
-        "validLabels": ["core", "addon"]
-    }
+  "pr-changelog-gen": {
+    "prTitleMatcher": [],
+    "validLabels": ["core", "addon"]
+  }
 }
 ```
 
@@ -115,10 +115,10 @@ As `pr-changelog-gen` reads repository information from your project you have to
 
 ```json
 {
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/<your username>/<your repository name>.git"
-    }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/<your username>/<your repository name>.git"
+  }
 }
 ```
 
@@ -130,7 +130,7 @@ If you want to use a custom date format you can configure `pr-changelog-gen.date
 
 ```json
 {
-    "pr-log": { "dateFormat": "dd.MM.yyyy" }
+  "pr-log": { "dateFormat": "dd.MM.yyyy" }
 }
 ```
 

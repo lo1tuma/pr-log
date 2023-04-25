@@ -1,25 +1,25 @@
 {
-    "$schema": "https://json.schemastore.org/swcrc",
-    "jsc": {
-        "target": "es2020",
-        "keepClassNames": true,
-        "minify": {
-            "keepFnames": true,
-            "keepClassnames": true,
-            "mangle": false,
-            "compress": false
-        },
-        "parser": {
-            "syntax": "typescript",
-            "decorators": true
-        },
-        "transform": {
-            "legacyDecorator": true,
-            "decoratorMetadata": true
-        }
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "target": "es2020",
+    "keepClassNames": true,
+    "minify": {
+      "keepFnames": true,
+      "keepClassnames": true,
+      "mangle": false,
+      "compress": false
     },
-    "module": {
-        "type": "es6",
-        "strict": true
+    "parser": {
+      "syntax": "typescript",
+      "decorators": true
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
     }
+  },
+  "module": {
+    "type": "es6",
+    "strict": true
+  }
 }
