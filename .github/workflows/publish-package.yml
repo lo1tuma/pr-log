@@ -1,0 +1,48 @@
+name: Publish Package
+
+permissions:
+  repository-projects: write
+
+on:
+  release:
+    types: [created]
+
+env:
+  NPM_TOKEN: ""
+
+jobs:
+  build-and-publish:
+    name: Build and Publish
+    permissions:
+      packages: write
+      contents: write
+      pull-requests: write
+      issues: write
+      repository-projects: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Installing dependencies
+        run: ./.yarn/yarn.cjs install
+      - name: Validating syntax
+        run: ./.yarn/yarn.cjs test:tsc
+      - name: Linting
+        run: ./.yarn/yarn.cjs test:eslint
+      - name: Validating formatting
+        run: ./.yarn/yarn.cjs test:prettier
+      - name: Building
+        run: ./.yarn/yarn.cjs build
+      - name: Publishing
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_AUTOMATION_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          GH_BOT_API_URL: ${{ secrets.GH_BOT_API_URL }}
+          GH_BOT_AUTH_TOKEN: ${{ secrets.GH_BOT_AUTH_TOKEN }}
+          GH_BOT_ENCRYPTION_SECRET: ${{ secrets.GH_BOT_ENCRYPTION_SECRET }}
+        run: ./scripts/publish.sh

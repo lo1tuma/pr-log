@@ -3,3 +3,4 @@
 /prettier.config.js
 /scripts/**
 /.yarn/**
+/bin/**

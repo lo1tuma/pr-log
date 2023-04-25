@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: ["master"]
 
+env:
+  NPM_TOKEN: ""
+
 jobs:
   run-tests:
     name: Run Build Tests
