@@ -1,13 +1,9 @@
 {
-    "jestrunner.jestCommand": "NODE_OPTIONS=--experimental-vm-modules node ./node_modules/.bin/jest",
-    "jestrunner.debugOptions": {
-        "args": [
-            "--no-cache"
-        ],
-        "sourcemaps": "inline",
-        "disableOptimisticBPs": true,
-        "runtimeArgs": [
-            "--experimental-vm-modules"
-        ]
-    }
+  "jestrunner.jestCommand": "NODE_OPTIONS=--experimental-vm-modules node ./node_modules/.bin/jest",
+  "jestrunner.debugOptions": {
+    "args": ["--no-cache"],
+    "sourcemaps": "inline",
+    "disableOptimisticBPs": true,
+    "runtimeArgs": ["--experimental-vm-modules"]
+  }
 }

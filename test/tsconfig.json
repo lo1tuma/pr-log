@@ -1,27 +1,23 @@
 {
-    "compilerOptions": {
-        "target": "ESNext", /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-        "rootDirs": [
-            "./",
-            "../src"
-        ],
-        "outDir": "./build",
-        "module": "ESNext", /* Specify what module code is generated. */
-        "moduleResolution": "nodenext", /* Specify how TypeScript looks up a file from a given module specifier. */
-        "resolveJsonModule": true, /* Enable importing .json files. */
-        "downlevelIteration": true, /* Emit more compliant, but verbose and less performant JavaScript for iteration. */
-        "esModuleInterop": true, /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
-        "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
-        "strict": true, /* Enable all strict type-checking options. */
-        "noImplicitAny": true, /* Enable error reporting for expressions and declarations with an implied 'any' type. */
-        "strictNullChecks": true, /* When type checking, take into account 'null' and 'undefined'. */
-        "noUnusedLocals": true, /* Enable error reporting when local variables aren't read. */
-        "noUncheckedIndexedAccess": true, /* Add 'undefined' to a type when accessed using an index. */
-        "skipDefaultLibCheck": true, /* Skip type checking .d.ts files that are included with TypeScript. */
-        "skipLibCheck": true /* Skip type checking all .d.ts files. */
-    },
-    "include": [
-        "./",
-        "../src"
-    ],
+  "compilerOptions": {
+    "target": "ESNext" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "rootDirs": ["./", "../src"],
+    "outDir": "./build",
+    "module": "ESNext" /* Specify what module code is generated. */,
+    "moduleResolution": "nodenext" /* Specify how TypeScript looks up a file from a given module specifier. */,
+    "resolveJsonModule": true /* Enable importing .json files. */,
+    "downlevelIteration": true /* Emit more compliant, but verbose and less performant JavaScript for iteration. */,
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+    "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
+    "strict": true /* Enable all strict type-checking options. */,
+    "noImplicitAny": true /* Enable error reporting for expressions and declarations with an implied 'any' type. */,
+    "strictNullChecks": true /* When type checking, take into account 'null' and 'undefined'. */,
+    "noUnusedLocals": true /* Enable error reporting when local variables aren't read. */,
+    "noUncheckedIndexedAccess": true /* Add 'undefined' to a type when accessed using an index. */,
+    "skipDefaultLibCheck": true /* Skip type checking .d.ts files that are included with TypeScript. */,
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "experimentalDecorators": true /* Enable experimental support for legacy experimental decorators. */,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["./", "../src"]
 }

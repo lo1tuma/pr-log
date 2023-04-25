@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
 module.exports = {
-    printWidth: 120,
-    tabWidth: 4,
-    useTabs: false,
-    semi: true,
-    singleQuote: true,
-    trailingComma: 'none',
-    bracketSpacing: true,
-    arrowParens: 'always'
+  printWidth: 90,
+  tabWidth: 2,
+  useTabs: false,
+  semi: true,
+  singleQuote: false,
+  trailingComma: "es5",
+  bracketSpacing: true,
+  arrowParens: "always",
 };
