@@ -73,6 +73,13 @@
         },
         "extendDefaults": true
       }
+    ],
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "ImportDeclaration[source.value=/.+dist.+/i]",
+        "message": "Imports from the dist folder are not allowed."
+      }
     ]
   }
 }

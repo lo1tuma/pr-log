@@ -1,14 +1,13 @@
 import type { GetDataType } from "dilswer";
 import { OptionalField, Type, assertDataType } from "dilswer";
 
-const StringRegexp = Type.OneOf(
-  Type.String,
-  Type.RecordOf({
-    regexp: Type.String,
-    flags: OptionalField(Type.String),
-    label: OptionalField(Type.String),
-  })
-);
+const LabeledRegex = Type.RecordOf({
+  regexp: Type.String,
+  flags: OptionalField(Type.String),
+  label: OptionalField(Type.String),
+});
+
+const StringRegexp = Type.OneOf(Type.String, LabeledRegex);
 
 export const ConfigSchema = Type.RecordOf({
   sloppy: OptionalField(Type.Boolean),
@@ -23,6 +22,8 @@ export const ConfigSchema = Type.RecordOf({
 });
 
 export type Config = GetDataType<typeof ConfigSchema>;
+
+export type LabeledRegexp = GetDataType<typeof LabeledRegex>;
 
 type Defined<T> = Exclude<T, undefined | null>;
 

@@ -1,5 +1,6 @@
 import { format as formatDate } from "date-fns";
 import enLocale from "date-fns/locale/en-US/index.js";
+import type { LabeledRegexp } from "../modules/config";
 import { ConfigFacade } from "../modules/config";
 import { DateResolver } from "../modules/date-resolver";
 import type { PullRequest, SemverNumber } from "../shared-types";
@@ -47,11 +48,7 @@ export class ChangelogGeneratorService extends Service {
     )})\n\n`;
   }
 
-  _getPrLabelsAndMatchers(pr: PullRequest) {
-    const validLabels = this.config.get("validLabels", DefaultValidLabels);
-
-    const matchingLabels = validLabels.filter((label) => pr.labels?.includes(label));
-
+  _getPrMatchers() {
     const regexp = this.config.get("prTitleMatcher", [
       {
         label: "Features",
@@ -65,7 +62,17 @@ export class ChangelogGeneratorService extends Service {
       },
     ]);
 
-    const allRegexps = (Array.isArray(regexp) ? regexp : [regexp]).map((r) => {
+    return Array.isArray(regexp) ? regexp : [regexp];
+  }
+
+  _getPrLabelsAndMatchers(pr: PullRequest) {
+    const validLabels = this.config.get("validLabels", DefaultValidLabels);
+
+    const matchingLabels = validLabels.filter((label) => pr.labels?.includes(label));
+
+    const regexp = this._getPrMatchers();
+
+    const allRegexps = regexp.map((r) => {
       let regexp: RegExp;
       let label: string | undefined = undefined;
 
@@ -120,6 +127,11 @@ export class ChangelogGeneratorService extends Service {
     const groupByLabels = this.config.get("groupByLabels", false);
     const groupByMatchers = this.config.get("groupByMatchers", true);
     const validaLabels = this.config.get("validLabels", DefaultValidLabels);
+    const regexp = this._getPrMatchers();
+
+    const matcherGroupNames = regexp
+      .filter((r): r is LabeledRegexp => typeof r !== "string" && r.label != null)
+      .map((r) => r.label!);
 
     const labelGroups: Array<PrGroup> = [];
 
@@ -195,6 +207,12 @@ export class ChangelogGeneratorService extends Service {
         pullRequests: pullRequests,
       };
     }
+
+    matcherGroups.sort((a, b) => {
+      const aIndex = matcherGroupNames.indexOf(a.groupName!);
+      const bIndex = matcherGroupNames.indexOf(b.groupName!);
+      return aIndex < bIndex ? -1 : 1;
+    });
 
     labelGroups.sort((a, b) => {
       const aIndex = validaLabels.indexOf(a.groupName!);
