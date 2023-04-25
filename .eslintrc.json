@@ -1,7 +1,5 @@
 {
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.json",
@@ -20,7 +18,7 @@
   "rules": {
     "max-len": [
       2,
-      80,
+      90,
       4,
       {
         "ignoreUrls": true,
@@ -29,10 +27,7 @@
         "ignoreTemplateLiterals": true
       }
     ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
+    "linebreak-style": ["error", "unix"],
     "quotes": [
       "error",
       "double",
@@ -40,10 +35,7 @@
         "avoidEscape": true
       }
     ],
-    "semi": [
-      "error",
-      "always"
-    ],
+    "semi": ["error", "always"],
     "@typescript-eslint/consistent-type-imports": 2,
     "@typescript-eslint/consistent-type-exports": 2,
     "@typescript-eslint/member-delimiter-style": 2,
@@ -70,14 +62,7 @@
     "no-constant-condition": 0,
     "no-prototype-builtins": 0,
     "no-control-regex": 0,
-    "no-restricted-imports": [
-      "error",
-      {
-        "patterns": [
-          ".*"
-        ]
-      }
-    ],
+    "prefer-spread": 1,
     "@typescript-eslint/ban-types": [
       "error",
       {

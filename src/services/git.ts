@@ -2,7 +2,7 @@ import parseGitUrl from "git-url-parse";
 import { Git } from "../modules/git-client";
 import { Inject } from "../utils/dependency-injector/inject";
 import { Service } from "../utils/dependency-injector/service";
-import { Repo } from "../utils/repo";
+import type { Repo } from "../utils/repo";
 
 export class GitService extends Service {
   @Inject(() => Git)
@@ -39,7 +39,9 @@ export class GitService extends Service {
     );
 
     if (!matchedRemote || !matchedRemote.alias) {
-      throw new Error(`This local git repository doesn’t have a remote pointing to ${gitRemote}`);
+      throw new Error(
+        `This local git repository doesn’t have a remote pointing to ${gitRemote}`
+      );
     }
 
     return matchedRemote.alias;

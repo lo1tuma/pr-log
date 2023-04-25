@@ -3,10 +3,10 @@ import semver from "semver";
 import { ConfigFacade } from "../modules/config";
 import { Filesystem } from "../modules/filesystem";
 import { GithubUrlResolver } from "../modules/github-url-resolver";
-import { PackageJson, SemverNumber } from "../shared-types";
+import type { PackageJson, SemverNumber } from "../shared-types";
 import { Inject } from "../utils/dependency-injector/inject";
 import { Service } from "../utils/dependency-injector/service";
-import { Repo } from "../utils/repo";
+import type { Repo } from "../utils/repo";
 import { ChangelogGeneratorService } from "./changelog-generator";
 import { GitService } from "./git";
 import { PullRequestResolverService } from "./pull-request-resolver";
@@ -63,7 +63,11 @@ export class CliService extends Service {
     }
 
     const pullRequests = await this.pr.getMerged(githubRepo);
-    const changelog = await this.changelog.create(newVersionNumber, pullRequests, githubRepo);
+    const changelog = await this.changelog.create(
+      newVersionNumber,
+      pullRequests,
+      githubRepo
+    );
 
     return this._stripTrailingEmptyLine(changelog);
   }

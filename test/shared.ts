@@ -1,7 +1,8 @@
 import { jest } from "@jest/globals";
-import { Octokit } from "@octokit/rest";
-import { Config, ConfigFacade } from "../src/modules/config";
-import { PullResponse } from "./services/pull-request-resolver";
+import type { Octokit } from "@octokit/rest";
+import type { Config } from "../src/modules/config";
+import { ConfigFacade } from "../src/modules/config";
+import type { PullResponse } from "./services/pull-request-resolver";
 
 type DeepPartial<T> = T extends object
   ? {
@@ -17,13 +18,15 @@ export const mockConfig = (overrides?: Config, overrideDefaults?: Config) => {
       groupByMatchers: true,
       outputFile: "CHANGELOG.md",
       sloppy: false,
-      ...(overrideDefaults || {}),
+      ...(overrideDefaults ?? {}),
     } satisfies Config,
     overrides
   );
 };
 
-export const mockGithubClient = (overrides: DeepPartial<InstanceType<typeof Octokit>> = {}) => {
+export const mockGithubClient = (
+  overrides: DeepPartial<InstanceType<typeof Octokit>> = {}
+) => {
   const deepAssign = (target: any, source: any) => {
     for (const [key, value] of Object.entries(source)) {
       if (

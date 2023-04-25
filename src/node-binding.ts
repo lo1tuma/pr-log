@@ -92,7 +92,7 @@ export const argument = <A extends ArgKey>(
     {
       value,
       isSet: true,
-      setDefault(v: any) {},
+      setDefault() {},
     },
   ];
 };
