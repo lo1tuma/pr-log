@@ -1,4 +1,8 @@
-[![MIT LICENSE](https://img.shields.io/github/license/ncpa0cpl/pr-changelog-gen?style=for-the-badge)](./LICENSE)
+[![MIT LICENSE](https://img.shields.io/github/license/ncpa0/pr-changelog-gen?style=for-the-badge)](./LICENSE)
+[![Build Test](https://img.shields.io/github/actions/workflow/status/ncpa0/pr-changelog-gen/build-test.yml?branch=master&style=for-the-badge)](https://github.com/ncpa0/pr-changelog-gen/actions)
+[![NPM](https://img.shields.io/npm/v/pr-changelog-gen?style=for-the-badge)](https://www.npmjs.com/package/pr-changelog-gen)
+[![Node Support](https://img.shields.io/node/v/pr-changelog-gen?style=for-the-badge)](./package.json)
+[![Dependencies](https://img.shields.io/librariesio/release/npm/pr-changelog-gen?style=for-the-badge)](https://libraries.io/npm/pr-changelog-gen)
 
 ---
 
@@ -130,7 +134,7 @@ If you want to use a custom date format you can configure `pr-changelog-gen.date
 
 ```json
 {
-  "pr-log": { "dateFormat": "dd.MM.yyyy" }
+  "pr-changelog-gen": { "dateFormat": "dd.MM.yyyy" }
 }
 ```
 
@@ -200,7 +204,7 @@ When enabled this option will group PRs in the changelog by their title matchers
 
 ##### Default: `false`
 
-The `--sloppy` option defaults to false. When set, it allows `pr-log` to generate a changelog even when you are not on the `master` branch. This should not be used in production!
+The `--sloppy` option defaults to false. When set, it allows `pr-changelog-gen` to generate a changelog even when you are not on the `master` branch. This should not be used in production!
 
 #### -t --trace
 

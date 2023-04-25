@@ -1,271 +1,143 @@
-## 4.0.0 (December 7, 2019)
-
-### Breaking Changes
-
--   Drop support for nodejs 6 and 8 ([#208](https://github.com/lo1tuma/pr-log/pull/208))
-
-### Dependency Upgrades
-
--   ⬆️ Update dependency babel-plugin-istanbul to v5.2.0 ([#193](https://github.com/lo1tuma/pr-log/pull/193))
--   ⬆️ Update dependency ava to v2 ([#201](https://github.com/lo1tuma/pr-log/pull/201))
--   ⬆️ Update dependency sinon to v7.5.0 ([#190](https://github.com/lo1tuma/pr-log/pull/190))
--   ⬆️ Update dependency moment to v2.24.0 ([#191](https://github.com/lo1tuma/pr-log/pull/191))
--   ⬆️ Update dependency coveralls to v3.0.9 ([#194](https://github.com/lo1tuma/pr-log/pull/194))
--   ⬆️ Update dependency @octokit/rest to v16.35.0 ([#187](https://github.com/lo1tuma/pr-log/pull/187))
--   ⬆️ Update dependency eslint to v6 ([#203](https://github.com/lo1tuma/pr-log/pull/203))
--   ⬆️ Update dependency eslint-plugin-ava to v9 ([#206](https://github.com/lo1tuma/pr-log/pull/206))
--   Update to babel 7 ([#209](https://github.com/lo1tuma/pr-log/pull/209))
--   ⬆️ Update dependency semver to v6 ([#197](https://github.com/lo1tuma/pr-log/pull/197))
--   ⬆️ Update dependency nyc to v14.1.1 ([#200](https://github.com/lo1tuma/pr-log/pull/200))
--   ⬆️ Update dependency commander to v4 ([#207](https://github.com/lo1tuma/pr-log/pull/207))
--   ⬆️ Update dependency nyc to v14 ([#199](https://github.com/lo1tuma/pr-log/pull/199))
--   ⬆️ Update dependency eslint-plugin-ava to v6 ([#195](https://github.com/lo1tuma/pr-log/pull/195))
-
-### Code Refactoring
-
--   Fix deprecation warnings from octokit ([#213](https://github.com/lo1tuma/pr-log/pull/213))
--   Refactor ESLint config/setup ([#211](https://github.com/lo1tuma/pr-log/pull/211))
--   Use builtin promisify instead of separate package ([#212](https://github.com/lo1tuma/pr-log/pull/212))
-
-### Build-Related
-
--   Add .editorconfig ([#210](https://github.com/lo1tuma/pr-log/pull/210))
-
-## 3.1.0 (January 8, 2019)
-
-### Bug Fixes
-
--   Fix octokit usage ([#186](https://github.com/lo1tuma/pr-log/pull/186))
--   Fix incorrect git URL in test case ([#161](https://github.com/lo1tuma/pr-log/pull/161))
+## 1.0.0 (April 25, 2023)
 
 ### Features
 
--   Support github token-based authentication ([#179](https://github.com/lo1tuma/pr-log/pull/179))
+- #### feat: added main export from the package to allow running pr-changelog-gen from a node script ([#9](https://github.com/ncpa0cpl/pr-changelog-gen/pull/9))
 
-### Documentation
+  `pr-changelog-gen` now has a main export that contains everything you need to easily use it from a node script.
 
--   Remove greenkeeper badge ([#160](https://github.com/lo1tuma/pr-log/pull/160))
+  **Example**
 
-### Dependency Upgrades
+  ```ts
+  import { MainAction, argument } from "pr-changelog-gen";
 
--   ⬆️ Update dependency git-url-parse to v11 ([#176](https://github.com/lo1tuma/pr-log/pull/176))
--   ⬆️ Update dependency eslint to v5.12.0 ([#181](https://github.com/lo1tuma/pr-log/pull/181))
--   ⬆️ Update dependency sinon to v7.2.2 ([#177](https://github.com/lo1tuma/pr-log/pull/177))
--   ⬆️ Update dependency ramda to v0.26.1 ([#182](https://github.com/lo1tuma/pr-log/pull/182))
--   ⬆️ Update dependency @octokit/rest to v16 ([#183](https://github.com/lo1tuma/pr-log/pull/183))
--   ⬆️ Update dependency ava to v1 ([#185](https://github.com/lo1tuma/pr-log/pull/185))
--   ⬆️ Update dependency moment to v2.23.0 ([#184](https://github.com/lo1tuma/pr-log/pull/184))
--   ⬆️ Update dependency eslint-plugin-ava to v5 ([#174](https://github.com/lo1tuma/pr-log/pull/174))
--   ⬆️ Update dependency sinon to v7 ([#171](https://github.com/lo1tuma/pr-log/pull/171))
--   ⬆️ Update dependency eslint to v5 ([#173](https://github.com/lo1tuma/pr-log/pull/173))
--   ⬆️ Update dependency git-url-parse to v10 ([#170](https://github.com/lo1tuma/pr-log/pull/170))
--   ⬆️ Update dependency nyc to v13 ([#175](https://github.com/lo1tuma/pr-log/pull/175))
--   ⬆️ Update dependency babel-plugin-istanbul to v5 ([#172](https://github.com/lo1tuma/pr-log/pull/172))
--   ⬆️ Update dependency sinon to v4.5.0 ([#169](https://github.com/lo1tuma/pr-log/pull/169))
--   ⬆️ Update dependency moment to v2.22.2 ([#168](https://github.com/lo1tuma/pr-log/pull/168))
--   ⬆️ Update dependency coveralls to v3.0.2 ([#165](https://github.com/lo1tuma/pr-log/pull/165))
--   ⬆️ Update dependency eslint-config-holidaycheck to v0.13.1 ([#166](https://github.com/lo1tuma/pr-log/pull/166))
--   ⬆️ Update dependency git-url-parse to v8.3.1 ([#167](https://github.com/lo1tuma/pr-log/pull/167))
--   ⬆️ Update dependency commander to v2.19.0 ([#164](https://github.com/lo1tuma/pr-log/pull/164))
--   Update sinon to the latest version 🚀 ([#147](https://github.com/lo1tuma/pr-log/pull/147))
--   Update sinon to the latest version 🚀 ([#146](https://github.com/lo1tuma/pr-log/pull/146))
+  const action = MainAction.init(
+    argument("-v", "1.0.0"),
+    argument("-c", "2023-01-01"),
+    argument("--sloppy", true)
+  );
 
-### Code Refactoring
+  await action.run();
+  ```
 
--   ⬆️ Pin dependencies ([#163](https://github.com/lo1tuma/pr-log/pull/163))
--   Remove bluebird dependency ([#145](https://github.com/lo1tuma/pr-log/pull/145))
+- #### feat: introduced a new dependency injection mechanism and refactored the whole project to use it ([#8](https://github.com/ncpa0cpl/pr-changelog-gen/pull/8))
 
-### Build-Related
+  **Dependency Injection Mechanism (internal changes)**
 
--   Configure Renovate ([#162](https://github.com/lo1tuma/pr-log/pull/162))
--   Update to node 10 in .travis.yml ([#158](https://github.com/lo1tuma/pr-log/pull/158))
+  A new dependency injection system that uses TypeScript decorators is being added.
 
-## 3.0.0 (March 9, 2018)
+  How it works:
 
-### Breaking Changes
+  ```ts
+  // define a module or a service that we will be injected into another service
+  class Module {
+    doSomething() {}
+  }
 
--   Make validLabels an array of pairs to define order of changelog sections ([#144](https://github.com/lo1tuma/pr-log/pull/144))
--   Don’t write stacktraces to stderr per default ([#141](https://github.com/lo1tuma/pr-log/pull/141))
--   Make references to pull requests a link ([#142](https://github.com/lo1tuma/pr-log/pull/142))
--   Remove support for nodejs 4 and 7 ([#125](https://github.com/lo1tuma/pr-log/pull/125))
+  // define a Service class that will be consuming the `Module`
+  class MyService extends Service {
+    @Inject(() => Module)
+    declare module: Module;
 
-### Enhancements
+    useModule() {
+      this.module.doSomething();
+    }
+  }
 
--   Add support for custom date format configuration ([#143](https://github.com/lo1tuma/pr-log/pull/143))
--   Validate CLI argument to be a valid semver version number ([#133](https://github.com/lo1tuma/pr-log/pull/133))
--   Add refactor label ([#132](https://github.com/lo1tuma/pr-log/pull/132))
+  // use the service
+  const service = new MyService();
+  service.useModule();
 
-### Documentation
+  // inject a different Module class into the service
+  class ModuleMock {
+    doSomething() {
+      // something different that what Module does
+    }
+  }
 
--   Small README.md improvements ([#140](https://github.com/lo1tuma/pr-log/pull/140))
+  const service = MyService.init([Module, ModuleMock]);
+  // or
+  const service = MyService.init([Module, new ModuleMock()]);
+  ```
 
-### Dependency Upgrades
+  Services can be nested, and depend on each other. Injecting different dependency on a service will also inject it into all of it's descendant, for example if you have a `Service1` depending on `Service2` which depends on `Service3` which depends on `SomeModule`, initializing the `Service1` with a different `SomeModule` will also affect the `Service3` ( despite the fact that `Service3` is deeply nested within the `Service1`).
 
--   Update commander to the latest version 🚀 ([#137](https://github.com/lo1tuma/pr-log/pull/137))
--   Update @octokit/rest to the latest version 🚀 ([#135](https://github.com/lo1tuma/pr-log/pull/135))
--   Update mocha to the latest version 🚀 ([#128](https://github.com/lo1tuma/pr-log/pull/128))
+  For nested injections to work, each depending service must be initiated via the `Inject()` decorator or the `spawnService()` method.
 
-### Code Refactoring
+  **Executing `pr-changelog-gen` from node**
 
--   Use ava instead of mocha/chai ([#138](https://github.com/lo1tuma/pr-log/pull/138))
--   Remove proxyquire dependency ([#134](https://github.com/lo1tuma/pr-log/pull/134))
--   Use octokit instead of restling ([#131](https://github.com/lo1tuma/pr-log/pull/131))
--   Use async/await instead of bluebird ([#130](https://github.com/lo1tuma/pr-log/pull/130))
+  With this change it should also now be much easier to run the `pr-changelog-gen` from a node script:
 
-## 2.1.0 (March 3, 2018)
+  ```ts
+  import {
+    MainAction,
+    ArgVersion,
+    ArgTrace,
+  } from "pr-changelog-gen/dist/esm/main-action.mjs";
 
-### Dependency Upgrades
+  const action = MainAction.init(
+    [ArgVersion, { value: "1.0.0", isSet: true }],
+    [ArgTrace, { value: true, isSet: true }]
+  );
 
--   Update chai to version 4.1.2 (#124)
--   Update git-url-parse to version 8.1.0 (#123)
--   chore(package): update coveralls to version 3.0.0 (#122)
--   Update mocha to version 5.0.1 (#121)
--   Update sinon to version 4.4.2 (#120)
--   Update babel-register to the latest version 🚀 (#104)
--   Update babel-cli to the latest version 🚀 (#105)
--   Update parse-github-repo-url to the latest version 🚀 (#106)
--   Update bluebird to the latest version 🚀 (#111)
--   Update ramda to the latest version 🚀 (#112)
--   fix(package): update moment to version 2.20.1 (#119)
--   fix(package): update commander to version 2.14.1 (#118)
--   chore(package): update eslint to version 4.7.0 (#109)
--   Update sinon to the latest version 🚀 (#101)
--   Update sinon to the latest version 🚀 (#88)
--   Update eslint and eslint-config-holidaycheck to the latest version 🚀 (#95)
--   Update eslint-plugin-mocha to the latest version 🚀 (#92)
--   Update chai-as-promised to the latest version 🚀 (#97)
--   Update commander to the latest version 🚀 (#96)
--   Update chai-as-promised to the latest version 🚀 (#90)
--   Update commander to the latest version 🚀 (#93)
--   Update git-url-parse to the latest version 🚀 (#91)
--   Update sinon-chai to the latest version 🚀 (#89)
--   Update nyc to the latest version 🚀 (#85)
--   Update ramda to the latest version 🚀 (#86)
--   Update dependencies to enable Greenkeeper 🌴 (#82)
--   Update eslint (#81)
+  const result = actions.run(); // equivalent to `yarn pr-changelog-gen -v 1.0.0 --trace`
 
-### Bug Fixes
+  result; // Promise<void> (can be awaited, might throw errors)
+  ```
 
--   Reduce cyclomatic complexity to fix build (#117)
+- #### feat: renamed the property under which the config in package.json file is located ([#5](https://github.com/ncpa0cpl/pr-changelog-gen/pull/5))
 
-### Build-Related
+  In the original fork the config could be specified in the `package.json` file under a `pr-log` property. This has been renamed to `pr-changelog-gen` to match this forked project name.
 
--   Use files whitelist instead of .npmignore (#100)
--   Switch to babel-preset-env (#99)
--   Add node 8 test environment (#98)
--   Move to nyc for code coverage (#80)
+- #### feat: added options to group entries in changelog by Label and/or by the matchers ([#4](https://github.com/ncpa0cpl/pr-changelog-gen/pull/4))
 
-## 2.0.0 (May 23, 2017)
+  Added new grouping options that can be enabled or disabled via the config or cli arguments:
 
-### Breaking Changes
+  - `--group-by-labels`/`groupByLabels` - will group the entries by the labels attached to the PR, if a PR has multiple labels, labels of lower index in the `validLabels` array will take priority (this option is disabled by default)
+  - `--group-by-matchers`/`groupByMatchers` - each PR matcher defined in the config's `prTitleMatcher` can now have a `label` attached to it, when this setting is enabled entries will be grouped by those labels (this option is enabled by default)
 
--   Drop nodejs 0.x and 5.x support (#79)
--   Skip prerelease tags and upgrade semver (#76)
+  **Example of a matcher with a label:**
 
-### Features
+  ```json
+  {
+    "pr-changelog-gen": {
+      "groupByMatchers": true,
+      "prTitleMatcher": [
+        {
+          "label": "Feature",
+          "regexp": "^(feat|feature)[:\\/\\(].+",
+          "flags": "i"
+        }
+      ]
+    }
+  }
+  ```
 
--   Allow the user to configure PR label to group mapping (#78)
--   Added --sloppy option (#75)
+- #### feat: reworked how config and options are handled and added new options ([#2](https://github.com/ncpa0cpl/pr-changelog-gen/pull/2))
 
-### Enhancements
+  Reworked how the CLI arguments and config options are handled. Most of the config options can now be overridden via CLI arguments. New config options has also been added:
 
--   Handle PRs that don't match expected merge format (#77)
+  - `--only-since`/`onlySince` - can be used to opt-out of the default method of determining which PRs should be included in the changelog, and instead use a specified date, all merged PRs past that date will be then included, the date value passed can be either a Unix Timestamp or a ISO Date or DateTime
+  - `--output-file`/`outputFile` - can be used to define a file to which the generated changelog will be saved to
+  - `--pr-title-matcher`/`prTitleMatcher` - an regular expression or an array of them, if defined will be used to match against the merged PR titles to determine if a given PR should be included in the changelog
 
-## 1.6.0 (August 25, 2016)
+- #### feat: changes ([#1](https://github.com/ncpa0cpl/pr-changelog-gen/pull/1))
+
+  A number of changes introduced vs the original repo this is project was forked from:
+
+  - added TypeScript and type annotations to all the source code files
+  - replaced the `npm` package manager with `yarn`
+  - replaced `babel` with an `esbuild` based build solution
+  - changed the algorithm that determines which PRs should be included in the changelog, instead of relying on the `git log` to provide all the merges to the main branch, the GitHub API is now being leveraged instead
+  - added new feature: PR descriptions can now be pulled from GitHub and included in the changelog along with the PR title, this option can be enabled or disabled via the `--include-pr-description` argument (default is enabled)
+  - adding multiple labels to a PR now shouldn't cause errors
 
 ### Bug Fixes
 
--   Support parentheses in PR titles (#74)
+- #### fix: order of matchers group to be the same as defined in config ([#11](https://github.com/ncpa0cpl/pr-changelog-gen/pull/11))
 
-## 1.5.0 (June 4, 2016)
+  Fixed an error in the ordering of PR groups in changelog. The order of elements should be exactly the same as the order of matchers defined in the `prTitleMatcher` config option, this however was not the case. Has been fixed now.
 
-### Bug Fixes
+- #### fix: added an additional endline character in between the PR title and the body ([#3](https://github.com/ncpa0cpl/pr-changelog-gen/pull/3))
 
--   Fix stripping trailing empty line (#70)
-
-### Dependency Upgrades
-
--   Update eslint-config-holidaycheck to version 0.9.0 🚀 (#69)
--   Update git-url-parse to version 6.0.3 🚀 (#65)
--   Update eslint-plugin-mocha to version 3.0.0 🚀 (#68)
--   Update bluebird to version 3.4.0 🚀 (#59)
--   Update babel-preset-es2015 to version 6.9.0 🚀 (#58)
--   Update sinon to version 1.17.4 🚀 (#45)
--   Update babel-cli to version 6.9.0 🚀 (#57)
--   Update babel-register to version 6.9.0 🚀 (#60)
--   Update proxyquire to version 1.7.9 🚀 (#52)
--   Update mocha to version 2.5.3 🚀 (#64)
--   Update eslint to version 2.11.1 🚀 (#67)
--   Update git-url-parse to version 6.0.2 🚀 (#43)
--   Update babel-cli to version 6.7.7 🚀 (#42)
--   Update eslint to version 2.8.0 🚀 (#39)
--   Update parse-github-repo-url to version 1.3.0 🚀 (#40)
--   Update moment to version 2.13.0 🚀 (#41)
--   Update eslint-plugin-mocha to version 2.2.0 🚀 (#38)
--   Update eslint-config-holidaycheck to version 0.7.0 🚀 (#36)
--   Update parse-github-repo-url to version 1.2.0 🚀 (#37)
--   Update bluebird to version 3.3.5 🚀 (#35)
--   Update ramda to version 0.21.0 🚀 (#33)
--   Update eslint-plugin-mocha to version 2.1.0 🚀 (#34)
--   Update babel-cli to version 6.7.5 🚀 (#32)
--   Update eslint to version 2.7.0 🚀 (#31)
--   Update eslint to version 2.6.0 🚀 (#29)
--   Update eslint-config-holidaycheck to version 0.6.0 🚀 (#30)
--   Update ramda to version 0.20.1 🚀 (#28)
--   Update ramda to version 0.20.0 🚀 (#24)
--   Update eslint to version 2.5.3 🚀 (#26)
--   Update coveralls to version 2.11.9 🚀 (#21)
--   Update chai-as-promised to version 5.3.0 🚀 (#20)
--   Update eslint to version 2.4.0 🚀 (#15)
--   Update bluebird to version 3.3.4 🚀 (#14)
--   Update moment to version 2.12.0 🚀 (#13)
-
-### Build-Related
-
--   Convert to es2015 (#18)
-
-## 1.4.0 (March 5, 2016)
-
-### Dependency Upgrades
-
--   Update all dependencies 🌴 (#11)
--   Update to ESLint 2 and use eslint-config-holidaycheck (#12)
-
-### Enhancements
-
--   Replace lodash by ramda (#10)
-
-### Bug Fixes
-
--   Fix long computation time (#9)
-
-## 1.3.0 (July 1, 2015)
-
-### Enhancements
-
--   Replace superagent-promise with restling (#8)
-
-### Bug Fixes
-
--   Avoid extra empty line (#7)
-
-## 1.2.0 (June 21, 2015)
-
-### Dependency Upgrades
-
--   Update dependencies (#6)
-
-## 1.1.0 (March 8, 2015)
-
-### Bug Fixes
-
--   Fix crash with mulitline commit message body (#4)
-
-### Dependency Upgrades
-
--   Update eslint (#5)
--   Update dependencies (#3)
-
-## 1.0.0 (January 22, 2015)
-
-Initial release
+  Fixed a bug where markdown was displaying the PR body on the same line as the PR title, because there was only one end-of-line character in between them
