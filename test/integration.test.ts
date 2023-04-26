@@ -10,11 +10,15 @@ import {
 import { Octokit } from "@octokit/rest";
 import {
   ArgDateFormat,
+  ArgExcludePattern,
+  ArgExcludePrs,
   ArgGroupByLabels,
   ArgGroupByMatchers,
   ArgIncludePrDescription,
+  ArgNoOutput,
   ArgOnlySince,
   ArgOutputFile,
+  ArgOutputToStdout,
   ArgPrTitleMatcher,
   ArgSloppy,
   ArgTrace,
@@ -45,6 +49,10 @@ const ALL_ARGS = {
   onlySince: ArgOnlySince as Constructor,
   groupByLabels: ArgGroupByLabels as Constructor,
   groupByMatchers: ArgGroupByMatchers as Constructor,
+  outputToStdout: ArgOutputToStdout as Constructor,
+  noOutput: ArgNoOutput as Constructor,
+  excludePrs: ArgExcludePrs as Constructor,
+  excludePattern: ArgExcludePattern as Constructor,
 };
 
 const mockArgument = (value?: string | number | boolean) => {
@@ -247,12 +255,13 @@ const factory = (
     [Git, gitClient],
     [Filesystem, filesystem],
     ...argDeps
-  );
+  ).setIsSpawnedFromCli(true);
 };
 
 const programExitSpy = jest.spyOn(process, "exit");
 const consoleErrorSpy = jest.spyOn(console, "error");
 const cwdSpy = jest.spyOn(process, "cwd");
+const stdoutSpy = jest.spyOn(process.stdout, "write");
 
 /**
  * These test all the modules that consist of this program, excluding only
@@ -281,7 +290,7 @@ describe("integration", () => {
       },
     });
 
-    await expect(action.run()).resolves.toBeUndefined();
+    await expect(action.run()).resolves.toEqual(expect.any(String));
 
     expect(consoleErrorSpy).not.toHaveBeenCalled();
     expect(programExitSpy).not.toHaveBeenCalled();
@@ -337,7 +346,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -356,7 +365,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -377,7 +386,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -395,7 +404,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -415,7 +424,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -469,7 +478,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -507,7 +516,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -565,7 +574,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -611,7 +620,7 @@ describe("integration", () => {
             },
           });
 
-          await expect(action.run()).resolves.toBeUndefined();
+          await expect(action.run()).resolves.toEqual(undefined);
 
           expect(consoleErrorSpy).toHaveBeenCalled();
           expect(programExitSpy).toHaveBeenCalled();
@@ -633,7 +642,7 @@ describe("integration", () => {
             },
           });
 
-          await expect(action.run()).resolves.toBeUndefined();
+          await expect(action.run()).resolves.toEqual(undefined);
 
           expect(consoleErrorSpy).toHaveBeenCalled();
           expect(programExitSpy).toHaveBeenCalled();
@@ -655,7 +664,7 @@ describe("integration", () => {
             },
           });
 
-          await expect(action.run()).resolves.toBeUndefined();
+          await expect(action.run()).resolves.toEqual(undefined);
 
           expect(consoleErrorSpy).toHaveBeenCalled();
           expect(programExitSpy).toHaveBeenCalled();
@@ -680,7 +689,7 @@ describe("integration", () => {
             },
           });
 
-          await expect(action.run()).resolves.toBeUndefined();
+          await expect(action.run()).resolves.toEqual(undefined);
 
           expect(consoleErrorSpy).toHaveBeenCalled();
           expect(programExitSpy).toHaveBeenCalled();
@@ -705,7 +714,7 @@ describe("integration", () => {
             },
           });
 
-          await expect(action.run()).resolves.toBeUndefined();
+          await expect(action.run()).resolves.toEqual(expect.any(String));
 
           expect(consoleErrorSpy).not.toHaveBeenCalled();
           expect(programExitSpy).not.toHaveBeenCalled();
@@ -725,7 +734,7 @@ describe("integration", () => {
             },
           });
 
-          await expect(action.run()).resolves.toBeUndefined();
+          await expect(action.run()).resolves.toEqual(expect.any(String));
 
           expect(consoleErrorSpy).not.toHaveBeenCalled();
           expect(programExitSpy).not.toHaveBeenCalled();
@@ -745,7 +754,7 @@ describe("integration", () => {
             },
           });
 
-          await expect(action.run()).resolves.toBeUndefined();
+          await expect(action.run()).resolves.toEqual(expect.any(String));
 
           expect(consoleErrorSpy).not.toHaveBeenCalled();
           expect(programExitSpy).not.toHaveBeenCalled();
@@ -766,7 +775,7 @@ describe("integration", () => {
             },
           });
 
-          await expect(action.run()).resolves.toBeUndefined();
+          await expect(action.run()).resolves.toEqual(expect.any(String));
 
           expect(consoleErrorSpy).not.toHaveBeenCalled();
           expect(programExitSpy).not.toHaveBeenCalled();
@@ -786,7 +795,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(undefined);
 
         expect(consoleErrorSpy).toHaveBeenCalled();
         expect(programExitSpy).toHaveBeenCalled();
@@ -811,7 +820,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -871,7 +880,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -952,7 +961,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -1007,7 +1016,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -1064,7 +1073,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -1120,7 +1129,7 @@ describe("integration", () => {
           },
         });
 
-        await expect(action.run()).resolves.toBeUndefined();
+        await expect(action.run()).resolves.toEqual(expect.any(String));
 
         expect(consoleErrorSpy).not.toHaveBeenCalled();
         expect(programExitSpy).not.toHaveBeenCalled();
@@ -1144,6 +1153,204 @@ describe("integration", () => {
           "- #### feat: added a new feature ([#2](https://github.com/repoOwner/repoName/pull/2))",
           "",
           "  - **new feature added** yada yada",
+          "",
+          "- #### fix: another bug ([#4](https://github.com/repoOwner/repoName/pull/4))",
+          "",
+          "  a list of bugs fixed:",
+          "  ",
+          "  - bug 1",
+          "  - bug 2",
+          "  - bug 3",
+          "  ",
+          "",
+        ].join("\n");
+
+        expect(FilesystemMock.prepend).toHaveBeenCalledWith(
+          "/home/user/Documents/repo/CHANGELOG.md",
+          expectedChangelog
+        );
+      });
+    });
+
+    describe("output to stdout", () => {
+      it("outputs to stdout when enabled", async () => {
+        stdoutSpy.mockImplementationOnce(() => true);
+
+        const action = factory({
+          argMocks: {
+            version: "2.0.2",
+            outputToStdout: true,
+          },
+        });
+
+        await expect(action.run()).resolves.toEqual(expect.any(String));
+
+        expect(consoleErrorSpy).not.toHaveBeenCalled();
+        expect(programExitSpy).not.toHaveBeenCalled();
+        expect(FilesystemMock.prepend).not.toHaveBeenCalled();
+
+        expect(stdoutSpy).toHaveBeenCalledTimes(1);
+        expect(stdoutSpy).toHaveBeenCalledWith(expect.stringMatching(/## 2\.0\.2 .+/));
+      });
+    });
+
+    describe("no output", () => {
+      it("doesn't write to a file when enabled", async () => {
+        stdoutSpy.mockImplementationOnce(() => true);
+
+        const action = factory({
+          argMocks: {
+            version: "2.0.2",
+            noOutput: true,
+          },
+        });
+
+        await expect(action.run()).resolves.toEqual(expect.any(String));
+
+        expect(consoleErrorSpy).not.toHaveBeenCalled();
+        expect(programExitSpy).not.toHaveBeenCalled();
+        expect(FilesystemMock.prepend).not.toHaveBeenCalled();
+        expect(stdoutSpy).not.toHaveBeenCalled();
+      });
+
+      it("doesn't print to stdout when enabled", async () => {
+        stdoutSpy.mockImplementationOnce(() => true);
+
+        const action = factory({
+          argMocks: {
+            version: "2.0.2",
+            outputToStdout: true,
+            noOutput: true,
+          },
+        });
+
+        await expect(action.run()).resolves.toEqual(expect.any(String));
+
+        expect(consoleErrorSpy).not.toHaveBeenCalled();
+        expect(programExitSpy).not.toHaveBeenCalled();
+        expect(FilesystemMock.prepend).not.toHaveBeenCalled();
+        expect(stdoutSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("exclude prs", () => {
+      it("should not include prs that have the matching id", async () => {
+        const action = factory({
+          argMocks: {
+            version: "2.0.2",
+            excludePrs: "1,4",
+          },
+        });
+
+        await expect(action.run()).resolves.toEqual(expect.any(String));
+
+        expect(consoleErrorSpy).not.toHaveBeenCalled();
+        expect(programExitSpy).not.toHaveBeenCalled();
+
+        const expectedChangelog = [
+          "## 2.0.2 (April 1, 2023)",
+          "",
+          "### Features",
+          "",
+          "- #### feat: replaced all the code with calls to ChatGPT (lol) ([#8](https://github.com/repoOwner/repoName/pull/8))",
+          "",
+          "  all api call are now replaced with calls to the ChatGPT API, hope the AI can do the job better than us",
+          "",
+          "- #### feat: added a new feature ([#2](https://github.com/repoOwner/repoName/pull/2))",
+          "",
+          "  - **new feature added** yada yada",
+          "",
+        ].join("\n");
+
+        expect(FilesystemMock.prepend).toHaveBeenCalledWith(
+          "/home/user/Documents/repo/CHANGELOG.md",
+          expectedChangelog
+        );
+      });
+    });
+
+    describe("exclude patterns", () => {
+      it("should exclude prs that match any of the given patterns", async () => {
+        const action = factory({
+          argMocks: {
+            version: "2.0.2",
+          },
+          config: {
+            excludePatterns: [
+              ".+?ChatGPT.+?",
+              {
+                regexp: "ADDED A NEW FEATURE",
+                flags: "mi",
+              },
+            ],
+          },
+        });
+
+        await expect(action.run()).resolves.toEqual(expect.any(String));
+
+        expect(consoleErrorSpy).not.toHaveBeenCalled();
+        expect(programExitSpy).not.toHaveBeenCalled();
+
+        const expectedChangelog = [
+          "## 2.0.2 (April 1, 2023)",
+          "",
+          "### Bug Fixes",
+          "",
+          "- #### fix: some bug ([#1](https://github.com/repoOwner/repoName/pull/1))",
+          "",
+          "  fixed a bug which ocurred when doing something like:",
+          "  ",
+          "  ```ts",
+          '    foo("bar");',
+          "  ```",
+          "  ",
+          "",
+          "- #### fix: another bug ([#4](https://github.com/repoOwner/repoName/pull/4))",
+          "",
+          "  a list of bugs fixed:",
+          "  ",
+          "  - bug 1",
+          "  - bug 2",
+          "  - bug 3",
+          "  ",
+          "",
+        ].join("\n");
+
+        expect(FilesystemMock.prepend).toHaveBeenCalledWith(
+          "/home/user/Documents/repo/CHANGELOG.md",
+          expectedChangelog
+        );
+      });
+
+      it("when specified via argument", async () => {
+        const action = factory({
+          argMocks: {
+            version: "2.0.2",
+            excludePattern: "(added a new feature)|(ChatGPT)",
+          },
+          config: {
+            excludePatterns: [".+"],
+          },
+        });
+
+        await expect(action.run()).resolves.toEqual(expect.any(String));
+
+        expect(consoleErrorSpy).not.toHaveBeenCalled();
+        expect(programExitSpy).not.toHaveBeenCalled();
+
+        const expectedChangelog = [
+          "## 2.0.2 (April 1, 2023)",
+          "",
+          "### Bug Fixes",
+          "",
+          "- #### fix: some bug ([#1](https://github.com/repoOwner/repoName/pull/1))",
+          "",
+          "  fixed a bug which ocurred when doing something like:",
+          "  ",
+          "  ```ts",
+          '    foo("bar");',
+          "  ```",
+          "  ",
           "",
           "- #### fix: another bug ([#4](https://github.com/repoOwner/repoName/pull/4))",
           "",

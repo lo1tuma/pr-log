@@ -3,7 +3,7 @@ import semver from "semver";
 import { ConfigFacade } from "../modules/config";
 import { Filesystem } from "../modules/filesystem";
 import { GithubUrlResolver } from "../modules/github-url-resolver";
-import type { PackageJson, SemverNumber } from "../shared-types";
+import type { PackageJson, PullRequest, SemverNumber } from "../shared-types";
 import { Inject } from "../utils/dependency-injector/inject";
 import { Service } from "../utils/dependency-injector/service";
 import type { Repo } from "../utils/repo";
@@ -57,12 +57,28 @@ export class CliService extends Service {
     return path.resolve(process.cwd(), "CHANGELOG.md");
   }
 
+  _filterPrs(prs: PullRequest[]) {
+    const excluded = this.config.get("excludePrs", []).map(Number);
+    const excludedPatterns = this.config.get("excludePatterns", []);
+
+    const plist =
+      typeof excludedPatterns === "string" ? [excludedPatterns] : excludedPatterns;
+
+    const regexList = plist.map((p) =>
+      typeof p === "string" ? new RegExp(p) : new RegExp(p.regexp, p.flags)
+    );
+
+    return prs
+      .filter((p) => !excluded.includes(p.id))
+      .filter((p) => !regexList.some((r) => r.test(p.title)));
+  }
+
   async _generateChangelog(githubRepo: Repo, newVersionNumber: SemverNumber) {
     if (!this.config.get("sloppy", false)) {
       await this.gitService.ensureCleanLocalGitState(githubRepo);
     }
 
-    const pullRequests = await this.pr.getMerged(githubRepo);
+    const pullRequests = this._filterPrs(await this.pr.getMerged(githubRepo));
     const changelog = await this.changelog.create(
       newVersionNumber,
       pullRequests,
@@ -85,6 +101,16 @@ export class CliService extends Service {
 
     const changelogPath = this._getOutputPath();
 
-    await this.filesystem.prepend(changelogPath, changelog);
+    if (this.config.get("noOutput", false)) {
+      return changelog;
+    }
+
+    if (this.config.get("outputToStdout", false)) {
+      process.stdout.write(changelog);
+    } else {
+      await this.filesystem.prepend(changelogPath, changelog);
+    }
+
+    return changelog;
   }
 }

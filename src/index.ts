@@ -6,5 +6,5 @@ configure((main) => {
   main.setDisplayName("pr-changelog-gen");
   main.setDescription("Generate a changelog from merged pull requests.");
 
-  main.setMainAction(() => new MainAction());
+  main.setMainAction(() => new MainAction().setIsSpawnedFromCli(true));
 });

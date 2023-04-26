@@ -10,11 +10,15 @@ import {
 import { Octokit } from "@octokit/rest";
 import {
   ArgDateFormat,
+  ArgExcludePattern,
+  ArgExcludePrs,
   ArgGroupByLabels,
   ArgGroupByMatchers,
   ArgIncludePrDescription,
+  ArgNoOutput,
   ArgOnlySince,
   ArgOutputFile,
+  ArgOutputToStdout,
   ArgPrTitleMatcher,
   ArgSloppy,
   ArgTrace,
@@ -44,6 +48,10 @@ const ALL_ARGS = {
   onlySince: ArgOnlySince as Constructor,
   groupByLabels: ArgGroupByLabels as Constructor,
   groupByMatchers: ArgGroupByMatchers as Constructor,
+  outputToStdout: ArgOutputToStdout as Constructor,
+  noOutput: ArgNoOutput as Constructor,
+  excludePrs: ArgExcludePrs as Constructor,
+  excludePattern: ArgExcludePattern as Constructor,
 };
 
 const mockArgument = (value?: string | number | boolean) => {
@@ -93,7 +101,7 @@ const factory = (
     [CliService, cliServiceMock ?? { run: cliRun }],
     [Octokit, githubClient],
     ...argDeps
-  );
+  ).setIsSpawnedFromCli(true);
 };
 
 const createCliForConfigTesting = async (
@@ -275,6 +283,7 @@ describe("MainAction", () => {
       expect(cli.config.get("prTitleMatcher")).toBe(undefined);
       expect(cli.config.get("sloppy")).toBe(undefined);
       expect(cli.config.get("validLabels")).toBe(undefined);
+      expect(cli.config.get("outputToStdout")).toBe(undefined);
     });
 
     it("all values as defined in config", async () => {
@@ -288,6 +297,7 @@ describe("MainAction", () => {
         prTitleMatcher: ["^feat", "^fix"],
         sloppy: true,
         validLabels: ["feat", "fix"],
+        outputToStdout: true,
       };
 
       const cli = await createCliForConfigTesting(config, { version: "1.0.0" });
@@ -302,6 +312,7 @@ describe("MainAction", () => {
       expect(cli.config.get("prTitleMatcher")).toEqual(["^feat", "^fix"]);
       expect(cli.config.get("sloppy")).toBe(true);
       expect(cli.config.get("validLabels")).toEqual(["feat", "fix"]);
+      expect(cli.config.get("outputToStdout")).toBe(true);
     });
 
     it("arguments should override config settings", async () => {
@@ -315,6 +326,7 @@ describe("MainAction", () => {
         prTitleMatcher: ["^feat", "^fix"],
         sloppy: true,
         validLabels: ["feat", "fix"],
+        outputToStdout: false,
       };
 
       const cli = await createCliForConfigTesting(config, {
@@ -335,6 +347,7 @@ describe("MainAction", () => {
       expect(cli.config.get("prTitleMatcher")).toEqual(["^feat", "^fix"]);
       expect(cli.config.get("sloppy")).toBe(true);
       expect(cli.config.get("validLabels")).toEqual(["bugfix", "feature", "docs"]);
+      expect(cli.config.get("outputToStdout")).toBe(false);
     });
   });
 });

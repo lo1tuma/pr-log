@@ -1,5 +1,22 @@
 import { Octokit } from "@octokit/rest";
-import { Argument } from "clify";
+import { Type, createValidator } from "dilswer";
+import {
+  ArgDateFormat,
+  ArgExcludePattern,
+  ArgExcludePrs,
+  ArgGroupByLabels,
+  ArgGroupByMatchers,
+  ArgIncludePrDescription,
+  ArgNoOutput,
+  ArgOnlySince,
+  ArgOutputFile,
+  ArgOutputToStdout,
+  ArgPrTitleMatcher,
+  ArgSloppy,
+  ArgTrace,
+  ArgValidLabels,
+  ArgVersion,
+} from "./arguments";
 import { ConfigFacade } from "./modules/config";
 import { ConfigLoader } from "./modules/config-loader";
 import { EnvvarReader } from "./modules/envvar-reader";
@@ -7,92 +24,7 @@ import { CliService } from "./services/cli";
 import { Inject } from "./utils/dependency-injector/inject";
 import { Service } from "./utils/dependency-injector/service";
 
-export const ArgIncludePrDescription = Argument.define({
-  keyword: "--include-pr-description",
-  flagChar: "-n",
-  dataType: "boolean",
-  description:
-    "Include the description of each pull request in the changelog. Default: true.",
-  default: true,
-  require: true,
-});
-
-export const ArgPrTitleMatcher = Argument.define({
-  keyword: "--pr-title-matcher",
-  flagChar: "-p",
-  dataType: "string",
-  description:
-    "A regex patter that will be used to determine if a Pull Request should be included in the changelog. Default: /^feat|fix[:\\/\\(].+/i",
-});
-
-export const ArgDateFormat = Argument.define({
-  keyword: "--date-format",
-  flagChar: "-d",
-  dataType: "string",
-  description: "The date format to use in the changelog. Default: MMMM d, yyyy",
-});
-
-export const ArgValidLabels = Argument.define({
-  keyword: "--valid-labels",
-  flagChar: "-l",
-  dataType: "string",
-  description:
-    "A comma separated list of PR labels. If a PR has a matching label it will be included in the changelog.",
-});
-
-export const ArgOutputFile = Argument.define({
-  keyword: "--output-file",
-  flagChar: "-o",
-  dataType: "string",
-  description: "The file to write the changelog to. Default: <cwd>/CHANGELOG.md",
-});
-
-export const ArgOnlySince = Argument.define({
-  keyword: "--only-since",
-  flagChar: "-c",
-  dataType: "string",
-  description:
-    "Only include PRs merged since the given date. This option overrides the default behavior of only including PRs merged since the last tag was created.",
-});
-
-export const ArgGroupByLabels = Argument.define({
-  keyword: "--group-by-labels",
-  flagChar: "-gl",
-  dataType: "boolean",
-  description: "Group PRs in the changelog by labels. Default: false.",
-});
-
-export const ArgGroupByMatchers = Argument.define({
-  keyword: "--group-by-matchers",
-  flagChar: "-gm",
-  dataType: "boolean",
-  description: "Group PRs in the changelog by PR matchers. Default: true.",
-});
-
-export const ArgSloppy = Argument.define({
-  keyword: "--sloppy",
-  flagChar: "-s",
-  dataType: "boolean",
-  description: "Skip ensuring clean local git state. Default: false.",
-});
-
-export const ArgTrace = Argument.define({
-  keyword: "--trace",
-  flagChar: "-t",
-  dataType: "boolean",
-  description: "Show stack traces for any error. Default: false.",
-  default: false,
-  require: true,
-});
-
-export const ArgVersion = Argument.define({
-  keyword: "--target-version",
-  flagChar: "-v",
-  dataType: "string",
-  description:
-    "[Required] The version number of the release the changelog is being created for.",
-  require: true,
-});
+export * from "./arguments";
 
 export class MainAction extends Service {
   @Inject(() => ArgSloppy)
@@ -128,6 +60,18 @@ export class MainAction extends Service {
   @Inject(() => ArgGroupByMatchers)
   private declare groupByMatchers: InstanceType<typeof ArgGroupByMatchers>;
 
+  @Inject(() => ArgOutputToStdout)
+  private declare outputToStdout: InstanceType<typeof ArgOutputToStdout>;
+
+  @Inject(() => ArgNoOutput)
+  private declare noOutput: InstanceType<typeof ArgNoOutput>;
+
+  @Inject(() => ArgExcludePrs)
+  private declare excludePrs: InstanceType<typeof ArgExcludePrs>;
+
+  @Inject(() => ArgExcludePattern)
+  private declare excludePatterns: InstanceType<typeof ArgExcludePattern>;
+
   @Inject(() => Octokit)
   private declare githubClient: InstanceType<typeof Octokit>;
 
@@ -137,11 +81,29 @@ export class MainAction extends Service {
   @Inject(() => EnvvarReader)
   private declare envvarReader: EnvvarReader;
 
+  private isSpawnedFromCli = false;
+
+  /**
+   * Set whether the action is spawned from the CLI or not. When this
+   * is set to true, program will be terminated if an error occurs.
+   *
+   * If you are using this action from a node script, avoid this function.
+   *
+   * @default false
+   * @internal
+   */
+  public setIsSpawnedFromCli(v: boolean) {
+    this.isSpawnedFromCli = v;
+    return this;
+  }
+
   public async run() {
     try {
       const GH_TOKEN = this.envvarReader.get("GH_TOKEN");
 
       const packageConfig = await this.configLoader.loadConfig();
+
+      const isNumeric = createValidator(Type.StringInt);
 
       const config = new ConfigFacade(packageConfig, {
         prTitleMatcher: this.prTitleMatcher.value,
@@ -153,6 +115,10 @@ export class MainAction extends Service {
         groupByLabels: this.groupByLabels.value,
         groupByMatchers: this.groupByMatchers.value,
         includePrBody: this.includePrDescription.value,
+        outputToStdout: this.outputToStdout.value,
+        noOutput: this.noOutput.value,
+        excludePrs: this.excludePrs.value?.split(",").filter(isNumeric),
+        excludePatterns: this.excludePatterns.value,
       });
 
       if (GH_TOKEN) {
@@ -172,14 +138,14 @@ export class MainAction extends Service {
 
         if (this.trace.value) {
           console.error(error.stack ?? message);
-          process.exit(1);
-          return;
+        } else {
+          console.error(message);
         }
-
-        console.error(message);
-        process.exit(1);
       } else {
         console.error(error);
+      }
+
+      if (this.isSpawnedFromCli) {
         process.exit(1);
       }
     }

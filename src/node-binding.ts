@@ -2,11 +2,15 @@ import type { Argument } from "clify";
 import "reflect-metadata";
 import {
   ArgDateFormat,
+  ArgExcludePattern,
+  ArgExcludePrs,
   ArgGroupByLabels,
   ArgGroupByMatchers,
   ArgIncludePrDescription,
+  ArgNoOutput,
   ArgOnlySince,
   ArgOutputFile,
+  ArgOutputToStdout,
   ArgPrTitleMatcher,
   ArgSloppy,
   ArgTrace,
@@ -53,6 +57,18 @@ const ARGS = [
   ["targetVersion", ArgVersion],
   ["--target-version", ArgVersion],
   ["-v", ArgVersion],
+  ["excludePatterns", ArgExcludePattern],
+  ["--exclude-pattern", ArgExcludePattern],
+  ["-x", ArgExcludePattern],
+  ["excludePrs", ArgExcludePrs],
+  ["-e", ArgExcludePrs],
+  ["--exclude-prs", ArgExcludePrs],
+  ["noOutput", ArgNoOutput],
+  ["-n", ArgNoOutput],
+  ["--no-output", ArgNoOutput],
+  ["outputToStdout", ArgOutputToStdout],
+  ["-u", ArgOutputToStdout],
+  ["--output-to-stdout", ArgOutputToStdout],
 ] as const;
 
 type TypeName = "string" | "boolean" | "number";
@@ -133,3 +149,7 @@ Service.setDefaultDependency(...defaultBindArg("--sloppy"));
 Service.setDefaultDependency(...defaultBindArg("--target-version"));
 Service.setDefaultDependency(...defaultBindArg("--trace"));
 Service.setDefaultDependency(...defaultBindArg("--valid-labels"));
+Service.setDefaultDependency(...defaultBindArg("--exclude-pattern"));
+Service.setDefaultDependency(...defaultBindArg("--exclude-prs"));
+Service.setDefaultDependency(...defaultBindArg("--no-output"));
+Service.setDefaultDependency(...defaultBindArg("--output-to-stdout"));

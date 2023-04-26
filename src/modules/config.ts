@@ -1,24 +1,35 @@
 import type { GetDataType } from "dilswer";
 import { OptionalField, Type, ValidationError, assertDataType } from "dilswer";
 
+const RegexType = Type.RecordOf({
+  regexp: Type.String,
+  flags: OptionalField(Type.String),
+});
+
 const LabeledRegex = Type.RecordOf({
   regexp: Type.String,
   flags: OptionalField(Type.String),
   label: OptionalField(Type.String),
 });
 
-const StringRegexp = Type.OneOf(Type.String, LabeledRegex);
+const PrTitleMatcher = Type.OneOf(Type.String, LabeledRegex);
 
 export const ConfigSchema = Type.RecordOf({
   sloppy: OptionalField(Type.Boolean),
   dateFormat: OptionalField(Type.String),
   validLabels: OptionalField(Type.ArrayOf(Type.String)),
-  prTitleMatcher: OptionalField(Type.OneOf(StringRegexp, Type.ArrayOf(StringRegexp))),
+  prTitleMatcher: OptionalField(Type.OneOf(PrTitleMatcher, Type.ArrayOf(PrTitleMatcher))),
   includePrBody: OptionalField(Type.Boolean),
   outputFile: OptionalField(Type.String),
   onlySince: OptionalField(Type.String),
   groupByLabels: OptionalField(Type.Boolean),
   groupByMatchers: OptionalField(Type.Boolean),
+  outputToStdout: OptionalField(Type.Boolean),
+  noOutput: OptionalField(Type.Boolean),
+  excludePrs: OptionalField(Type.ArrayOf(Type.StringInt, Type.Int)),
+  excludePatterns: OptionalField(
+    Type.OneOf(Type.String, Type.ArrayOf(Type.String, RegexType))
+  ),
 });
 
 export type Config = GetDataType<typeof ConfigSchema>;
