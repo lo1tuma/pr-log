@@ -31,7 +31,7 @@ export class CliService extends Service {
   private declare gitService: GitService;
 
   _stripTrailingEmptyLine(text: string) {
-    if (text.lastIndexOf("\n\n") === text.length - 2) {
+    if (text.endsWith("\n\n")) {
       return text.slice(0, -1);
     }
 

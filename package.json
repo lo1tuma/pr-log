@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Changelog generator based on GitHub Pull Requests",
   "bin": "./bin/pr-changelog-gen.mjs",
+  "types": "./dist/types/node-binding.d.ts",
   "exports": {
     ".": {
       "default": "./dist/esm/node-binding.mjs",
