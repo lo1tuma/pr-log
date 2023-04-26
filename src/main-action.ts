@@ -168,10 +168,12 @@ export class MainAction extends Service {
       return await cli.run(this.version.value, await this.configLoader.loadPackageJson());
     } catch (error) {
       if (error instanceof Error) {
-        let message = `Error: ${error.message}`;
+        const message = `Error: ${error.message}`;
 
         if (this.trace.value) {
-          message += `\n${error.stack ?? ""}`;
+          console.error(error.stack ?? message);
+          process.exit(1);
+          return;
         }
 
         console.error(message);
