@@ -3161,13 +3161,6 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
   languageName: node
   linkType: hard
 
-"git-promise@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "git-promise@npm:1.0.0"
-  checksum: 37d0040bb7376521e3e3ac62116e64cc5166815c491484f13eefa18a32800d41187359ffbc25a47b1a498a36da7c751757fb24fe6cfc22bf0263f56d83610396
-  languageName: node
-  linkType: hard
-
 "git-up@npm:^7.0.0":
   version: 7.0.0
   resolution: "git-up@npm:7.0.0"
@@ -5071,7 +5064,6 @@ git-hook-tasks@ncpa0cpl/git-hook-tasks:
     eslint: ^8.39.0
     eslint-config-prettier: ^8.8.0
     git-hook-tasks: ncpa0cpl/git-hook-tasks
-    git-promise: ^1.0.0
     git-url-parse: ^13.1.0
     husky: ^8.0.3
     jest: ^29.5.0

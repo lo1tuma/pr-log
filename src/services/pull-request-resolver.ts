@@ -62,7 +62,7 @@ export class PullRequestResolverService extends Service {
   }
 
   async _getLatestVersionTag() {
-    const result = await this.git.run("tag --list");
+    const result = await this.git.run(["tag", "--list"]);
     const tags = result.split("\n");
     const versionTags = tags.filter(
       (tag) => semver.valid(tag) && !semver.prerelease(tag)

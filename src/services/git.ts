@@ -24,7 +24,7 @@ export class GitService extends Service {
   async _findRemoteAlias(githubRepo: Repo) {
     const gitRemote = this._getGitUrl(githubRepo);
 
-    const output = await this.git.run("remote -v");
+    const output = await this.git.run(["remote", "-v"]);
     const remotes = output.split("\n").map((remote) => {
       const tokens = remote.split(/\s/);
 
@@ -48,27 +48,31 @@ export class GitService extends Service {
   }
 
   async _ensureCleanLocalCopy() {
-    const status = await this.git.run("status -s");
+    const status = await this.git.run(["status", "-s"]);
     if (status.trim() !== "") {
       throw new Error("Local copy is not clean");
     }
   }
 
   async _ensureMasterBranch() {
-    const branchName = await this.git.run("rev-parse --abbrev-ref HEAD");
+    const branchName = await this.git.run(["rev-parse", "--abbrev-ref", "HEAD"]);
     if (branchName.trim() !== "master") {
       throw new Error("Not on master branch");
     }
   }
 
   async _fetchRemote(remoteAlias: string) {
-    return await this.git.run(`fetch ${remoteAlias}`);
+    return await this.git.run(["fetch", remoteAlias]);
   }
 
   async _ensureLocalIsEqualToRemote(remoteAlias: string) {
     const remoteBranch = `${remoteAlias}/master`;
 
-    const result = await this.git.run(`rev-list --left-right master...${remoteBranch}`);
+    const result = await this.git.run([
+      "rev-list",
+      "--left-right",
+      `master...${remoteBranch}`,
+    ]);
     const commits = result.split("\n");
 
     let commitsAhead = 0;

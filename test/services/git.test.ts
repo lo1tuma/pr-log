@@ -13,10 +13,12 @@ class GS extends GitService {
 
 function createGitServiceWithDefaultRemoteAlias(
   { status = "", revParse = "master", revList = "" } = {},
-  git = jest.fn()
+  git = jest.fn<(a: string[]) => Promise<string>>()
 ) {
-  git.mockImplementation(async (arg) => {
-    switch (arg) {
+  git.mockImplementation(async (arg: string[]) => {
+    const cmd = arg.join(" ");
+
+    switch (cmd) {
       case "status -s":
         return status;
       case "rev-parse --abbrev-ref HEAD":
@@ -24,6 +26,12 @@ function createGitServiceWithDefaultRemoteAlias(
       case "rev-list --left-right master...origin/master":
         return revList;
     }
+
+    if (cmd.startsWith("fetch")) {
+      return "";
+    }
+
+    throw new Error("Unexpected git command");
   });
 
   return GS.init([Git, { run: git }]);
@@ -74,12 +82,12 @@ describe("GitService", () => {
     });
 
     it("fetches the remote repository", async () => {
-      const gitModuleMock = jest.fn();
+      const gitModuleMock = jest.fn<(a: string[]) => Promise<string>>();
       const git = createGitServiceWithDefaultRemoteAlias({}, gitModuleMock);
 
       await git.ensureCleanLocalGitState(githubRepo);
 
-      expect(gitModuleMock).toHaveBeenCalledWith("fetch origin");
+      expect(gitModuleMock).toHaveBeenCalledWith(["fetch", "origin"]);
     });
 
     it("fulfills if the local git state is clean", async () => {
