@@ -23,7 +23,7 @@
     "license": "MIT",
     "dependencies": {
         "@octokit/rest": "19.0.5",
-        "commander": "9.4.1",
+        "commander": "9.5.0",
         "date-fns": "2.29.3",
         "git-promise": "1.0.0",
         "git-url-parse": "13.1.0",
