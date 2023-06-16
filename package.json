@@ -36,7 +36,7 @@
         "@babel/cli": "7.19.3",
         "@babel/preset-env": "7.19.4",
         "@babel/register": "7.18.9",
-        "ava": "5.0.1",
+        "ava": "5.3.1",
         "babel-plugin-istanbul": "6.1.1",
         "eslint": "8.26.0",
         "eslint-config-joyn": "0.39.0",
