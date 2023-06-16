@@ -22,7 +22,7 @@
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "@octokit/rest": "19.0.5",
+        "@octokit/rest": "19.0.13",
         "commander": "9.4.1",
         "date-fns": "2.29.3",
         "git-promise": "1.0.0",
