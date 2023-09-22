@@ -1,4 +1,4 @@
-export default new Map([
+export const defaultValidLabels: ReadonlyMap<string, string> = new Map([
     ['breaking', 'Breaking Changes'],
     ['bug', 'Bug Fixes'],
     ['feature', 'Features'],

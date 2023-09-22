@@ -1,10 +1,10 @@
 import test from 'ava';
-import createChangelogFactory from '../../../lib/createChangelog';
-import defaultValidLabels from '../../../lib/validLabels';
+import { createChangelogFactory } from './create-changelog.js';
+import { defaultValidLabels } from './valid-labels.js';
 
 test('contains a title with the version number and the formatted date', (t) => {
     const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
-    const changelog = createChangelog('1.0.0', defaultValidLabels, []);
+    const changelog = createChangelog('1.0.0', defaultValidLabels, [], '');
     const expectedTitle = '## 1.0.0 (January 1, 1970)';
 
     t.true(changelog.includes(expectedTitle));
@@ -13,7 +13,7 @@ test('contains a title with the version number and the formatted date', (t) => {
 test('format the date with a custom date format', (t) => {
     const packageInfo = { 'pr-log': { dateFormat: 'dd.MM.yyyy' } };
     const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo });
-    const changelog = createChangelog('1.0.0', defaultValidLabels, []);
+    const changelog = createChangelog('1.0.0', defaultValidLabels, [], '');
     const expectedTitle = '## 1.0.0 (01.01.1970)';
 
     t.true(changelog.includes(expectedTitle));
@@ -23,21 +23,21 @@ test('creates a formatted changelog', (t) => {
     const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
     const mergedPullRequests = [
         {
-            id: '1',
+            id: 1,
             title: 'Fixed bug foo',
             label: 'bug'
         },
         {
-            id: '2',
+            id: 2,
             title: 'Fixed bug bar',
             label: 'bug'
         },
         {
-            id: '3',
+            id: 3,
             title: 'Fix spelling error',
             label: 'documentation'
         }
-    ];
+    ] as const;
 
     const expectedChangelog = [
         '### Bug Fixes',
@@ -58,27 +58,27 @@ test('creates a formatted changelog', (t) => {
 
 test('uses custom labels when provided', (t) => {
     const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
-    const customValidLabels = [
+    const customValidLabels = new Map([
         ['core', 'Core Features'],
         ['addons', 'Addons']
-    ];
+    ]);
     const mergedPullRequests = [
         {
-            id: '1',
+            id: 1,
             title: 'Fixed bug foo',
             label: 'core'
         },
         {
-            id: '2',
+            id: 2,
             title: 'Fixed bug bar',
             label: 'addons'
         },
         {
-            id: '3',
+            id: 3,
             title: 'Fix spelling error',
             label: 'core'
         }
-    ];
+    ] as const;
 
     const expectedChangelog = [
         '### Core Features',
@@ -99,27 +99,27 @@ test('uses custom labels when provided', (t) => {
 
 test('uses the same order for the changelog sections as in validLabels', (t) => {
     const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
-    const customValidLabels = [
+    const customValidLabels = new Map([
         ['first', 'First Section'],
         ['second', 'Second Section']
-    ];
+    ]);
     const mergedPullRequests = [
         {
-            id: '1',
+            id: 1,
             title: 'Fixed bug foo',
             label: 'second'
         },
         {
-            id: '2',
+            id: 2,
             title: 'Fixed bug bar',
             label: 'second'
         },
         {
-            id: '3',
+            id: 3,
             title: 'Fix spelling error',
             label: 'first'
         }
-    ];
+    ] as const;
 
     const expectedChangelog = [
         '### First Section',

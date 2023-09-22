@@ -1,17 +1,19 @@
 import { stub } from 'sinon';
 import test from 'ava';
-import createCliAgent from '../../../lib/cli';
+import _prependFile from 'prepend-file';
+import type { CliRunner, CliRunnerDependencies } from './cli.js';
+import { createCliRunner } from './cli.js';
 
-function createCli(dependencies = {}) {
+function createCli(dependencies: Partial<CliRunnerDependencies> = {}): CliRunner {
     const {
         ensureCleanLocalGitState = stub().resolves(),
         getMergedPullRequests = stub().resolves([]),
         createChangelog = stub().returns(''),
-        prependFile = stub().resolves(),
+        prependFile = stub().resolves() as unknown as typeof _prependFile,
         packageInfo = { repository: { url: 'https://github.com/foo/bar.git' } }
     } = dependencies;
 
-    return createCliAgent({
+    return createCliRunner({
         ensureCleanLocalGitState,
         getMergedPullRequests,
         createChangelog,
@@ -25,27 +27,31 @@ const options = { sloppy: false, changelogPath: '/foo/CHANGELOG.md' };
 test('throws if no version number was specified', async (t) => {
     const cli = createCli();
 
-    await t.throwsAsync(cli.run(), { message: 'version-number not specified' });
+    await t.throwsAsync(cli.run('', options), { message: 'version-number not specified' });
 });
 
 test('throws if an invalid version number was specified', async (t) => {
     const cli = createCli();
 
-    await t.throwsAsync(cli.run('a.b.c'), { message: 'version-number is invalid' });
+    await t.throwsAsync(cli.run('a.b.c', options), { message: 'version-number is invalid' });
 });
 
 test('throws if the repository is dirty', async (t) => {
     const ensureCleanLocalGitState = stub().rejects(new Error('Local copy is not clean'));
     const cli = createCli({ ensureCleanLocalGitState });
 
-    await t.throwsAsync(cli.run('1.0.0'), { message: 'Local copy is not clean' });
+    await t.throwsAsync(cli.run('1.0.0', options), { message: 'Local copy is not clean' });
 });
 
 test('does not throw if the repository is dirty', async (t) => {
     const ensureCleanLocalGitState = stub().rejects(new Error('Local copy is not clean'));
     const createChangelog = stub().returns('sloppy changelog');
     const prependFile = stub().resolves();
-    const cli = createCli({ prependFile, ensureCleanLocalGitState, createChangelog });
+    const cli = createCli({
+        prependFile: prependFile as unknown as typeof _prependFile,
+        ensureCleanLocalGitState,
+        createChangelog
+    });
 
     await cli.run('1.0.0', { sloppy: true, changelogPath: '/foo/CHANGELOG.md' });
 
@@ -90,7 +96,7 @@ test('reports the generated changelog', async (t) => {
         createChangelog,
         getMergedPullRequests,
         ensureCleanLocalGitState,
-        prependFile
+        prependFile: prependFile as unknown as typeof _prependFile
     });
 
     const expectedGithubRepo = 'foo/bar';
@@ -114,7 +120,7 @@ test('strips trailing empty lines from the generated changelog', async (t) => {
     const createChangelog = stub().returns('generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n');
     const prependFile = stub().resolves();
 
-    const cli = createCli({ createChangelog, prependFile });
+    const cli = createCli({ createChangelog, prependFile: prependFile as unknown as typeof _prependFile });
 
     await cli.run('1.0.0', options);
 

@@ -1,12 +1,12 @@
 import test from 'ava';
-import { stub } from 'sinon';
-import findRemoteAliasFactory from '../../../lib/findRemoteAlias';
+import { fake } from 'sinon';
+import { findRemoteAliasFactory, FindRemoteAliasDependencies, FindRemoteAlias } from './find-remote-alias.js';
 
 const githubRepo = 'foo/bar';
 
-function factory(result = '') {
-    const git = stub().resolves(result);
-    const dependencies = { git };
+function factory(result = ''): FindRemoteAlias {
+    const execute = fake.resolves({ stdout: result });
+    const dependencies = { execute } as unknown as FindRemoteAliasDependencies;
 
     return findRemoteAliasFactory(dependencies);
 }

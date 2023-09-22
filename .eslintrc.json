@@ -1,23 +1,24 @@
 {
-    "extends": ["joyn", "joyn/presets/node"],
-
-    "settings": {
-        "import/ignore": ["ramda"]
-    },
+    "extends": ["joyn", "joyn/presets/esm", "joyn/presets/node"],
 
     "rules": {
         "camelcase": "off",
-        "import/no-unresolved": ["error", { "ignore": ["ava", "ramda"] }]
+        "import/no-unresolved": ["error", { "ignore": ["ava"] }],
+        "node/no-unsupported-features/es-syntax": "off",
+        "import/extensions": "off"
     },
 
     "overrides": [
         {
-            "files": ["prettier.config.js"],
-            "extends": ["joyn/presets/commonjs"]
-        },
-        {
-            "files": ["bin/**/*.js", "lib/**/*.js", "test/**/*.js"],
-            "extends": ["joyn/presets/esm"]
+            "files": ["**/*.ts"],
+            "extends": "joyn/presets/typescript",
+            "parserOptions": {
+                "EXPERIMENTAL_useProjectService": true,
+                "project": "tsconfig.json"
+            },
+            "rules": {
+                "import/no-unresolved": "off"
+            }
         },
         {
             "files": ["test/**/*.js"],
