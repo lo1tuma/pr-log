@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = {
+const prettierConfig = {
     printWidth: 120,
     tabWidth: 4,
     useTabs: false,
@@ -10,3 +8,5 @@ module.exports = {
     bracketSpacing: true,
     arrowParens: 'always'
 };
+
+export default prettierConfig;

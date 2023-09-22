@@ -1,18 +1,19 @@
 import test from 'ava';
 import { stub } from 'sinon';
-import ensureCleanLocalGitStateFactory from '../../../lib/ensureCleanLocalGitState';
+import type { EnsureCleanLocalGitState, EnsureCleanLocalGitStateDependencies } from './ensure-clean-local-git-state.js';
+import { ensureCleanLocalGitStateFactory } from './ensure-clean-local-git-state.js';
 
 const githubRepo = 'foo/bar';
 
-function factory({ status = '', revParse = 'master', revList = '' } = {}, git = stub()) {
+function factory({ status = '', revParse = 'master', revList = '' } = {}, execute = stub()): EnsureCleanLocalGitState {
     const findRemoteAlias = stub();
     const remoteAlias = 'origin';
-    const dependencies = { git, findRemoteAlias };
+    const dependencies = { execute, findRemoteAlias } as unknown as EnsureCleanLocalGitStateDependencies;
 
-    git.resolves();
-    git.withArgs('status -s').resolves(status);
-    git.withArgs('rev-parse --abbrev-ref HEAD').resolves(revParse);
-    git.withArgs('rev-list --left-right master...origin/master').resolves(revList);
+    execute.resolves({ stdout: '' });
+    execute.withArgs(['git status -s']).resolves({ stdout: status });
+    execute.withArgs(['git rev-parse --abbrev-ref HEAD']).resolves({ stdout: revParse });
+    execute.withArgs(['git rev-list --left-right master...', ''], 'origin/master').resolves({ stdout: revList });
 
     findRemoteAlias.resolves(remoteAlias);
 
@@ -46,12 +47,12 @@ test('rejects if the local branch is behind the remote', async (t) => {
 });
 
 test('fetches the remote repository', async (t) => {
-    const git = stub();
-    const ensureCleanLocalGitState = factory({}, git);
+    const execute = stub();
+    const ensureCleanLocalGitState = factory({}, execute);
 
     await ensureCleanLocalGitState(githubRepo);
 
-    t.true(git.calledWithExactly('fetch origin'));
+    t.true(execute.calledWithExactly(['git fetch ', ''], 'origin'));
 });
 
 test('fulfills if the local git state is clean', async (t) => {

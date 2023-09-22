@@ -1,0 +1,15 @@
+{
+    "all": true,
+    "statements": 97.44,
+    "branches": 93.33,
+    "functions": 100,
+    "lines": 97.44,
+    "instrument": true,
+    "check-coverage": true,
+    "extension": [".js"],
+    "src": "target/build/source",
+    "reporter": ["lcov", "text-summary", "cobertura"],
+    "reportDir": "./target/coverage",
+    "tempDirectory": "./target/c8_output",
+    "exclude": ["target/build/source/**/*.test.js", "target/build/source/bin/**/*"]
+}

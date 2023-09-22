@@ -1,6 +1,6 @@
 import parseGithubUrl from 'parse-github-repo-url';
 
-function getGithubRepo(githubUrl) {
+export function getGithubRepo(githubUrl: string): string {
     const result = parseGithubUrl(githubUrl);
 
     if (!result) {
@@ -9,5 +9,3 @@ function getGithubRepo(githubUrl) {
 
     return `${result[0]}/${result[1]}`;
 }
-
-export default getGithubRepo;

@@ -1,5 +1,5 @@
 import test from 'ava';
-import getGithubRepo from '../../../lib/getGithubRepo';
+import { getGithubRepo } from './get-github-repo.js';
 
 test('extracts the repo path of a github URL', (t) => {
     t.is(getGithubRepo('git://github.com/foo/bar.git#master'), 'foo/bar');

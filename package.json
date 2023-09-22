@@ -1,86 +1,66 @@
 {
     "name": "pr-log",
     "version": "4.0.0",
+    "type": "module",
     "description": "Changelog generator based on GitHub Pull Requests",
-    "bin": "dist/bin/pr-log.js",
+    "bin": "target/build/source/bin/pr-log.js",
     "files": [
-        "dist/",
+        "target/build/source/",
+        "!target/build/source/**/*.test.js",
+        "!target/build/source/**/*.d.ts",
+        "!target/build/source/**/*.map",
         "LICENSE",
         "README.md"
     ],
     "scripts": {
-        "build": "babel lib --out-dir dist && babel bin --out-dir dist/bin",
+        "compile": "tsc --build",
         "prettier": "prettier '**/*.(yml|json|yaml|md)'",
-        "eslint": "eslint .",
+        "eslint": "eslint --ext '.js,.ts' .",
         "lint": "npm run eslint && npm run prettier -- --check",
         "lint:fix": "npm run eslint -- --fix && npm run prettier -- --write",
-        "pretest": "npm run lint",
-        "test": "nyc npm run test:unit",
-        "prepublish": "npm run build",
+        "test": "c8 npm run test:unit",
+        "pretest:unit": "npm run compile",
         "test:unit": "ava"
     },
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "@octokit/rest": "19.0.5",
-        "commander": "9.4.1",
-        "date-fns": "2.29.3",
-        "git-promise": "1.0.0",
+        "@octokit/rest": "20.0.1",
+        "commander": "11.0.0",
+        "date-fns": "2.30.0",
+        "execa": "^8.0.1",
         "git-url-parse": "13.1.0",
         "parse-github-repo-url": "1.4.1",
-        "prepend": "1.0.2",
-        "ramda": "0.28.0",
-        "semver": "7.3.8"
+        "prepend-file": "^2.0.1",
+        "semver": "7.5.4"
     },
     "devDependencies": {
-        "@babel/cli": "7.19.3",
-        "@babel/preset-env": "7.19.4",
-        "@babel/register": "7.18.9",
-        "ava": "5.0.1",
-        "babel-plugin-istanbul": "6.1.1",
-        "eslint": "8.26.0",
-        "eslint-config-joyn": "0.39.0",
-        "eslint-plugin-array-func": "3.1.7",
-        "eslint-plugin-ava": "13.2.0",
+        "@ava/typescript": "^4.1.0",
+        "@types/git-url-parse": "^9.0.1",
+        "@types/node": "^20.6.3",
+        "@types/parse-github-repo-url": "^1.4.0",
+        "@types/semver": "^7.5.2",
+        "@types/sinon": "^10.0.16",
+        "@typescript-eslint/eslint-plugin": "^6.7.2",
+        "@typescript-eslint/parser": "^6.7.2",
+        "ava": "5.3.1",
+        "c8": "^8.0.1",
+        "eslint": "8.49.0",
+        "eslint-config-joyn": "2.5.0",
+        "eslint-plugin-array-func": "4.0.0",
+        "eslint-plugin-ava": "14.0.0",
         "eslint-plugin-eslint-comments": "3.2.0",
-        "eslint-plugin-import": "2.26.0",
+        "eslint-plugin-functional": "^6.0.0",
+        "eslint-plugin-import": "2.28.1",
         "eslint-plugin-no-secrets": "0.8.9",
         "eslint-plugin-node": "11.1.0",
         "eslint-plugin-optimize-regex": "1.2.1",
-        "eslint-plugin-prettier": "4.2.1",
+        "eslint-plugin-prettier": "5.0.0",
         "eslint-plugin-promise": "6.1.1",
-        "eslint-plugin-unicorn": "44.0.2",
-        "nyc": "15.1.0",
-        "prettier": "2.7.1",
-        "sinon": "14.0.1"
-    },
-    "ava": {
-        "files": [
-            "./test/unit/**/*Spec.js"
-        ]
-    },
-    "nyc": {
-        "lines": 100,
-        "statements": 100,
-        "functions": 100,
-        "branches": 100,
-        "include": [
-            "lib/**/*.js"
-        ],
-        "reporter": [
-            "lcov",
-            "text-summary"
-        ],
-        "cache": false,
-        "all": true,
-        "check-coverage": true,
-        "require": [
-            "@babel/register"
-        ],
-        "sourceMap": true,
-        "instrumment": false,
-        "report-dir": "./target/coverage",
-        "tempDir": "./target/nyc_output"
+        "eslint-plugin-unicorn": "48.0.1",
+        "prettier": "3.0.3",
+        "sinon": "16.0.0",
+        "typescript": "^5.2.2"
     },
     "repository": {
         "type": "git",
@@ -95,9 +75,10 @@
         "history.md"
     ],
     "contributors": [
-        "Alexander Schmidt <alexanderschmidt1@gmail.com>"
+        "Alexander Schmidt <alexanderschmidt1@gmail.com>",
+        "Christian Rackerseder <github@echooff.de>"
     ],
     "engines": {
-        "node": "^18"
+        "node": "^20"
     }
 }
