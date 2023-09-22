@@ -13,7 +13,8 @@
             "files": ["**/*.ts"],
             "extends": "joyn/presets/typescript",
             "parserOptions": {
-                "project": ["**/tsconfig.sources.json", "**/tsconfig.unit-tests.json"]
+                "EXPERIMENTAL_useProjectService": true,
+                "project": "tsconfig.json"
             },
             "rules": {
                 "import/no-unresolved": "off"
