@@ -4,7 +4,8 @@
     "rules": {
         "camelcase": "off",
         "import/no-unresolved": ["error", { "ignore": ["ava"] }],
-        "node/no-unsupported-features/es-syntax": "off"
+        "node/no-unsupported-features/es-syntax": "off",
+        "import/extensions": "off"
     },
 
     "overrides": [
