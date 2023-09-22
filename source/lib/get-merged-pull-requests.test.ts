@@ -22,9 +22,9 @@ function factory(overrides: Overrides = {}): GetMergedPullRequests {
     getPullRequestLabel.resolves('bug');
 
     execute.resolves({ stdout: '' });
-    execute.withArgs(['git tag --list']).resolves({ stdout: tag });
+    execute.withArgs('git tag --list').resolves({ stdout: tag });
     execute
-        .withArgs(['git log --no-color --pretty=format:"%s (%b)" --merges ', '..HEAD'], latestVersion)
+        .withArgs(`git log --no-color --pretty=format:"%s (%b)" --merges ${latestVersion}..HEAD`)
         .resolves({ stdout: log });
 
     const dependencies = { getPullRequestLabel, execute } as unknown as GetMergedPullRequestsDependencies;
@@ -35,31 +35,31 @@ function factory(overrides: Overrides = {}): GetMergedPullRequests {
 test('ignores non-semver tag', async (t) => {
     const execute = stub();
     const getMergedPullRequests = factory({ tag: '0.0.1\nfoo\n0.0.2\n0.0.0.0.1', execute });
-    const expectedGitLogCommand = [['git log --no-color --pretty=format:"%s (%b)" --merges ', '..HEAD'], '0.0.2'];
+    const expectedGitLogCommand = 'git log --no-color --pretty=format:"%s (%b)" --merges 0.0.2..HEAD';
 
     await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-    t.true(execute.calledWith(...expectedGitLogCommand));
+    t.true(execute.calledWith(expectedGitLogCommand));
 });
 
 test('always uses the highest version', async (t) => {
     const execute = stub();
     const getMergedPullRequests = factory({ tag: '1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n0.5.0', execute });
-    const expectedGitLogCommand = [['git log --no-color --pretty=format:"%s (%b)" --merges ', '..HEAD'], '2.0.0'];
+    const expectedGitLogCommand = 'git log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
 
     await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-    t.true(execute.calledWith(...expectedGitLogCommand));
+    t.true(execute.calledWith(expectedGitLogCommand));
 });
 
 test('ignores prerelease versions', async (t) => {
     const execute = stub();
     const getMergedPullRequests = factory({ tag: '1.0.0\n0.0.0\n0.7.5\n2.0.0\n0.2.5\n3.0.0-alpha.1', execute });
-    const expectedGitLogCommand = [['git log --no-color --pretty=format:"%s (%b)" --merges ', '..HEAD'], '2.0.0'];
+    const expectedGitLogCommand = 'git log --no-color --pretty=format:"%s (%b)" --merges 2.0.0..HEAD';
 
     await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-    t.true(execute.calledWith(...expectedGitLogCommand));
+    t.true(execute.calledWith(expectedGitLogCommand));
 });
 
 test('extracts id, title and label for merged pull requests', async (t) => {

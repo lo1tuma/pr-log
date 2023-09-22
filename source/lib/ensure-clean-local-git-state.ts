@@ -1,8 +1,8 @@
-import type { Execa$ } from 'execa';
+import { execaCommand } from 'execa';
 import type { FindRemoteAlias } from './find-remote-alias.js';
 
 export interface EnsureCleanLocalGitStateDependencies {
-    readonly execute: Execa$;
+    readonly execute: typeof execaCommand;
     readonly findRemoteAlias: FindRemoteAlias;
 }
 
@@ -14,27 +14,27 @@ export function ensureCleanLocalGitStateFactory(
     const { execute, findRemoteAlias } = dependencies;
 
     async function ensureCleanLocalCopy(): Promise<void> {
-        const status = await execute`git status -s`;
+        const status = await execute('git status -s');
         if (status.stdout.trim() !== '') {
             throw new Error('Local copy is not clean');
         }
     }
 
     async function ensureMasterBranch(): Promise<void> {
-        const branchName = await execute`git rev-parse --abbrev-ref HEAD`;
+        const branchName = await execute('git rev-parse --abbrev-ref HEAD');
         if (branchName.stdout.trim() !== 'master') {
             throw new Error('Not on master branch');
         }
     }
 
     async function fetchRemote(remoteAlias: string): Promise<void> {
-        await execute`git fetch ${remoteAlias}`;
+        await execute(`git fetch ${remoteAlias}`);
     }
 
     async function ensureLocalIsEqualToRemote(remoteAlias: string): Promise<void> {
         const remoteBranch = `${remoteAlias}/master`;
 
-        const result = await execute`git rev-list --left-right master...${remoteBranch}`;
+        const result = await execute(`git rev-list --left-right master...${remoteBranch}`);
         const commits = result.stdout.split('\n');
 
         let commitsAhead = 0;

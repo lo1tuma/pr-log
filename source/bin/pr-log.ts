@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import { createCommand } from 'commander';
 import { Octokit } from '@octokit/rest';
 import prependFile from 'prepend-file';
-import { $ } from 'execa';
+import { execaCommand } from 'execa';
 import config from '../../package.json';
 import { createCliRunner, RunOptions } from '../lib/cli.js';
 import { ensureCleanLocalGitStateFactory } from '../lib/ensure-clean-local-git-state.js';
@@ -14,10 +14,19 @@ import { createChangelogFactory } from '../lib/create-changelog.js';
 import { findRemoteAliasFactory } from '../lib/find-remote-alias.js';
 import { getPullRequestLabel } from '../lib/get-pull-request-label.js';
 
-const program = createCommand(config.name);
-
 let isTracingEnabled = false;
 
+const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
+const findRemoteAlias = findRemoteAliasFactory({ execute: execaCommand });
+const githubClient = new Octokit();
+const getMergedPullRequests = getMergedPullRequestsFactory({
+    githubClient,
+    execute: execaCommand,
+    getPullRequestLabel
+});
+const getCurrentDate = (): Date => new Date();
+
+const program = createCommand(config.name);
 program
     .storeOptionsAsProperties(false)
     .description(config.description)
@@ -29,23 +38,18 @@ program
         // eslint-disable-next-line node/no-process-env
         const { GH_TOKEN } = process.env;
 
-        isTracingEnabled = options.trace === true;
-        const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
         const runOptions: RunOptions = { sloppy: options.sloppy === true, changelogPath };
-        const findRemoteAlias = findRemoteAliasFactory({ execute: $ });
-        const githubClient = new Octokit();
+        isTracingEnabled = options.trace === true;
         if (GH_TOKEN) {
             await githubClient.auth({ type: 'token', token: GH_TOKEN });
         }
-        const getMergedPullRequests = getMergedPullRequestsFactory({ githubClient, execute: $, getPullRequestLabel });
-        const getCurrentDate = (): Date => new Date();
         const packageInfoAsText = await fs.readFile(path.join(process.cwd(), 'package.json'), { encoding: 'utf8' });
         const packageInfo = JSON.parse(packageInfoAsText);
         const dependencies = {
             githubClient,
             prependFile,
             packageInfo,
-            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory({ execute: $, findRemoteAlias }),
+            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory({ execute: execaCommand, findRemoteAlias }),
             getMergedPullRequests,
             createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
         };
