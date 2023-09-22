@@ -14,9 +14,12 @@ jobs:
                   node-version: 20
             - name: Install dependencies
               run: npm clean-install
+            - name: Static code analysis
+              run: npm run lint
+            - name: Compile Typescript
+              run: npm run compile
             - name: Run tests
               run: npm test
-              timeout-minutes: 20
             - name: Coveralls
               uses: coverallsapp/github-action@master
               with:
