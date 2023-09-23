@@ -31,6 +31,24 @@ function factory(overrides: Overrides = {}): GetMergedPullRequests {
     return getMergedPullRequestsFactory(dependencies);
 }
 
+test('throws when there is no tag at all', async (t) => {
+    const listTags = fake.resolves([]);
+    const getMergedPullRequests = factory({ listTags });
+
+    await t.throwsAsync(getMergedPullRequests(anyRepo, defaultValidLabels), {
+        message: 'Failed to determine latest version number git tag'
+    });
+});
+
+test('throws when there are only non-semver tags', async (t) => {
+    const listTags = fake.resolves(['foo', 'bar']);
+    const getMergedPullRequests = factory({ listTags });
+
+    await t.throwsAsync(getMergedPullRequests(anyRepo, defaultValidLabels), {
+        message: 'Failed to determine latest version number git tag'
+    });
+});
+
 test('ignores non-semver tag', async (t) => {
     const listTags = fake.resolves(['0.0.1', 'foo', '0.0.2', '0.0.0.0.1']);
     const getMergeCommitLogs = fake.resolves([]);
@@ -62,6 +80,34 @@ test('ignores prerelease versions', async (t) => {
 
     t.is(getMergeCommitLogs.callCount, 1);
     t.deepEqual(getMergeCommitLogs.firstCall.args, ['2.0.0']);
+});
+
+test('throws when the pull request cannot be extracted from the commit message', async (t) => {
+    const getMergeCommitLogs = fake.resolves([
+        {
+            subject: 'Merge pull request foo from branch',
+            body: 'pr-1 message'
+        }
+    ]);
+    const getMergedPullRequests = factory({ getMergeCommitLogs });
+
+    await t.throwsAsync(getMergedPullRequests(anyRepo, defaultValidLabels), {
+        message: 'Failed to extract pull request id from merge commit log'
+    });
+});
+
+test('throws when the the commit log doesn’t have a body', async (t) => {
+    const getMergeCommitLogs = fake.resolves([
+        {
+            subject: 'Merge pull request #1 from branch',
+            body: undefined
+        }
+    ]);
+    const getMergedPullRequests = factory({ getMergeCommitLogs });
+
+    await t.throwsAsync(getMergedPullRequests(anyRepo, defaultValidLabels), {
+        message: 'Failed to extract pull request title from merge commit log'
+    });
 });
 
 test('extracts id, title and label for merged pull requests', async (t) => {
