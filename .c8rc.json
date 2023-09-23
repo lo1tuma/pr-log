@@ -1,9 +1,9 @@
 {
     "all": true,
-    "statements": 99.27,
-    "branches": 98.19,
+    "statements": 100,
+    "branches": 100,
     "functions": 100,
-    "lines": 99.27,
+    "lines": 100,
     "instrument": true,
     "check-coverage": true,
     "extension": [".js"],

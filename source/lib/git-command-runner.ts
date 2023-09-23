@@ -1,4 +1,5 @@
 import { execaCommand } from 'execa';
+import { splitByString, splitByPattern } from './split.js';
 
 export interface RemoteAlias {
     alias: string;
@@ -33,7 +34,7 @@ function isNonEmptyString(value: string): boolean {
 }
 
 function splitLines(value: string, lineSeperatorPrefix = ''): readonly string[] {
-    return value.split(`${lineSeperatorPrefix}\n`).map(trim).filter(isNonEmptyString);
+    return splitByString(value, `${lineSeperatorPrefix}\n`).map(trim).filter(isNonEmptyString);
 }
 
 export function createGitCommandRunner(dependencies: GitCommandRunnerDependencies): GitCommandRunner {
@@ -63,10 +64,10 @@ export function createGitCommandRunner(dependencies: GitCommandRunnerDependencie
             const result = await execute('git remote -v');
 
             return splitLines(result.stdout).map((line: string) => {
-                const remoteLineTokens = line.split(/\s/);
+                const remoteLineTokens = splitByPattern(line, /\s/);
                 const [alias, url] = remoteLineTokens;
 
-                if (alias === undefined || url === undefined) {
+                if (url === undefined) {
                     throw new TypeError('Failed to determine git remote alias');
                 }
 
@@ -91,12 +92,8 @@ export function createGitCommandRunner(dependencies: GitCommandRunnerDependencie
 
             const logs = splitLines(result.stdout, lineSeperator);
             return logs.map((log) => {
-                const parts = log.split(fieldSeperator);
+                const parts = splitByString(log, fieldSeperator);
                 const [subject, body] = parts;
-
-                if (subject === undefined) {
-                    throw new TypeError('Failed to extract subject from git commit log');
-                }
 
                 return { subject, body: body === '' ? undefined : body };
             });
