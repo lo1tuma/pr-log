@@ -1,4 +1,4 @@
-import { $ } from 'execa';
+import { execaCommand } from 'execa';
 import parseGitUrl from 'git-url-parse';
 
 function isSameGitUrl(gitUrlA: string, gitUrlB: string): boolean {
@@ -15,7 +15,7 @@ function getGitUrl(githubRepo: string): string {
 }
 
 export interface FindRemoteAliasDependencies {
-    readonly execute: typeof $;
+    readonly execute: typeof execaCommand;
 }
 
 export type FindRemoteAlias = (githubRepo: string) => Promise<string>;
@@ -26,7 +26,7 @@ export function findRemoteAliasFactory(dependencies: FindRemoteAliasDependencies
     return async function findRemoteAlias(githubRepo: string) {
         const gitRemote = getGitUrl(githubRepo);
 
-        const output = await execute`git remote -v`;
+        const output = await execute('git remote -v');
         const remotes = output.stdout.split('\n').map((remote: string) => {
             const tokens = remote.split(/\s/);
 

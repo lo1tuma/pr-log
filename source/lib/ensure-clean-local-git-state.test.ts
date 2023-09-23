@@ -11,9 +11,9 @@ function factory({ status = '', revParse = 'master', revList = '' } = {}, execut
     const dependencies = { execute, findRemoteAlias } as unknown as EnsureCleanLocalGitStateDependencies;
 
     execute.resolves({ stdout: '' });
-    execute.withArgs(['git status -s']).resolves({ stdout: status });
-    execute.withArgs(['git rev-parse --abbrev-ref HEAD']).resolves({ stdout: revParse });
-    execute.withArgs(['git rev-list --left-right master...', ''], 'origin/master').resolves({ stdout: revList });
+    execute.withArgs('git status -s').resolves({ stdout: status });
+    execute.withArgs('git rev-parse --abbrev-ref HEAD').resolves({ stdout: revParse });
+    execute.withArgs('git rev-list --left-right master...origin/master').resolves({ stdout: revList });
 
     findRemoteAlias.resolves(remoteAlias);
 
@@ -52,7 +52,7 @@ test('fetches the remote repository', async (t) => {
 
     await ensureCleanLocalGitState(githubRepo);
 
-    t.true(execute.calledWithExactly(['git fetch ', ''], 'origin'));
+    t.true(execute.calledWithExactly('git fetch origin'));
 });
 
 test('fulfills if the local git state is clean', async (t) => {

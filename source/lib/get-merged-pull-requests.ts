@@ -1,4 +1,4 @@
-import { $ } from 'execa';
+import { execaCommand } from 'execa';
 import semver from 'semver';
 import type { Octokit } from '@octokit/rest';
 import type { GetPullRequestLabel } from './get-pull-request-label.js';
@@ -13,7 +13,7 @@ export interface PullRequestWithLabel extends PullRequest {
 }
 
 export interface GetMergedPullRequestsDependencies {
-    readonly execute: typeof $;
+    readonly execute: typeof execaCommand;
     readonly getPullRequestLabel: GetPullRequestLabel;
     readonly githubClient: Octokit;
 }
@@ -31,7 +31,7 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
     const { execute, getPullRequestLabel } = dependencies;
 
     async function getLatestVersionTag(): Promise<string> {
-        const result = await execute`git tag --list`;
+        const result = await execute('git tag --list');
         const tags = result.stdout.split('\n');
         const versionTags = tags.filter((tag: string) => semver.valid(tag) && !semver.prerelease(tag));
         const orderedVersionTags = versionTags.sort(semver.compare);
@@ -45,7 +45,7 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
     }
 
     async function getPullRequests(fromTag: string): Promise<readonly PullRequest[]> {
-        const result = await execute`git log --no-color --pretty=format:"%s (%b)" --merges ${fromTag}..HEAD`;
+        const result = await execute(`git log --no-color --pretty=format:"%s (%b)" --merges ${fromTag}..HEAD`);
         const mergeCommits = result.stdout.replaceAll(/[\n\r]+\)/g, ')').split('\n');
 
         return mergeCommits
