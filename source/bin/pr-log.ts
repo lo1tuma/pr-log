@@ -13,15 +13,17 @@ import { getMergedPullRequestsFactory } from '../lib/get-merged-pull-requests.js
 import { createChangelogFactory } from '../lib/create-changelog.js';
 import { findRemoteAliasFactory } from '../lib/find-remote-alias.js';
 import { getPullRequestLabel } from '../lib/get-pull-request-label.js';
+import { createGitCommandRunner } from '../lib/git-command-runner.js';
 
 let isTracingEnabled = false;
 
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
-const findRemoteAlias = findRemoteAliasFactory({ execute: execaCommand });
+const gitCommandRunner = createGitCommandRunner({ execute: execaCommand });
+const findRemoteAlias = findRemoteAliasFactory({ gitCommandRunner });
 const githubClient = new Octokit();
 const getMergedPullRequests = getMergedPullRequestsFactory({
     githubClient,
-    execute: execaCommand,
+    gitCommandRunner,
     getPullRequestLabel
 });
 const getCurrentDate = (): Date => new Date();
@@ -49,7 +51,7 @@ program
             githubClient,
             prependFile,
             packageInfo,
-            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory({ execute: execaCommand, findRemoteAlias }),
+            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory({ gitCommandRunner, findRemoteAlias }),
             getMergedPullRequests,
             createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
         };

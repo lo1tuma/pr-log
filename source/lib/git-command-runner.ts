@@ -1,6 +1,6 @@
 import { execaCommand } from 'execa';
 
-interface RemoteAlias {
+export interface RemoteAlias {
     alias: string;
     url: string;
 }

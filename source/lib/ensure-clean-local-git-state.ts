@@ -1,8 +1,8 @@
-import { execaCommand } from 'execa';
 import type { FindRemoteAlias } from './find-remote-alias.js';
+import { GitCommandRunner } from './git-command-runner.js';
 
 export interface EnsureCleanLocalGitStateDependencies {
-    readonly execute: typeof execaCommand;
+    readonly gitCommandRunner: GitCommandRunner;
     readonly findRemoteAlias: FindRemoteAlias;
 }
 
@@ -11,42 +11,34 @@ export type EnsureCleanLocalGitState = (githubRepo: string) => Promise<void>;
 export function ensureCleanLocalGitStateFactory(
     dependencies: EnsureCleanLocalGitStateDependencies
 ): EnsureCleanLocalGitState {
-    const { execute, findRemoteAlias } = dependencies;
+    const { gitCommandRunner, findRemoteAlias } = dependencies;
 
     async function ensureCleanLocalCopy(): Promise<void> {
-        const status = await execute('git status -s');
-        if (status.stdout.trim() !== '') {
+        const status = await gitCommandRunner.getShortStatus();
+        if (status !== '') {
             throw new Error('Local copy is not clean');
         }
     }
 
     async function ensureMasterBranch(): Promise<void> {
-        const branchName = await execute('git rev-parse --abbrev-ref HEAD');
-        if (branchName.stdout.trim() !== 'master') {
+        const branchName = await gitCommandRunner.getCurrentBranchName();
+        if (branchName !== 'master') {
             throw new Error('Not on master branch');
         }
-    }
-
-    async function fetchRemote(remoteAlias: string): Promise<void> {
-        await execute(`git fetch ${remoteAlias}`);
     }
 
     async function ensureLocalIsEqualToRemote(remoteAlias: string): Promise<void> {
         const remoteBranch = `${remoteAlias}/master`;
 
-        const result = await execute(`git rev-list --left-right master...${remoteBranch}`);
-        const commits = result.stdout.split('\n');
-
+        const commits = await gitCommandRunner.getSymmetricDifferencesBetweenBranches('master', remoteBranch);
         let commitsAhead = 0;
         let commitsBehind = 0;
 
         commits.forEach((commit: string) => {
-            if (commit.trim().length > 0) {
-                if (commit.startsWith('>')) {
-                    commitsBehind += 1;
-                } else {
-                    commitsAhead += 1;
-                }
+            if (commit.startsWith('>')) {
+                commitsBehind += 1;
+            } else {
+                commitsAhead += 1;
             }
         });
 
@@ -63,7 +55,7 @@ export function ensureCleanLocalGitStateFactory(
 
         const remoteAlias = await findRemoteAlias(githubRepo);
 
-        await fetchRemote(remoteAlias);
+        await gitCommandRunner.fetchRemote(remoteAlias);
         await ensureLocalIsEqualToRemote(remoteAlias);
     };
 }
