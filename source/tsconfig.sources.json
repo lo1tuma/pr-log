@@ -4,6 +4,6 @@
         "tsBuildInfoFile": "../target/buildcache/sources.tsbuildinfo",
         "rootDir": "../"
     },
-    "include": ["./**/*.ts", "../package.json"],
+    "include": ["./**/*.ts"],
     "exclude": ["./**/*.test.ts"]
 }
