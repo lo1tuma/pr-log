@@ -41,8 +41,8 @@ program
     .description(config.description ?? '')
     .version(config.version ?? '')
     .arguments('<version-number>')
-    .option('--sloppy', 'Skip ensuring clean local git state.')
-    .option('--trace', 'Show stack traces for any error.')
+    .option('--sloppy', 'skip ensuring clean local git state')
+    .option('--trace', 'show stack traces for any error')
     .action(async (versionNumber: string, options: Record<string, unknown>) => {
         // eslint-disable-next-line node/no-process-env
         const { GH_TOKEN } = process.env;
