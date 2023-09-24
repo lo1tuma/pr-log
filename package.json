@@ -45,7 +45,7 @@
         "@typescript-eslint/parser": "^6.7.2",
         "ava": "5.3.1",
         "c8": "^8.0.1",
-        "eslint": "8.49.0",
+        "eslint": "8.50.0",
         "eslint-config-joyn": "2.5.0",
         "eslint-plugin-array-func": "4.0.0",
         "eslint-plugin-ava": "14.0.0",
