@@ -137,9 +137,7 @@ test('getMergeCommitLogs() executes "git log" with the correct options', async (
     await runner.getMergeCommitLogs('foo');
 
     t.is(execute.callCount, 1);
-    t.deepEqual(execute.firstCall.args, [
-        'git log --no-color --pretty=format:"%s__||__%b##$$@@$$##" --merges foo..HEAD'
-    ]);
+    t.deepEqual(execute.firstCall.args, ['git log --no-color --pretty=format:%s__||__%b##$$@@$$## --merges foo..HEAD']);
 });
 
 test('getMergeCommitLogs() returns the parsed command output', async (t) => {

@@ -88,7 +88,7 @@ export function createGitCommandRunner(dependencies: GitCommandRunnerDependencie
             const fields = [subjectPlaceholder, bodyPlaceholder];
             const format = `${fields.join(fieldSeperator)}${lineSeperator}`;
 
-            const result = await execute(`git log --no-color --pretty=format:"${format}" --merges ${from}..HEAD`);
+            const result = await execute(`git log --no-color --pretty=format:${format} --merges ${from}..HEAD`);
 
             const logs = splitLines(result.stdout, lineSeperator);
             return logs.map((log) => {
