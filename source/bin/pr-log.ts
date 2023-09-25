@@ -22,12 +22,15 @@ async function readJson(filePath: string): Promise<unknown> {
 const prLogPackageJsonURL = new URL('../../../../package.json', import.meta.url);
 const config = (await readJson(prLogPackageJsonURL.pathname)) as Record<string, string>;
 
+// eslint-disable-next-line node/no-process-env
+const { GH_TOKEN } = process.env;
+const githubClient = new Octokit({ auth: GH_TOKEN });
+
 let isTracingEnabled = false;
 
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
 const gitCommandRunner = createGitCommandRunner({ execute: execaCommand });
 const findRemoteAlias = findRemoteAliasFactory({ gitCommandRunner });
-const githubClient = new Octokit();
 const getMergedPullRequests = getMergedPullRequestsFactory({
     githubClient,
     gitCommandRunner,
@@ -44,13 +47,10 @@ program
     .option('--sloppy', 'skip ensuring clean local git state')
     .option('--trace', 'show stack traces for any error')
     .action(async (versionNumber: string, options: Record<string, unknown>) => {
-        // eslint-disable-next-line node/no-process-env
-        const { GH_TOKEN } = process.env;
-
         const runOptions: RunOptions = { sloppy: options.sloppy === true, changelogPath };
         isTracingEnabled = options.trace === true;
         if (GH_TOKEN) {
-            await githubClient.auth({ type: 'token', token: GH_TOKEN });
+            await githubClient.auth();
         }
         const packageInfo = (await readJson(path.join(process.cwd(), 'package.json'))) as Record<string, unknown>;
         const dependencies = {
