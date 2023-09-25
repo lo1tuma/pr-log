@@ -80,7 +80,7 @@ test('does not throw if the repository is dirty', async (t) => {
     await cli.run('1.0.0', { sloppy: true, changelogPath: '/foo/CHANGELOG.md' });
 
     t.is(prependFile.callCount, 1);
-    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'sloppy changelog']);
+    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'sloppy changelog\n\n']);
 });
 
 test('uses custom labels if they are provided in package.json', async (t) => {
@@ -137,11 +137,11 @@ test('reports the generated changelog', async (t) => {
     t.is(createChangelog.firstCall.args[0], '1.0.0');
 
     t.is(prependFile.callCount, 1);
-    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'generated changelog']);
+    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'generated changelog\n\n']);
 });
 
 test('strips trailing empty lines from the generated changelog', async (t) => {
-    const createChangelog = stub().returns('generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n');
+    const createChangelog = stub().returns('generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n\n\n\n');
     const prependFile = stub().resolves();
 
     const cli = createCli({ createChangelog, prependFile: prependFile as unknown as typeof _prependFile });
@@ -150,6 +150,6 @@ test('strips trailing empty lines from the generated changelog', async (t) => {
 
     t.deepEqual(prependFile.firstCall.args, [
         '/foo/CHANGELOG.md',
-        'generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n'
+        'generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n'
     ]);
 });

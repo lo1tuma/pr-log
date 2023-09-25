@@ -87,7 +87,7 @@ export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner 
             validateVersionNumber(newVersionNumber);
 
             const changelog = await generateChangelog(options, githubRepo, validLabels, newVersionNumber);
-            await prependFile(options.changelogPath, changelog);
+            await prependFile(options.changelogPath, `${changelog.trim()}\n\n`);
         }
     };
 }
