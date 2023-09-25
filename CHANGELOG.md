@@ -1,3 +1,57 @@
+## 5.0.0 (September 25, 2023)
+
+### Breaking Changes
+
+* Rewrite codebase to TypeScript (drop nodejs support for versions < 20) ([#298](https://github.com/lo1tuma/pr-log/pull/298))
+* Drop support for node < 18 ([#275](https://github.com/lo1tuma/pr-log/pull/275))
+* Replace moment.js by date-fns ([#239](https://github.com/lo1tuma/pr-log/pull/239))
+* Drop support for node v10 ([#238](https://github.com/lo1tuma/pr-log/pull/238))
+
+### Bug Fixes
+
+* Ensure there is always an empty line between the existing content and the new content in CHANGELOG.md ([#308](https://github.com/lo1tuma/pr-log/pull/308))
+* Fix parsing of git commit log messages ([#307](https://github.com/lo1tuma/pr-log/pull/307))
+* Fix token authentication ([#306](https://github.com/lo1tuma/pr-log/pull/306))
+* Remove quotes from git log format ([#305](https://github.com/lo1tuma/pr-log/pull/305))
+
+### Documentation
+
+* Remove david-dm badge from README.md ([#277](https://github.com/lo1tuma/pr-log/pull/277))
+
+### Dependency Upgrades
+
+* ⬆️ Update dependency @types/node to v20.6.5 ([#301](https://github.com/lo1tuma/pr-log/pull/301))
+* ⬆️ Update dependency eslint to v8.50.0 ([#283](https://github.com/lo1tuma/pr-log/pull/283))
+* Update all dependencies ([#273](https://github.com/lo1tuma/pr-log/pull/273))
+* ⬆️ Update dependency ava to v3 ([#222](https://github.com/lo1tuma/pr-log/pull/222))
+* ⬆️ Update dependency nyc to v15 ([#220](https://github.com/lo1tuma/pr-log/pull/220))
+* ⬆️ Update dependency babel-plugin-istanbul to v6 ([#219](https://github.com/lo1tuma/pr-log/pull/219))
+* ⬆️ Update dependency git-promise to v1 ([#228](https://github.com/lo1tuma/pr-log/pull/228))
+* ⬆️ Update dependency sinon to v9 ([#230](https://github.com/lo1tuma/pr-log/pull/230))
+* ⬆️ Update dependency semver to v7 ([#216](https://github.com/lo1tuma/pr-log/pull/216))
+* ⬆️ Update dependency commander to v6 ([#234](https://github.com/lo1tuma/pr-log/pull/234))
+* ⬆️ Update dependency moment to v2.29.0 ([#229](https://github.com/lo1tuma/pr-log/pull/229))
+* ⬆️ Update dependency ramda to v0.27.1 ([#224](https://github.com/lo1tuma/pr-log/pull/224))
+* ⬆️ Update dependency eslint-plugin-ava to v11 ([#237](https://github.com/lo1tuma/pr-log/pull/237))
+* ⬆️ Update dependency eslint to v7 ([#231](https://github.com/lo1tuma/pr-log/pull/231))
+* ⬆️ Update dependency @octokit/rest to v18 ([#232](https://github.com/lo1tuma/pr-log/pull/232))
+* ⬆️ Update dependency git-url-parse to v11.2.0 ([#233](https://github.com/lo1tuma/pr-log/pull/233))
+* ⬆️ Update babel monorepo ([#214](https://github.com/lo1tuma/pr-log/pull/214))
+
+### Code Refactoring
+
+* Refactoring: introduce GitCommandRunner ([#300](https://github.com/lo1tuma/pr-log/pull/300))
+* Use execaCommand instead of template string tag ([#299](https://github.com/lo1tuma/pr-log/pull/299))
+* ⬆️ Pin dependencies ([#242](https://github.com/lo1tuma/pr-log/pull/242))
+* Use eslint-config-joyn ([#241](https://github.com/lo1tuma/pr-log/pull/241))
+* ⬆️ Pin dependency date-fns to 2.16.1 ([#240](https://github.com/lo1tuma/pr-log/pull/240))
+
+### Build-Related
+
+* ⬆️ Update actions/setup-node action to v3 ([#281](https://github.com/lo1tuma/pr-log/pull/281))
+* Add node v18 to CI environments ([#274](https://github.com/lo1tuma/pr-log/pull/274))
+* Use github actions instead  of travis ci ([#236](https://github.com/lo1tuma/pr-log/pull/236))
+
 ## 4.0.0 (December 7, 2019)
 
 ### Breaking Changes
