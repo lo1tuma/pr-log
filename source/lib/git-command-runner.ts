@@ -33,8 +33,8 @@ function isNonEmptyString(value: string): boolean {
     return value.length > 0;
 }
 
-function splitLines(value: string, lineSeperatorPrefix = ''): readonly string[] {
-    return splitByString(value, `${lineSeperatorPrefix}\n`).map(trim).filter(isNonEmptyString);
+function splitLines(value: string, lineSeparator = '\n'): readonly string[] {
+    return splitByString(value, lineSeparator).map(trim).filter(isNonEmptyString);
 }
 
 export function createGitCommandRunner(dependencies: GitCommandRunnerDependencies): GitCommandRunner {

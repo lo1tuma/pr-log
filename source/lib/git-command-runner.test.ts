@@ -164,6 +164,18 @@ test('getMergeCommitLogs() parses multi-line message bodies correctly', async (t
     ]);
 });
 
+test('getMergeCommitLogs() parses multi-line message bodies correctly when it doesn’t end with a line break', async (t) => {
+    const execute = fake.resolves({ stdout: 'foo__||__bar\nbaz\nqux##$$@@$$##\nbaz__||__qux##$$@@$$##' });
+    const runner = gitCommandRunnerFactory({ execute });
+
+    const result = await runner.getMergeCommitLogs('');
+
+    t.deepEqual(result, [
+        { subject: 'foo', body: 'bar\nbaz\nqux' },
+        { subject: 'baz', body: 'qux' }
+    ]);
+});
+
 test('getMergeCommitLogs() falls back to undefined when the body couldn’t be extracted', async (t) => {
     const execute = fake.resolves({ stdout: 'foo##$$@@$$##\n\n\n' });
     const runner = gitCommandRunnerFactory({ execute });
