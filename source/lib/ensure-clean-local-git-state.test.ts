@@ -1,58 +1,77 @@
 import test from 'ava';
-import { stub } from 'sinon';
+import { fake, SinonSpy } from 'sinon';
 import type { EnsureCleanLocalGitState, EnsureCleanLocalGitStateDependencies } from './ensure-clean-local-git-state.js';
 import { ensureCleanLocalGitStateFactory } from './ensure-clean-local-git-state.js';
 
 const githubRepo = 'foo/bar';
 
-function factory({ status = '', revParse = 'master', revList = '' } = {}, execute = stub()): EnsureCleanLocalGitState {
-    const findRemoteAlias = stub();
-    const remoteAlias = 'origin';
-    const dependencies = { execute, findRemoteAlias } as unknown as EnsureCleanLocalGitStateDependencies;
-
-    execute.resolves({ stdout: '' });
-    execute.withArgs('git status -s').resolves({ stdout: status });
-    execute.withArgs('git rev-parse --abbrev-ref HEAD').resolves({ stdout: revParse });
-    execute.withArgs('git rev-list --left-right master...origin/master').resolves({ stdout: revList });
-
-    findRemoteAlias.resolves(remoteAlias);
-
-    return ensureCleanLocalGitStateFactory(dependencies);
+interface Overrides {
+    getShortStatus?: SinonSpy;
+    getCurrentBranchName?: SinonSpy;
+    getSymmetricDifferencesBetweenBranches?: SinonSpy;
+    fetchRemote?: SinonSpy;
+    findRemoteAlias?: SinonSpy;
 }
 
-test('rejects if `git status -s` is not empty', async (t) => {
-    const ensureCleanLocalGitState = factory({ status: 'M foobar\n' });
+function factory(overrides: Overrides = {}): EnsureCleanLocalGitState {
+    const {
+        getShortStatus = fake.resolves(''),
+        getCurrentBranchName = fake.resolves('master'),
+        getSymmetricDifferencesBetweenBranches = fake.resolves([]),
+        fetchRemote = fake.resolves(undefined),
+        findRemoteAlias = fake.resolves('origin')
+    } = overrides;
+    const fakeDependencies = {
+        gitCommandRunner: {
+            getShortStatus,
+            getCurrentBranchName,
+            getSymmetricDifferencesBetweenBranches,
+            fetchRemote
+        },
+        findRemoteAlias
+    } as unknown as EnsureCleanLocalGitStateDependencies;
+
+    return ensureCleanLocalGitStateFactory(fakeDependencies);
+}
+
+test('rejects if git status is not empty', async (t) => {
+    const ensureCleanLocalGitState = factory({ getShortStatus: fake.resolves('M foobar') });
 
     await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: 'Local copy is not clean' });
 });
 
 test('rejects if current branch is not master', async (t) => {
-    const ensureCleanLocalGitState = factory({ revParse: 'feature-foo\n' });
+    const ensureCleanLocalGitState = factory({ getCurrentBranchName: fake.resolves('feature-foo') });
 
     await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: 'Not on master branch' });
 });
 
 test('rejects if the local branch is ahead of the remote', async (t) => {
-    const ensureCleanLocalGitState = factory({ revList: '<commit-sha1\n' });
+    const ensureCleanLocalGitState = factory({
+        getSymmetricDifferencesBetweenBranches: fake.resolves(['<commit-sha1'])
+    });
     const expectedMessage = 'Local git master branch is 1 commits ahead and 0 commits behind of origin/master';
 
     await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: expectedMessage });
 });
 
 test('rejects if the local branch is behind the remote', async (t) => {
-    const ensureCleanLocalGitState = factory({ revList: '>commit-sha1\n' });
+    const ensureCleanLocalGitState = factory({
+        getSymmetricDifferencesBetweenBranches: fake.resolves(['>commit-sha1'])
+    });
     const expectedMessage = 'Local git master branch is 0 commits ahead and 1 commits behind of origin/master';
 
     await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: expectedMessage });
 });
 
 test('fetches the remote repository', async (t) => {
-    const execute = stub();
-    const ensureCleanLocalGitState = factory({}, execute);
+    const fetchRemote = fake.resolves(undefined);
+    const ensureCleanLocalGitState = factory({ fetchRemote });
 
     await ensureCleanLocalGitState(githubRepo);
 
-    t.true(execute.calledWithExactly('git fetch origin'));
+    t.is(fetchRemote.callCount, 1);
+    t.deepEqual(fetchRemote.firstCall.args, ['origin']);
 });
 
 test('fulfills if the local git state is clean', async (t) => {

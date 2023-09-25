@@ -1,7 +1,7 @@
-import { execaCommand } from 'execa';
 import semver from 'semver';
 import type { Octokit } from '@octokit/rest';
 import type { GetPullRequestLabel } from './get-pull-request-label.js';
+import { GitCommandRunner } from './git-command-runner.js';
 
 export interface PullRequest {
     readonly id: number;
@@ -13,7 +13,7 @@ export interface PullRequestWithLabel extends PullRequest {
 }
 
 export interface GetMergedPullRequestsDependencies {
-    readonly execute: typeof execaCommand;
+    readonly gitCommandRunner: GitCommandRunner;
     readonly getPullRequestLabel: GetPullRequestLabel;
     readonly githubClient: Octokit;
 }
@@ -23,16 +23,11 @@ export type GetMergedPullRequests = (
     validLabels: ReadonlyMap<string, string>
 ) => Promise<readonly PullRequestWithLabel[]>;
 
-function isNotNull<T>(value: T): value is NonNullable<T> {
-    return value !== null;
-}
-
 export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequestsDependencies): GetMergedPullRequests {
-    const { execute, getPullRequestLabel } = dependencies;
+    const { gitCommandRunner, getPullRequestLabel } = dependencies;
 
     async function getLatestVersionTag(): Promise<string> {
-        const result = await execute('git tag --list');
-        const tags = result.stdout.split('\n');
+        const tags = await gitCommandRunner.listTags();
         const versionTags = tags.filter((tag: string) => semver.valid(tag) && !semver.prerelease(tag));
         const orderedVersionTags = versionTags.sort(semver.compare);
         const latestTag = orderedVersionTags.at(-1);
@@ -45,19 +40,20 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
     }
 
     async function getPullRequests(fromTag: string): Promise<readonly PullRequest[]> {
-        const result = await execute(`git log --no-color --pretty=format:"%s (%b)" --merges ${fromTag}..HEAD`);
-        const mergeCommits = result.stdout.replaceAll(/[\n\r]+\)/g, ')').split('\n');
+        const mergeCommits = await gitCommandRunner.getMergeCommitLogs(fromTag);
 
-        return mergeCommits
-            .map((commit: string) => /^Merge pull request #(?<id>\d+) from .*? \((?<title>.*)\)$/u.exec(commit))
-            .filter(isNotNull)
-            .map((matches) => {
-                if (matches.groups?.id === undefined || matches.groups.title === undefined) {
-                    throw new TypeError('Failed to extract pull request information');
-                }
+        return mergeCommits.map((log) => {
+            const matches = /^Merge pull request #(?<id>\d+) from .*?$/u.exec(log.subject);
+            if (matches?.groups?.id === undefined) {
+                throw new TypeError('Failed to extract pull request id from merge commit log');
+            }
 
-                return { id: Number.parseInt(matches.groups.id, 10), title: matches.groups.title };
-            });
+            if (log.body === undefined) {
+                throw new TypeError('Failed to extract pull request title from merge commit log');
+            }
+
+            return { id: Number.parseInt(matches.groups.id, 10), title: log.body };
+        });
     }
 
     async function extendWithLabel(

@@ -6,34 +6,43 @@ import { createCommand } from 'commander';
 import { Octokit } from '@octokit/rest';
 import prependFile from 'prepend-file';
 import { execaCommand } from 'execa';
-import config from '../../package.json';
 import { createCliRunner, RunOptions } from '../lib/cli.js';
 import { ensureCleanLocalGitStateFactory } from '../lib/ensure-clean-local-git-state.js';
 import { getMergedPullRequestsFactory } from '../lib/get-merged-pull-requests.js';
 import { createChangelogFactory } from '../lib/create-changelog.js';
 import { findRemoteAliasFactory } from '../lib/find-remote-alias.js';
 import { getPullRequestLabel } from '../lib/get-pull-request-label.js';
+import { createGitCommandRunner } from '../lib/git-command-runner.js';
+
+async function readJson(filePath: string): Promise<unknown> {
+    const fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
+    return JSON.parse(fileContent);
+}
+
+const prLogPackageJsonURL = new URL('../../../../package.json', import.meta.url);
+const config = (await readJson(prLogPackageJsonURL.pathname)) as Record<string, string>;
 
 let isTracingEnabled = false;
 
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
-const findRemoteAlias = findRemoteAliasFactory({ execute: execaCommand });
+const gitCommandRunner = createGitCommandRunner({ execute: execaCommand });
+const findRemoteAlias = findRemoteAliasFactory({ gitCommandRunner });
 const githubClient = new Octokit();
 const getMergedPullRequests = getMergedPullRequestsFactory({
     githubClient,
-    execute: execaCommand,
+    gitCommandRunner,
     getPullRequestLabel
 });
 const getCurrentDate = (): Date => new Date();
 
-const program = createCommand(config.name);
+const program = createCommand(config.name ?? '');
 program
     .storeOptionsAsProperties(false)
-    .description(config.description)
-    .version(config.version)
+    .description(config.description ?? '')
+    .version(config.version ?? '')
     .arguments('<version-number>')
-    .option('--sloppy', 'Skip ensuring clean local git state.')
-    .option('--trace', 'Show stack traces for any error.')
+    .option('--sloppy', 'skip ensuring clean local git state')
+    .option('--trace', 'show stack traces for any error')
     .action(async (versionNumber: string, options: Record<string, unknown>) => {
         // eslint-disable-next-line node/no-process-env
         const { GH_TOKEN } = process.env;
@@ -43,13 +52,12 @@ program
         if (GH_TOKEN) {
             await githubClient.auth({ type: 'token', token: GH_TOKEN });
         }
-        const packageInfoAsText = await fs.readFile(path.join(process.cwd(), 'package.json'), { encoding: 'utf8' });
-        const packageInfo = JSON.parse(packageInfoAsText);
+        const packageInfo = (await readJson(path.join(process.cwd(), 'package.json'))) as Record<string, unknown>;
         const dependencies = {
             githubClient,
             prependFile,
             packageInfo,
-            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory({ execute: execaCommand, findRemoteAlias }),
+            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory({ gitCommandRunner, findRemoteAlias }),
             getMergedPullRequests,
             createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
         };

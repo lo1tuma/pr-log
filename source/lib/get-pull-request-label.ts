@@ -1,4 +1,5 @@
 import type { Octokit } from '@octokit/rest';
+import { splitByString } from './split.js';
 
 interface Dependencies {
     readonly githubClient: Octokit;
@@ -15,11 +16,7 @@ export async function getPullRequestLabel(
     const { githubClient } = dependencies;
     const validLabelNames = Array.from(validLabels.keys());
 
-    const [owner, repo] = githubRepo.split('/');
-
-    if (owner === undefined) {
-        throw new TypeError('Could not find a repository owner');
-    }
+    const [owner, repo] = splitByString(githubRepo, '/');
 
     if (repo === undefined) {
         throw new TypeError('Could not find a repository');

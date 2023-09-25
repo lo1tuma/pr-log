@@ -19,6 +19,14 @@ function createGithubClient(overrides: Overrides = {}): Octokit {
 const anyRepo = 'any/repo';
 const anyPullRequestId = 123;
 
+test('throws when the given repo doesn’t have a "/"', async (t) => {
+    const githubClient = createGithubClient();
+
+    await t.throwsAsync(getPullRequestLabel('foo', defaultValidLabels, anyPullRequestId, { githubClient }), {
+        message: 'Could not find a repository'
+    });
+});
+
 test('requests the labels for the correct repo and pull request', async (t) => {
     const listLabelsOnIssue = fake.resolves({ data: [{ name: 'bug' }] });
     const githubClient = createGithubClient({ listLabelsOnIssue });

@@ -36,6 +36,30 @@ test('throws if an invalid version number was specified', async (t) => {
     await t.throwsAsync(cli.run('a.b.c', options), { message: 'version-number is invalid' });
 });
 
+test('throws when the repository entry in the given packageInfo is missing', async (t) => {
+    const cli = createCli({ packageInfo: {} });
+
+    await t.throwsAsync(cli.run('', options), { message: 'Repository information missing in package.json' });
+});
+
+test('throws when the repository entry in the given packageInfo is not an object', async (t) => {
+    const cli = createCli({ packageInfo: { repository: 'foo' } });
+
+    await t.throwsAsync(cli.run('', options), { message: 'Repository information missing in package.json' });
+});
+
+test('throws when the repository.url entry in the given packageInfo is missing', async (t) => {
+    const cli = createCli({ packageInfo: { repository: {} } });
+
+    await t.throwsAsync(cli.run('', options), { message: 'Repository url is not a string in package.json' });
+});
+
+test('throws when the repository.url entry in the given packageInfo is not a string', async (t) => {
+    const cli = createCli({ packageInfo: { repository: { url: 42 } } });
+
+    await t.throwsAsync(cli.run('', options), { message: 'Repository url is not a string in package.json' });
+});
+
 test('throws if the repository is dirty', async (t) => {
     const ensureCleanLocalGitState = stub().rejects(new Error('Local copy is not clean'));
     const cli = createCli({ ensureCleanLocalGitState });
