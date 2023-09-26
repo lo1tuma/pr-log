@@ -1,5 +1,5 @@
 import parseGitUrl from 'git-url-parse';
-import { GitCommandRunner } from './git-command-runner.js';
+import type { GitCommandRunner } from './git-command-runner.js';
 
 function isSameGitUrl(gitUrlA: string, gitUrlB: string): boolean {
     const parsedUrlA = parseGitUrl(gitUrlA);
@@ -14,9 +14,9 @@ function getGitUrl(githubRepo: string): string {
     return `git://github.com/${githubRepo}.git`;
 }
 
-export interface FindRemoteAliasDependencies {
+export type FindRemoteAliasDependencies = {
     readonly gitCommandRunner: GitCommandRunner;
-}
+};
 
 export type FindRemoteAlias = (githubRepo: string) => Promise<string>;
 
@@ -28,11 +28,11 @@ export function findRemoteAliasFactory(dependencies: FindRemoteAliasDependencies
 
         const remotes = await gitCommandRunner.getRemoteAliases();
         const matchedRemote = remotes.find((remote) => {
-            return remote.url && isSameGitUrl(gitRemote, remote.url);
+            return isSameGitUrl(gitRemote, remote.url);
         });
 
-        if (!matchedRemote) {
-            throw new Error(`This local git repository doesn’t have a remote pointing to ${gitRemote}`);
+        if (matchedRemote === undefined) {
+            throw new TypeError(`This local git repository doesn’t have a remote pointing to ${gitRemote}`);
         }
 
         return matchedRemote.alias;

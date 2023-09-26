@@ -1,20 +1,20 @@
 import test from 'ava';
-import { fake, SinonSpy } from 'sinon';
+import { fake, type SinonSpy } from 'sinon';
 import { defaultValidLabels } from './valid-labels.js';
 import {
     getMergedPullRequestsFactory,
-    GetMergedPullRequests,
-    GetMergedPullRequestsDependencies
+    type GetMergedPullRequests,
+    type GetMergedPullRequestsDependencies
 } from './get-merged-pull-requests.js';
 
 const anyRepo = 'any/repo';
 const latestVersion = '1.2.3';
 
-interface Overrides {
-    listTags?: SinonSpy;
-    getMergeCommitLogs?: SinonSpy;
-    getPullRequestLabel?: SinonSpy;
-}
+type Overrides = {
+    readonly listTags?: SinonSpy;
+    readonly getMergeCommitLogs?: SinonSpy;
+    readonly getPullRequestLabel?: SinonSpy;
+};
 
 function factory(overrides: Overrides = {}): GetMergedPullRequests {
     const {
@@ -111,10 +111,8 @@ test('throws when the the commit log doesn’t have a body', async (t) => {
 });
 
 test('extracts id, title and label for merged pull requests', async (t) => {
-    const expectedPullRequests = [
-        { id: 1, title: 'pr-1 message', label: 'bug' },
-        { id: 2, title: 'pr-2 message', label: 'bug' }
-    ];
+    const firstExpectedPullRequest = { id: 1, title: 'pr-1 message', label: 'bug' };
+    const secondExpectedPullRequest = { id: 2, title: 'pr-2 message', label: 'bug' };
     const getPullRequestLabel = fake.resolves('bug');
     const getMergeCommitLogs = fake.resolves([
         {
@@ -127,9 +125,10 @@ test('extracts id, title and label for merged pull requests', async (t) => {
 
     const pullRequests = await getMergedPullRequests(anyRepo, defaultValidLabels);
 
-    t.is(getPullRequestLabel.callCount, 2);
-    t.is(getPullRequestLabel.firstCall.args[2], 1);
-    t.is(getPullRequestLabel.secondCall.args[2], 2);
+    t.like(getPullRequestLabel.args, [
+        ['any/repo', defaultValidLabels, firstExpectedPullRequest.id],
+        ['any/repo', defaultValidLabels, secondExpectedPullRequest.id]
+    ]);
 
-    t.deepEqual(pullRequests, expectedPullRequests);
+    t.deepEqual(pullRequests, [firstExpectedPullRequest, secondExpectedPullRequest]);
 });

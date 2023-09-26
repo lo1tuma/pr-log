@@ -1,14 +1,15 @@
 import test from 'ava';
-import { fake, SinonSpy } from 'sinon';
+import { fake, type SinonSpy } from 'sinon';
+import { oneLine } from 'common-tags';
 import type { Octokit } from '@octokit/rest';
 import { getPullRequestLabel } from './get-pull-request-label.js';
 import { defaultValidLabels } from './valid-labels.js';
 
-interface Overrides {
-    listLabelsOnIssue?: SinonSpy;
-}
+type Overrides = {
+    readonly listLabelsOnIssue?: SinonSpy;
+};
 
-function createGithubClient(overrides: Overrides = {}): Octokit {
+function createGithubClient(overrides: Overrides = {}): Readonly<Octokit> {
     const { listLabelsOnIssue = fake.resolves({ data: [] }) } = overrides;
 
     return {
@@ -59,8 +60,8 @@ test('uses custom labels when provided', async (t) => {
 test('rejects if the pull request doesn’t have one valid label', async (t) => {
     const githubClient = createGithubClient();
 
-    const expectedErrorMessage =
-        'Pull Request #123 has no label of breaking, bug, feature, enhancement, documentation, upgrade, refactor, build';
+    const expectedErrorMessage = oneLine`Pull Request #123 has no label of breaking, bug,
+        feature, enhancement, documentation, upgrade, refactor, build`;
 
     await t.throwsAsync(getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }), {
         message: expectedErrorMessage
@@ -70,8 +71,8 @@ test('rejects if the pull request doesn’t have one valid label', async (t) => 
 test('rejects if the pull request has more than one valid label', async (t) => {
     const listLabelsOnIssue = fake.resolves({ data: [{ name: 'bug' }, { name: 'documentation' }] });
     const githubClient = createGithubClient({ listLabelsOnIssue });
-    const expectedErrorMessage =
-        'Pull Request #123 has multiple labels of breaking, bug, feature, enhancement, documentation, upgrade, refactor, build';
+    const expectedErrorMessage = oneLine`Pull Request #123 has multiple labels of breaking,
+        bug, feature, enhancement, documentation, upgrade, refactor, build`;
 
     await t.throwsAsync(getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }), {
         message: expectedErrorMessage

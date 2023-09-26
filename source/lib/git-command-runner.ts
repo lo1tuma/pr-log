@@ -1,17 +1,17 @@
-import { execaCommand } from 'execa';
+import type { execaCommand } from 'execa';
 import { splitByString, splitByPattern } from './split.js';
 
-export interface RemoteAlias {
-    alias: string;
-    url: string;
-}
+export type RemoteAlias = {
+    readonly alias: string;
+    readonly url: string;
+};
 
-interface MergeCommitLogEntry {
-    subject: string;
-    body: string | undefined;
-}
+type MergeCommitLogEntry = {
+    readonly subject: string;
+    readonly body: string | undefined;
+};
 
-export interface GitCommandRunner {
+export type GitCommandRunner = {
     getShortStatus(): Promise<string>;
     getCurrentBranchName(): Promise<string>;
     fetchRemote(remoteAlias: string): Promise<void>;
@@ -19,11 +19,11 @@ export interface GitCommandRunner {
     getRemoteAliases(): Promise<readonly RemoteAlias[]>;
     listTags(): Promise<readonly string[]>;
     getMergeCommitLogs(from: string): Promise<readonly MergeCommitLogEntry[]>;
-}
+};
 
-export interface GitCommandRunnerDependencies {
+export type GitCommandRunnerDependencies = {
     readonly execute: typeof execaCommand;
-}
+};
 
 function trim(value: string): string {
     return value.trim();
@@ -35,6 +35,17 @@ function isNonEmptyString(value: string): boolean {
 
 function splitLines(value: string, lineSeparator = '\n'): readonly string[] {
     return splitByString(value, lineSeparator).map(trim).filter(isNonEmptyString);
+}
+
+const lineSeparator = '##$$@@$$##';
+const fieldSeparator = '__||__';
+
+function createParsableGitLogFormat(): string {
+    const subjectPlaceholder = '%s';
+    const bodyPlaceholder = '%b';
+    const fields = [subjectPlaceholder, bodyPlaceholder];
+
+    return `${fields.join(fieldSeparator)}${lineSeparator}`;
 }
 
 export function createGitCommandRunner(dependencies: GitCommandRunnerDependencies): GitCommandRunner {
@@ -81,18 +92,13 @@ export function createGitCommandRunner(dependencies: GitCommandRunnerDependencie
         },
 
         async getMergeCommitLogs(from) {
-            const subjectPlaceholder = '%s';
-            const bodyPlaceholder = '%b';
-            const fieldSeperator = '__||__';
-            const lineSeperator = '##$$@@$$##';
-            const fields = [subjectPlaceholder, bodyPlaceholder];
-            const format = `${fields.join(fieldSeperator)}${lineSeperator}`;
+            const result = await execute(
+                `git log --no-color --pretty=format:${createParsableGitLogFormat()} --merges ${from}..HEAD`
+            );
 
-            const result = await execute(`git log --no-color --pretty=format:${format} --merges ${from}..HEAD`);
-
-            const logs = splitLines(result.stdout, lineSeperator);
+            const logs = splitLines(result.stdout, lineSeparator);
             return logs.map((log) => {
-                const parts = splitByString(log, fieldSeperator);
+                const parts = splitByString(log, fieldSeparator);
                 const [subject, body] = parts;
 
                 return { subject, body: body === '' ? undefined : body };

@@ -1,10 +1,14 @@
 import test from 'ava';
-import { fake, SinonSpy } from 'sinon';
-import { createGitCommandRunner, GitCommandRunner, GitCommandRunnerDependencies } from './git-command-runner.js';
+import { fake, type SinonSpy } from 'sinon';
+import {
+    createGitCommandRunner,
+    type GitCommandRunner,
+    type GitCommandRunnerDependencies
+} from './git-command-runner.js';
 
-interface Overrides {
-    execute?: SinonSpy;
-}
+type Overrides = {
+    readonly execute?: SinonSpy;
+};
 
 function gitCommandRunnerFactory(overrides: Overrides = {}): GitCommandRunner {
     const { execute = fake.resolves({ stdout: '' }) } = overrides;
@@ -164,7 +168,7 @@ test('getMergeCommitLogs() parses multi-line message bodies correctly', async (t
     ]);
 });
 
-test('getMergeCommitLogs() parses multi-line message bodies correctly when it doesn’t end with a line break', async (t) => {
+test('getMergeCommitLogs() parses multi-line bodies correctly when it doesn’t end with a line break', async (t) => {
     const execute = fake.resolves({ stdout: 'foo__||__bar\nbaz\nqux##$$@@$$##\nbaz__||__qux##$$@@$$##' });
     const runner = gitCommandRunnerFactory({ execute });
 

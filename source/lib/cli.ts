@@ -1,10 +1,10 @@
 import semver from 'semver';
-import _prependFile from 'prepend-file';
-import { CreateChangelog } from './create-changelog.js';
+import type _prependFile from 'prepend-file';
+import type { CreateChangelog } from './create-changelog.js';
 import { getGithubRepo } from './get-github-repo.js';
 import { defaultValidLabels } from './valid-labels.js';
-import { GetMergedPullRequests } from './get-merged-pull-requests.js';
-import { EnsureCleanLocalGitState } from './ensure-clean-local-git-state.js';
+import type { GetMergedPullRequests } from './get-merged-pull-requests.js';
+import type { EnsureCleanLocalGitState } from './ensure-clean-local-git-state.js';
 
 function stripTrailingEmptyLine(text: string): string {
     if (text.endsWith('\n\n')) {
@@ -27,31 +27,31 @@ function getValidLabels(packageInfo: Record<string, unknown>): ReadonlyMap<strin
     return defaultValidLabels;
 }
 
-function validateVersionNumber(versionNumber?: string): void {
-    if (!versionNumber) {
-        throw new Error('version-number not specified');
+function validateVersionNumber(versionNumber: string): void {
+    if (versionNumber.length === 0) {
+        throw new TypeError('version-number not specified');
     }
     if (semver.valid(versionNumber) === null) {
         throw new Error('version-number is invalid');
     }
 }
 
-export interface RunOptions {
+export type RunOptions = {
     readonly changelogPath: string;
     readonly sloppy: boolean;
-}
+};
 
-export interface CliRunnerDependencies {
+export type CliRunnerDependencies = {
     readonly ensureCleanLocalGitState: EnsureCleanLocalGitState;
     readonly getMergedPullRequests: GetMergedPullRequests;
     readonly createChangelog: CreateChangelog;
     readonly packageInfo: Record<string, unknown>;
     readonly prependFile: typeof _prependFile;
-}
+};
 
-export interface CliRunner {
+export type CliRunner = {
     run(newVersionNumber: string, options: RunOptions): Promise<void>;
-}
+};
 
 export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner {
     const { ensureCleanLocalGitState, getMergedPullRequests, createChangelog, packageInfo, prependFile } = dependencies;

@@ -43,7 +43,7 @@ test('splitByPattern() throws when an empty pattern as literal is given', (t) =>
 test('splitByPattern() throws when an empty pattern is given', (t) => {
     t.throws(
         () => {
-            // eslint-disable-next-line prefer-regex-literals
+            // eslint-disable-next-line prefer-regex-literals -- we want to test if the empty regex is detected correctly using the constructor
             splitByPattern('foo', new RegExp(''));
         },
         { message: 'The given regex pattern was empty and can’t be used to split a string value' }
