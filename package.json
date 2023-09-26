@@ -40,7 +40,7 @@
         "@types/node": "20.7.0",
         "@types/parse-github-repo-url": "1.4.0",
         "@types/semver": "7.5.2",
-        "@types/sinon": "10.0.16",
+        "@types/sinon": "10.0.17",
         "@typescript-eslint/eslint-plugin": "6.7.3",
         "@typescript-eslint/parser": "6.7.3",
         "ava": "5.3.1",
