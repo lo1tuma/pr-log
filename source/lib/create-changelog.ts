@@ -1,6 +1,6 @@
 import { format as formatDate } from 'date-fns';
 import enLocale from 'date-fns/locale/en-US/index.js';
-import { PullRequest, PullRequestWithLabel } from './get-merged-pull-requests.js';
+import type { PullRequest, PullRequestWithLabel } from './get-merged-pull-requests.js';
 
 function formatLinkToPullRequest(pullRequestId: number, repo: string): string {
     return `[#${pullRequestId}](https://github.com/${repo}/pull/${pullRequestId})`;
@@ -11,7 +11,11 @@ function formatPullRequest(pullRequest: PullRequest, repo: string): string {
 }
 
 function formatListOfPullRequests(pullRequests: readonly PullRequest[], repo: string): string {
-    return pullRequests.map((pr) => formatPullRequest(pr, repo)).join('');
+    return pullRequests
+        .map((pr) => {
+            return formatPullRequest(pr, repo);
+        })
+        .join('');
 }
 
 function formatSection(displayLabel: string, pullRequests: readonly PullRequest[], repo: string): string {
@@ -63,10 +67,10 @@ function groupByLabel(pullRequests: readonly PullRequestWithLabel[]): Record<str
     }, {});
 }
 
-interface Dependencies {
+type Dependencies = {
     readonly packageInfo: PackageInfo;
-    getCurrentDate(): Date;
-}
+    getCurrentDate(): Readonly<Date>;
+};
 
 const defaultDateFormat = 'MMMM d, yyyy';
 
@@ -84,7 +88,7 @@ export function createChangelogFactory(dependencies: Dependencies): CreateChange
         for (const [label, displayLabel] of validLabels) {
             const pullRequests = groupedPullRequests[label];
 
-            if (pullRequests) {
+            if (pullRequests !== undefined) {
                 changelog += formatSection(displayLabel, pullRequests, repo);
             }
         }

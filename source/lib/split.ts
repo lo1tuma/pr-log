@@ -1,6 +1,6 @@
 type NonEmptyArray<T> = readonly [T, ...(readonly T[])];
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- only with inference it is possible to define a non empty string type, but we don’t need the inferred type
 type NonEmptyString<T extends string> = T extends `${infer _Character}${string}` ? T : never;
 
 type SplitReturnValue<T extends string> = T extends NonEmptyString<T> ? NonEmptyArray<string> : readonly string[];

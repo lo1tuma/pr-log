@@ -1,8 +1,7 @@
 import { stub } from 'sinon';
 import test from 'ava';
-import _prependFile from 'prepend-file';
-import type { CliRunner, CliRunnerDependencies } from './cli.js';
-import { createCliRunner } from './cli.js';
+import type _prependFile from 'prepend-file';
+import { createCliRunner, type CliRunner, type CliRunnerDependencies } from './cli.js';
 
 function createCli(dependencies: Partial<CliRunnerDependencies> = {}): CliRunner {
     const {
@@ -110,18 +109,10 @@ test('uses custom labels if they are provided in package.json', async (t) => {
     t.deepEqual(createChangelog.firstCall.args, ['1.0.0', expectedLabels, undefined, 'foo/bar']);
 });
 
-test('reports the generated changelog', async (t) => {
-    const createChangelog = stub().returns('generated changelog');
-    const getMergedPullRequests = stub().resolves();
+test('calls ensureCleanLocalGitState with correct parameters', async (t) => {
     const ensureCleanLocalGitState = stub().resolves();
-    const prependFile = stub().resolves();
 
-    const cli = createCli({
-        createChangelog,
-        getMergedPullRequests,
-        ensureCleanLocalGitState,
-        prependFile: prependFile as unknown as typeof _prependFile
-    });
+    const cli = createCli({ ensureCleanLocalGitState });
 
     const expectedGithubRepo = 'foo/bar';
 
@@ -129,9 +120,31 @@ test('reports the generated changelog', async (t) => {
 
     t.is(ensureCleanLocalGitState.callCount, 1);
     t.deepEqual(ensureCleanLocalGitState.firstCall.args, [expectedGithubRepo]);
+});
+
+test('calls getMergedPullRequests with the correct repo', async (t) => {
+    const getMergedPullRequests = stub().resolves();
+
+    const cli = createCli({ getMergedPullRequests });
+
+    const expectedGithubRepo = 'foo/bar';
+
+    await cli.run('1.0.0', options);
 
     t.is(getMergedPullRequests.callCount, 1);
     t.is(getMergedPullRequests.firstCall.args[0], expectedGithubRepo);
+});
+
+test('reports the generated changelog', async (t) => {
+    const createChangelog = stub().returns('generated changelog');
+    const prependFile = stub().resolves();
+
+    const cli = createCli({
+        createChangelog,
+        prependFile: prependFile as unknown as typeof _prependFile
+    });
+
+    await cli.run('1.0.0', options);
 
     t.is(createChangelog.callCount, 1);
     t.is(createChangelog.firstCall.args[0], '1.0.0');

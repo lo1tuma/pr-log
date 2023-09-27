@@ -1,17 +1,20 @@
 import test from 'ava';
-import { fake, SinonSpy } from 'sinon';
-import type { EnsureCleanLocalGitState, EnsureCleanLocalGitStateDependencies } from './ensure-clean-local-git-state.js';
-import { ensureCleanLocalGitStateFactory } from './ensure-clean-local-git-state.js';
+import { fake, type SinonSpy } from 'sinon';
+import {
+    ensureCleanLocalGitStateFactory,
+    type EnsureCleanLocalGitState,
+    type EnsureCleanLocalGitStateDependencies
+} from './ensure-clean-local-git-state.js';
 
 const githubRepo = 'foo/bar';
 
-interface Overrides {
-    getShortStatus?: SinonSpy;
-    getCurrentBranchName?: SinonSpy;
-    getSymmetricDifferencesBetweenBranches?: SinonSpy;
-    fetchRemote?: SinonSpy;
-    findRemoteAlias?: SinonSpy;
-}
+type Overrides = {
+    readonly getShortStatus?: SinonSpy;
+    readonly getCurrentBranchName?: SinonSpy;
+    readonly getSymmetricDifferencesBetweenBranches?: SinonSpy;
+    readonly fetchRemote?: SinonSpy;
+    readonly findRemoteAlias?: SinonSpy;
+};
 
 function factory(overrides: Overrides = {}): EnsureCleanLocalGitState {
     const {

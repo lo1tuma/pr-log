@@ -3,7 +3,12 @@ import { createChangelogFactory } from './create-changelog.js';
 import { defaultValidLabels } from './valid-labels.js';
 
 test('contains a title with the version number and the formatted date', (t) => {
-    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
+    const createChangelog = createChangelogFactory({
+        getCurrentDate: () => {
+            return new Date(0);
+        },
+        packageInfo: {}
+    });
     const changelog = createChangelog('1.0.0', defaultValidLabels, [], '');
     const expectedTitle = '## 1.0.0 (January 1, 1970)';
 
@@ -12,7 +17,12 @@ test('contains a title with the version number and the formatted date', (t) => {
 
 test('format the date with a custom date format', (t) => {
     const packageInfo = { 'pr-log': { dateFormat: 'dd.MM.yyyy' } };
-    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo });
+    const createChangelog = createChangelogFactory({
+        getCurrentDate: () => {
+            return new Date(0);
+        },
+        packageInfo
+    });
     const changelog = createChangelog('1.0.0', defaultValidLabels, [], '');
     const expectedTitle = '## 1.0.0 (01.01.1970)';
 
@@ -20,7 +30,12 @@ test('format the date with a custom date format', (t) => {
 });
 
 test('creates a formatted changelog', (t) => {
-    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
+    const createChangelog = createChangelogFactory({
+        getCurrentDate: () => {
+            return new Date(0);
+        },
+        packageInfo: {}
+    });
     const mergedPullRequests = [
         {
             id: 1,
@@ -57,7 +72,12 @@ test('creates a formatted changelog', (t) => {
 });
 
 test('uses custom labels when provided', (t) => {
-    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
+    const createChangelog = createChangelogFactory({
+        getCurrentDate: () => {
+            return new Date(0);
+        },
+        packageInfo: {}
+    });
     const customValidLabels = new Map([
         ['core', 'Core Features'],
         ['addons', 'Addons']
@@ -98,7 +118,12 @@ test('uses custom labels when provided', (t) => {
 });
 
 test('uses the same order for the changelog sections as in validLabels', (t) => {
-    const createChangelog = createChangelogFactory({ getCurrentDate: () => new Date(0), packageInfo: {} });
+    const createChangelog = createChangelogFactory({
+        getCurrentDate: () => {
+            return new Date(0);
+        },
+        packageInfo: {}
+    });
     const customValidLabels = new Map([
         ['first', 'First Section'],
         ['second', 'Second Section']
