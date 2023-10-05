@@ -51,7 +51,7 @@
         "c8": "8.0.1",
         "eslint": "8.50.0",
         "prettier": "3.0.3",
-        "sinon": "16.0.0",
+        "sinon": "16.1.0",
         "typescript": "5.2.2"
     },
     "repository": {
