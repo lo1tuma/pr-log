@@ -46,7 +46,7 @@
         "@types/node": "20.8.3",
         "@types/parse-github-repo-url": "1.4.0",
         "@types/semver": "7.5.3",
-        "@types/sinon": "10.0.18",
+        "@types/sinon": "10.0.19",
         "ava": "5.3.1",
         "c8": "8.0.1",
         "eslint": "8.51.0",
