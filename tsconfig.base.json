@@ -21,6 +21,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noUncheckedIndexedAccess": true,
+        "verbatimModuleSyntax": true,
         "outDir": "./target/build"
     }
 }
