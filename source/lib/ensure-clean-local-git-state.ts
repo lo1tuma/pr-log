@@ -2,6 +2,10 @@ import { oneLine } from 'common-tags';
 import type { FindRemoteAlias } from './find-remote-alias.js';
 import type { GitCommandRunner } from './git-command-runner.js';
 
+type EnsureCleanLocalGitStateOptions = {
+    readonly defaultBranch: string;
+};
+
 export type EnsureCleanLocalGitStateDependencies = {
     readonly gitCommandRunner: GitCommandRunner;
     readonly findRemoteAlias: FindRemoteAlias;
@@ -10,7 +14,8 @@ export type EnsureCleanLocalGitStateDependencies = {
 export type EnsureCleanLocalGitState = (githubRepo: string) => Promise<void>;
 
 export function ensureCleanLocalGitStateFactory(
-    dependencies: EnsureCleanLocalGitStateDependencies
+    dependencies: EnsureCleanLocalGitStateDependencies,
+    options: EnsureCleanLocalGitStateOptions
 ): EnsureCleanLocalGitState {
     const { gitCommandRunner, findRemoteAlias } = dependencies;
 
@@ -21,17 +26,20 @@ export function ensureCleanLocalGitStateFactory(
         }
     }
 
-    async function ensureMasterBranch(): Promise<void> {
+    async function ensureDefaultBranch(): Promise<void> {
         const branchName = await gitCommandRunner.getCurrentBranchName();
-        if (branchName !== 'master') {
-            throw new Error('Not on master branch');
+        if (branchName !== options.defaultBranch) {
+            throw new Error(`Not on ${options.defaultBranch} branch`);
         }
     }
 
     async function ensureLocalIsEqualToRemote(remoteAlias: string): Promise<void> {
-        const remoteBranch = `${remoteAlias}/master`;
+        const remoteBranch = `${remoteAlias}/${options.defaultBranch}`;
 
-        const commits = await gitCommandRunner.getSymmetricDifferencesBetweenBranches('master', remoteBranch);
+        const commits = await gitCommandRunner.getSymmetricDifferencesBetweenBranches(
+            options.defaultBranch,
+            remoteBranch
+        );
         let commitsAhead = 0;
         let commitsBehind = 0;
 
@@ -44,7 +52,7 @@ export function ensureCleanLocalGitStateFactory(
         });
 
         if (commitsAhead > 0 || commitsBehind > 0) {
-            const errorMessage = oneLine`Local git master branch is ${commitsAhead} commits ahead
+            const errorMessage = oneLine`Local git ${options.defaultBranch} branch is ${commitsAhead} commits ahead
                 and ${commitsBehind} commits behind of ${remoteBranch}`;
 
             throw new Error(errorMessage);
@@ -53,7 +61,7 @@ export function ensureCleanLocalGitStateFactory(
 
     return async function ensureCleanLocalGitState(githubRepo: string): Promise<void> {
         await ensureCleanLocalCopy();
-        await ensureMasterBranch();
+        await ensureDefaultBranch();
 
         const remoteAlias = await findRemoteAlias(githubRepo);
 
