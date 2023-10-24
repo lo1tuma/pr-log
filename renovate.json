@@ -1,7 +1,7 @@
 {
     "extends": ["config:base"],
     "commitMessagePrefix": "⬆️ ",
-    "labels": ["renovate"],
+    "labels": ["renovate", "upgrade"],
     "rebaseStalePrs": true,
     "lockFileMaintenance": {
         "enabled": true,
