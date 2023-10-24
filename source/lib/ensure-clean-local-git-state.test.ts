@@ -34,7 +34,7 @@ function factory(overrides: Overrides = {}): EnsureCleanLocalGitState {
         findRemoteAlias
     } as unknown as EnsureCleanLocalGitStateDependencies;
 
-    return ensureCleanLocalGitStateFactory(fakeDependencies);
+    return ensureCleanLocalGitStateFactory(fakeDependencies, { defaultBranch: 'master' });
 }
 
 test('rejects if git status is not empty', async (t) => {
@@ -43,7 +43,7 @@ test('rejects if git status is not empty', async (t) => {
     await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: 'Local copy is not clean' });
 });
 
-test('rejects if current branch is not master', async (t) => {
+test('rejects if current branch is not default branch', async (t) => {
     const ensureCleanLocalGitState = factory({ getCurrentBranchName: fake.resolves('feature-foo') });
 
     await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: 'Not on master branch' });

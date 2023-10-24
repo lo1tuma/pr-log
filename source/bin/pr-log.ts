@@ -47,9 +47,11 @@ program
     .arguments('<version-number>')
     .option('--sloppy', 'skip ensuring clean local git state')
     .option('--trace', 'show stack traces for any error')
+    .option('--default-branch <name>', 'set custom default branch', 'main')
     .action(async (versionNumber: string, options: Record<string, unknown>) => {
         const runOptions: RunOptions = { sloppy: options.sloppy === true, changelogPath };
         isTracingEnabled = options.trace === true;
+        const defaultBranch = options.defaultBranch as string;
         if (GH_TOKEN !== undefined) {
             await githubClient.auth();
         }
@@ -58,7 +60,10 @@ program
             githubClient,
             prependFile,
             packageInfo,
-            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory({ gitCommandRunner, findRemoteAlias }),
+            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory(
+                { gitCommandRunner, findRemoteAlias },
+                { defaultBranch }
+            ),
             getMergedPullRequests,
             createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
         };
