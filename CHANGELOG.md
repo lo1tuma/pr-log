@@ -1,3 +1,39 @@
+## 6.0.0 (October 24, 2023)
+
+### Breaking Changes
+
+* Add support for custom default branch and change default to `main` ([#326](https://github.com/lo1tuma/pr-log/pull/326))
+
+### Bug Fixes
+
+* Ignore merge commits with indirect parent ([#328](https://github.com/lo1tuma/pr-log/pull/328))
+
+### Dependency Upgrades
+
+* ⬆️ Update actions/setup-node action to v4 ([#327](https://github.com/lo1tuma/pr-log/pull/327))
+* ⬆️ Update dependency sinon to v17 ([#324](https://github.com/lo1tuma/pr-log/pull/324))
+* ⬆️ Lock file maintenance ([#325](https://github.com/lo1tuma/pr-log/pull/325))
+* ⬆️ Lock file maintenance ([#322](https://github.com/lo1tuma/pr-log/pull/322))
+* ⬆️ Update dependency @types/semver to v7.5.3 ([#312](https://github.com/lo1tuma/pr-log/pull/312))
+* ⬆️ Update dependency @types/sinon to v10.0.17 ([#313](https://github.com/lo1tuma/pr-log/pull/313))
+* ⬆️ Update typescript-eslint monorepo to v6.7.3 ([#314](https://github.com/lo1tuma/pr-log/pull/314))
+* ⬆️ Update dependency @octokit/rest to v20.0.2 ([#296](https://github.com/lo1tuma/pr-log/pull/296))
+* ⬆️ Update dependency @types/node to v20.7.0 ([#315](https://github.com/lo1tuma/pr-log/pull/315))
+* ⬆️ Update dependency @types/node to v20.6.5 ([#311](https://github.com/lo1tuma/pr-log/pull/311))
+
+### Code Refactoring
+
+* Force exact dependency installation ([#309](https://github.com/lo1tuma/pr-log/pull/309))
+
+### Build-Related
+
+* Automatically set upgrade label for renovate PRs ([#329](https://github.com/lo1tuma/pr-log/pull/329))
+* Enable verbatim module syntax in TypeScript compiler settings ([#323](https://github.com/lo1tuma/pr-log/pull/323))
+* Group @enormora/eslint-config dependencies ([#321](https://github.com/lo1tuma/pr-log/pull/321))
+* Migrate to ESLint flat config ([#317](https://github.com/lo1tuma/pr-log/pull/317))
+* Enable automatic dependency updates for minor and patch versions ([#316](https://github.com/lo1tuma/pr-log/pull/316))
+* Specify versions of GitHub actions ([#310](https://github.com/lo1tuma/pr-log/pull/310))
+
 ## 5.0.0 (September 25, 2023)
 
 ### Breaking Changes
