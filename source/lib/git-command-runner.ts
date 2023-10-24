@@ -1,4 +1,5 @@
 import type { execaCommand } from 'execa';
+import { oneLine } from 'common-tags';
 import { splitByString, splitByPattern } from './split.js';
 
 export type RemoteAlias = {
@@ -92,9 +93,8 @@ export function createGitCommandRunner(dependencies: GitCommandRunnerDependencie
         },
 
         async getMergeCommitLogs(from) {
-            const result = await execute(
-                `git log --no-color --pretty=format:${createParsableGitLogFormat()} --merges ${from}..HEAD`
-            );
+            const result = await execute(oneLine`git log --first-parent --no-color
+                    --pretty=format:${createParsableGitLogFormat()} --merges ${from}..HEAD`);
 
             const logs = splitLines(result.stdout, lineSeparator);
             return logs.map((log) => {
