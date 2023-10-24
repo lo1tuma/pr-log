@@ -43,7 +43,7 @@
         "@ava/typescript": "4.1.0",
         "@types/common-tags": "1.8.3",
         "@types/git-url-parse": "9.0.2",
-        "@types/node": "20.8.7",
+        "@types/node": "20.8.8",
         "@types/parse-github-repo-url": "1.4.1",
         "@types/semver": "7.5.4",
         "@types/sinon": "10.0.20",
