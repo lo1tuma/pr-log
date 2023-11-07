@@ -44,7 +44,7 @@
         "@types/common-tags": "1.8.4",
         "@types/git-url-parse": "9.0.3",
         "@types/node": "20.8.10",
-        "@types/parse-github-repo-url": "1.4.1",
+        "@types/parse-github-repo-url": "1.4.2",
         "@types/semver": "7.5.4",
         "@types/sinon": "10.0.20",
         "ava": "5.3.1",
