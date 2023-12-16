@@ -1,5 +1,6 @@
 import semver from 'semver';
 import type _prependFile from 'prepend-file';
+import type { Logger } from 'loglevel';
 import type { CreateChangelog } from './create-changelog.js';
 import { getGithubRepo } from './get-github-repo.js';
 import { defaultValidLabels } from './valid-labels.js';
@@ -39,6 +40,7 @@ function validateVersionNumber(versionNumber: string): void {
 export type RunOptions = {
     readonly changelogPath: string;
     readonly sloppy: boolean;
+    readonly stdout: boolean;
 };
 
 export type CliRunnerDependencies = {
@@ -47,6 +49,7 @@ export type CliRunnerDependencies = {
     readonly createChangelog: CreateChangelog;
     readonly packageInfo: Record<string, unknown>;
     readonly prependFile: typeof _prependFile;
+    readonly logger: Logger;
 };
 
 export type CliRunner = {
@@ -54,7 +57,8 @@ export type CliRunner = {
 };
 
 export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner {
-    const { ensureCleanLocalGitState, getMergedPullRequests, createChangelog, packageInfo, prependFile } = dependencies;
+    const { ensureCleanLocalGitState, getMergedPullRequests, createChangelog, packageInfo, prependFile, logger } =
+        dependencies;
 
     async function generateChangelog(
         options: RunOptions,
@@ -72,8 +76,16 @@ export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner 
         return stripTrailingEmptyLine(changelog);
     }
 
+    async function writeChangelog(changelog: string, options: RunOptions): Promise<void> {
+        if (options.stdout) {
+            logger.log(changelog);
+        } else {
+            await prependFile(options.changelogPath, `${changelog.trim()}\n\n`);
+        }
+    }
+
     return {
-        run: async (newVersionNumber: string, options: RunOptions) => {
+        async run(newVersionNumber: string, options: RunOptions) {
             const { repository } = packageInfo;
             if (!isRecord(repository)) {
                 throw new Error('Repository information missing in package.json');
@@ -87,7 +99,8 @@ export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner 
             validateVersionNumber(newVersionNumber);
 
             const changelog = await generateChangelog(options, githubRepo, validLabels, newVersionNumber);
-            await prependFile(options.changelogPath, `${changelog.trim()}\n\n`);
+
+            await writeChangelog(changelog, options);
         }
     };
 }

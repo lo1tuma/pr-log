@@ -6,13 +6,16 @@ import { createCommand } from 'commander';
 import { Octokit } from '@octokit/rest';
 import prependFile from 'prepend-file';
 import { execaCommand } from 'execa';
-import { createCliRunner, type RunOptions } from '../lib/cli.js';
+import loglevel from 'loglevel';
+import { createCliRunner, type CliRunnerDependencies, type RunOptions } from '../lib/cli.js';
 import { ensureCleanLocalGitStateFactory } from '../lib/ensure-clean-local-git-state.js';
 import { getMergedPullRequestsFactory } from '../lib/get-merged-pull-requests.js';
 import { createChangelogFactory } from '../lib/create-changelog.js';
 import { findRemoteAliasFactory } from '../lib/find-remote-alias.js';
 import { getPullRequestLabel } from '../lib/get-pull-request-label.js';
 import { createGitCommandRunner } from '../lib/git-command-runner.js';
+
+loglevel.enableAll();
 
 async function readJson(filePath: string): Promise<unknown> {
     const fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
@@ -48,18 +51,23 @@ program
     .option('--sloppy', 'skip ensuring clean local git state')
     .option('--trace', 'show stack traces for any error')
     .option('--default-branch <name>', 'set custom default branch', 'main')
+    .option('--stdout', 'output the changelog to stdout instead of writing to CHANGELOG.md')
     .action(async (versionNumber: string, options: Record<string, unknown>) => {
-        const runOptions: RunOptions = { sloppy: options.sloppy === true, changelogPath };
+        const runOptions: RunOptions = {
+            sloppy: options.sloppy === true,
+            changelogPath,
+            stdout: options.stdout === true
+        };
         isTracingEnabled = options.trace === true;
         const defaultBranch = options.defaultBranch as string;
         if (GH_TOKEN !== undefined) {
             await githubClient.auth();
         }
         const packageInfo = (await readJson(path.join(process.cwd(), 'package.json'))) as Record<string, unknown>;
-        const dependencies = {
-            githubClient,
+        const dependencies: CliRunnerDependencies = {
             prependFile,
             packageInfo,
+            logger: loglevel,
             ensureCleanLocalGitState: ensureCleanLocalGitStateFactory(
                 { gitCommandRunner, findRemoteAlias },
                 { defaultBranch }
