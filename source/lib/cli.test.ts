@@ -1,7 +1,8 @@
 import { stub } from 'sinon';
 import test from 'ava';
 import type _prependFile from 'prepend-file';
-import { createCliRunner, type CliRunner, type CliRunnerDependencies } from './cli.js';
+import type { Logger } from 'loglevel';
+import { createCliRunner, type CliRunner, type CliRunnerDependencies, type RunOptions } from './cli.js';
 
 function createCli(dependencies: Partial<CliRunnerDependencies> = {}): CliRunner {
     const {
@@ -9,7 +10,8 @@ function createCli(dependencies: Partial<CliRunnerDependencies> = {}): CliRunner
         getMergedPullRequests = stub().resolves([]),
         createChangelog = stub().returns(''),
         prependFile = stub().resolves() as unknown as typeof _prependFile,
-        packageInfo = { repository: { url: 'https://github.com/foo/bar.git' } }
+        packageInfo = { repository: { url: 'https://github.com/foo/bar.git' } },
+        logger = { log: stub() } as unknown as Logger
     } = dependencies;
 
     return createCliRunner({
@@ -17,11 +19,12 @@ function createCli(dependencies: Partial<CliRunnerDependencies> = {}): CliRunner
         getMergedPullRequests,
         createChangelog,
         prependFile,
-        packageInfo
+        packageInfo,
+        logger
     });
 }
 
-const options = { sloppy: false, changelogPath: '/foo/CHANGELOG.md' };
+const options: RunOptions = { sloppy: false, changelogPath: '/foo/CHANGELOG.md', stdout: false };
 
 test('throws if no version number was specified', async (t) => {
     const cli = createCli();
@@ -76,7 +79,7 @@ test('does not throw if the repository is dirty', async (t) => {
         createChangelog
     });
 
-    await cli.run('1.0.0', { sloppy: true, changelogPath: '/foo/CHANGELOG.md' });
+    await cli.run('1.0.0', { sloppy: true, changelogPath: '/foo/CHANGELOG.md', stdout: false });
 
     t.is(prependFile.callCount, 1);
     t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'sloppy changelog\n\n']);
@@ -135,7 +138,29 @@ test('calls getMergedPullRequests with the correct repo', async (t) => {
     t.is(getMergedPullRequests.firstCall.args[0], expectedGithubRepo);
 });
 
-test('reports the generated changelog', async (t) => {
+test('reports the generated changelog to stdout and not to a file when stdout is set to true', async (t) => {
+    const createChangelog = stub().returns('generated changelog');
+    const prependFile = stub().resolves();
+    const log = stub();
+
+    const cli = createCli({
+        createChangelog,
+        prependFile: prependFile as unknown as typeof _prependFile,
+        logger: { log } as unknown as Logger
+    });
+
+    await cli.run('1.0.0', { ...options, stdout: true });
+
+    t.is(createChangelog.callCount, 1);
+    t.is(createChangelog.firstCall.args[0], '1.0.0');
+
+    t.is(prependFile.callCount, 0);
+
+    t.is(log.callCount, 1);
+    t.deepEqual(log.firstCall.args, ['generated changelog']);
+});
+
+test('reports the generated changelog to a file when stdout is set to false', async (t) => {
     const createChangelog = stub().returns('generated changelog');
     const prependFile = stub().resolves();
 
@@ -144,7 +169,7 @@ test('reports the generated changelog', async (t) => {
         prependFile: prependFile as unknown as typeof _prependFile
     });
 
-    await cli.run('1.0.0', options);
+    await cli.run('1.0.0', { ...options, stdout: false });
 
     t.is(createChangelog.callCount, 1);
     t.is(createChangelog.firstCall.args[0], '1.0.0');
