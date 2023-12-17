@@ -1,0 +1,20 @@
+name: Check pull request labels
+
+on:
+    pull_request:
+        types: [opened, labeled, unlabeled]
+
+jobs:
+    check-labels:
+        runs-on: ubuntu-latest
+        if: >
+            contains(github.event.pull_request.labels.*.name, 'breaking') == false &&
+            contains(github.event.pull_request.labels.*.name, 'bug') == false &&
+            contains(github.event.pull_request.labels.*.name, 'feature') == false &&
+            contains(github.event.pull_request.labels.*.name, 'enhancement') == false &&
+            contains(github.event.pull_request.labels.*.name, 'documentation') == false &&
+            contains(github.event.pull_request.labels.*.name, 'upgrade') == false &&
+            contains(github.event.pull_request.labels.*.name, 'refactor') == false &&
+            contains(github.event.pull_request.labels.*.name, 'build') == false
+        steps:
+            - run: echo "None of the required pull request labels are set" && exit 1
