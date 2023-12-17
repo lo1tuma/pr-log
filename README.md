@@ -10,7 +10,7 @@
 
 The main features:
 
--   Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag. This works by
+-   Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag (as long as [--stdout](#options) is not provided). This works by
     -   first getting a list of all tags
     -   than removing all tags that are not compatible to [semver versioning](http://semver.org/)
     -   sort the tags
@@ -136,6 +136,10 @@ The `--sloppy` option defaults to false. When set, it allows `pr-log` to generat
 #### --trace
 
 When enabled this option outputs the stacktrace of an error additionally to the error message to `stderr`.
+
+#### --stdout
+
+This option disables writing the changelog into the file `CHANGELOG.md`. Instead it prints the changelog to `stdout`.
 
 ### Correct usage makes a clean and complete changelog
 
