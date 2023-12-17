@@ -3,6 +3,7 @@
     "commitMessagePrefix": "⬆️ ",
     "labels": ["renovate", "upgrade"],
     "rebaseStalePrs": true,
+    "dependencyDashboard": false,
     "lockFileMaintenance": {
         "enabled": true,
         "automerge": true
