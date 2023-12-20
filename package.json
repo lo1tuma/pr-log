@@ -30,6 +30,7 @@
         "@enormora/eslint-config-node": "0.0.9",
         "@enormora/eslint-config-typescript": "0.0.10",
         "@octokit/rest": "20.0.2",
+        "@sindresorhus/is": "6.1.0",
         "commander": "11.1.0",
         "common-tags": "1.8.2",
         "date-fns": "2.30.0",
