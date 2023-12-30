@@ -1,5 +1,6 @@
 import semver from 'semver';
 import type { Octokit } from '@octokit/rest';
+import { isUndefined } from '@sindresorhus/is';
 import type { GetPullRequestLabel } from './get-pull-request-label.js';
 import type { GitCommandRunner } from './git-command-runner.js';
 
@@ -34,7 +35,7 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
         const orderedVersionTags = versionTags.sort(semver.compare);
         const latestTag = orderedVersionTags.at(-1);
 
-        if (latestTag === undefined) {
+        if (isUndefined(latestTag)) {
             throw new TypeError('Failed to determine latest version number git tag');
         }
 
@@ -46,11 +47,11 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
 
         return mergeCommits.map((log) => {
             const matches = /^Merge pull request #(?<id>\d+) from .*?$/u.exec(log.subject);
-            if (matches?.groups?.id === undefined) {
+            if (isUndefined(matches?.groups?.id)) {
                 throw new TypeError('Failed to extract pull request id from merge commit log');
             }
 
-            if (log.body === undefined) {
+            if (isUndefined(log.body)) {
                 throw new TypeError('Failed to extract pull request title from merge commit log');
             }
 

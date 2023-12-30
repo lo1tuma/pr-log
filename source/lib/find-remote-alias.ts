@@ -1,4 +1,5 @@
 import parseGitUrl from 'git-url-parse';
+import { isUndefined } from '@sindresorhus/is';
 import type { GitCommandRunner } from './git-command-runner.js';
 
 function isSameGitUrl(gitUrlA: string, gitUrlB: string): boolean {
@@ -31,7 +32,7 @@ export function findRemoteAliasFactory(dependencies: FindRemoteAliasDependencies
             return isSameGitUrl(gitRemote, remote.url);
         });
 
-        if (matchedRemote === undefined) {
+        if (isUndefined(matchedRemote)) {
             throw new TypeError(`This local git repository doesn’t have a remote pointing to ${gitRemote}`);
         }
 

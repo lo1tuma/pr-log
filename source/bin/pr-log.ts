@@ -7,6 +7,7 @@ import { Octokit } from '@octokit/rest';
 import prependFile from 'prepend-file';
 import { execaCommand } from 'execa';
 import loglevel from 'loglevel';
+import { isString } from '@sindresorhus/is';
 import { createCliRunOptions } from '../lib/cli-run-options.js';
 import { createCliRunner, type CliRunnerDependencies } from '../lib/cli.js';
 import { ensureCleanLocalGitStateFactory } from '../lib/ensure-clean-local-git-state.js';
@@ -65,7 +66,7 @@ program
     .action(async (versionNumber: string | undefined, options: Record<string, unknown>) => {
         isTracingEnabled = options.trace === true;
         const defaultBranch = options.defaultBranch as string;
-        if (GH_TOKEN !== undefined) {
+        if (isString(GH_TOKEN)) {
             await githubClient.auth();
         }
         const packageInfo = (await readJson(path.join(process.cwd(), 'package.json'))) as Record<string, unknown>;

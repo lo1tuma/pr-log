@@ -1,5 +1,6 @@
 import type _prependFile from 'prepend-file';
 import type { Logger } from 'loglevel';
+import { isPlainObject, isString } from '@sindresorhus/is';
 import type { CliRunOptions } from './cli-run-options.js';
 import type { CreateChangelog } from './create-changelog.js';
 import type { GetMergedPullRequests } from './get-merged-pull-requests.js';
@@ -16,13 +17,9 @@ function stripTrailingEmptyLine(text: string): string {
     return text;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null;
-}
-
 function getValidLabels(packageInfo: Record<string, unknown>): ReadonlyMap<string, string> {
     const prLogConfig = packageInfo['pr-log'];
-    if (isRecord(prLogConfig) && Array.isArray(prLogConfig.validLabels)) {
+    if (isPlainObject(prLogConfig) && Array.isArray(prLogConfig.validLabels)) {
         return new Map(prLogConfig.validLabels);
     }
 
@@ -78,10 +75,10 @@ export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner 
     return {
         async run(options: CliRunOptions) {
             const { repository } = packageInfo;
-            if (!isRecord(repository)) {
+            if (!isPlainObject(repository)) {
                 throw new Error('Repository information missing in package.json');
             }
-            if (typeof repository.url !== 'string') {
+            if (!isString(repository.url)) {
                 throw new TypeError('Repository url is not a string in package.json');
             }
             const githubRepo = getGithubRepo(repository.url);
