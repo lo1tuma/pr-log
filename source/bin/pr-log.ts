@@ -2,12 +2,13 @@
 
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { createCommand } from 'commander';
+import { createCommand, InvalidArgumentError } from 'commander';
 import { Octokit } from '@octokit/rest';
 import prependFile from 'prepend-file';
 import { execaCommand } from 'execa';
 import loglevel from 'loglevel';
-import { createCliRunner, type CliRunnerDependencies, type RunOptions } from '../lib/cli.js';
+import { createCliRunOptions } from '../lib/cli-run-options.js';
+import { createCliRunner, type CliRunnerDependencies } from '../lib/cli.js';
 import { ensureCleanLocalGitStateFactory } from '../lib/ensure-clean-local-git-state.js';
 import { getMergedPullRequestsFactory } from '../lib/get-merged-pull-requests.js';
 import { createChangelogFactory } from '../lib/create-changelog.js';
@@ -47,17 +48,21 @@ program
     .storeOptionsAsProperties(false)
     .description(config.description ?? '')
     .version(config.version ?? '')
-    .arguments('<version-number>')
-    .option('--sloppy', 'skip ensuring clean local git state')
-    .option('--trace', 'show stack traces for any error')
+    .argument('[version-number]', 'Desired version number. Optional when --unreleased was provided')
+    .option('--sloppy', 'skip ensuring clean local git state', false)
+    .option('--trace', 'show stack traces for any error', false)
     .option('--default-branch <name>', 'set custom default branch', 'main')
-    .option('--stdout', 'output the changelog to stdout instead of writing to CHANGELOG.md')
-    .action(async (versionNumber: string, options: Record<string, unknown>) => {
-        const runOptions: RunOptions = {
-            sloppy: options.sloppy === true,
-            changelogPath,
-            stdout: options.stdout === true
-        };
+    .option('--stdout', 'output the changelog to stdout instead of writing to CHANGELOG.md', false)
+    .option('--unreleased', 'include section for unreleased changes', false)
+    .hook('preAction', (thisCommand) => {
+        const { unreleased } = thisCommand.opts<Record<string, unknown>>();
+        const hasArguments = thisCommand.args.length > 0;
+
+        if (unreleased === true && hasArguments) {
+            throw new InvalidArgumentError('A version number is not allowed when --unreleased was provided');
+        }
+    })
+    .action(async (versionNumber: string | undefined, options: Record<string, unknown>) => {
         isTracingEnabled = options.trace === true;
         const defaultBranch = options.defaultBranch as string;
         if (GH_TOKEN !== undefined) {
@@ -76,8 +81,16 @@ program
             createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
         };
         const cliRunner = createCliRunner(dependencies);
+        const runOptionsResult = createCliRunOptions({ versionNumber, changelogPath, commandOptions: options });
 
-        await cliRunner.run(versionNumber, runOptions);
+        await runOptionsResult.match({
+            async Ok(runOptions) {
+                await cliRunner.run(runOptions);
+            },
+            Err(error) {
+                throw error;
+            }
+        });
     });
 
 function crash(error: Readonly<Error>): void {

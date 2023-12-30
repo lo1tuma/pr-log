@@ -1,11 +1,12 @@
-import semver from 'semver';
 import type _prependFile from 'prepend-file';
 import type { Logger } from 'loglevel';
+import type { CliRunOptions } from './cli-run-options.js';
 import type { CreateChangelog } from './create-changelog.js';
-import { getGithubRepo } from './get-github-repo.js';
-import { defaultValidLabels } from './valid-labels.js';
 import type { GetMergedPullRequests } from './get-merged-pull-requests.js';
 import type { EnsureCleanLocalGitState } from './ensure-clean-local-git-state.js';
+import { validateVersionNumber } from './version-number.js';
+import { getGithubRepo } from './get-github-repo.js';
+import { defaultValidLabels } from './valid-labels.js';
 
 function stripTrailingEmptyLine(text: string): string {
     if (text.endsWith('\n\n')) {
@@ -28,21 +29,6 @@ function getValidLabels(packageInfo: Record<string, unknown>): ReadonlyMap<strin
     return defaultValidLabels;
 }
 
-function validateVersionNumber(versionNumber: string): void {
-    if (versionNumber.length === 0) {
-        throw new TypeError('version-number not specified');
-    }
-    if (semver.valid(versionNumber) === null) {
-        throw new Error('version-number is invalid');
-    }
-}
-
-export type RunOptions = {
-    readonly changelogPath: string;
-    readonly sloppy: boolean;
-    readonly stdout: boolean;
-};
-
 export type CliRunnerDependencies = {
     readonly ensureCleanLocalGitState: EnsureCleanLocalGitState;
     readonly getMergedPullRequests: GetMergedPullRequests;
@@ -53,7 +39,7 @@ export type CliRunnerDependencies = {
 };
 
 export type CliRunner = {
-    run(newVersionNumber: string, options: RunOptions): Promise<void>;
+    run(options: CliRunOptions): Promise<void>;
 };
 
 export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner {
@@ -61,31 +47,36 @@ export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner 
         dependencies;
 
     async function generateChangelog(
-        options: RunOptions,
+        options: CliRunOptions,
         githubRepo: string,
-        validLabels: ReadonlyMap<string, string>,
-        newVersionNumber: string
+        validLabels: ReadonlyMap<string, string>
     ): Promise<string> {
         if (!options.sloppy) {
             await ensureCleanLocalGitState(githubRepo);
         }
 
-        const pullRequests = await getMergedPullRequests(githubRepo, validLabels);
-        const changelog = createChangelog(newVersionNumber, validLabels, pullRequests, githubRepo);
+        const mergedPullRequests = await getMergedPullRequests(githubRepo, validLabels);
+        const commonChangelogOptions = { validLabels, mergedPullRequests, githubRepo };
+        const changelogOptions = options.unreleased
+            ? ({ ...commonChangelogOptions, unreleased: true, versionNumber: options.versionNumber } as const)
+            : ({ ...commonChangelogOptions, unreleased: false, versionNumber: options.versionNumber } as const);
+        const changelog = createChangelog(changelogOptions);
 
         return stripTrailingEmptyLine(changelog);
     }
 
-    async function writeChangelog(changelog: string, options: RunOptions): Promise<void> {
+    async function writeChangelog(changelog: string, options: CliRunOptions): Promise<void> {
+        const trimmedChangelog = changelog.trim();
+
         if (options.stdout) {
-            logger.log(changelog);
+            logger.log(trimmedChangelog);
         } else {
-            await prependFile(options.changelogPath, `${changelog.trim()}\n\n`);
+            await prependFile(options.changelogPath, `${trimmedChangelog}\n\n`);
         }
     }
 
     return {
-        async run(newVersionNumber: string, options: RunOptions) {
+        async run(options: CliRunOptions) {
             const { repository } = packageInfo;
             if (!isRecord(repository)) {
                 throw new Error('Repository information missing in package.json');
@@ -96,9 +87,11 @@ export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner 
             const githubRepo = getGithubRepo(repository.url);
             const validLabels = getValidLabels(packageInfo);
 
-            validateVersionNumber(newVersionNumber);
+            validateVersionNumber(options).unwrapOrElse((error) => {
+                throw error;
+            });
 
-            const changelog = await generateChangelog(options, githubRepo, validLabels, newVersionNumber);
+            const changelog = await generateChangelog(options, githubRepo, validLabels);
 
             await writeChangelog(changelog, options);
         }

@@ -1,5 +1,7 @@
 import { format as formatDate } from 'date-fns';
+import { isPlainObject, isArray, isString } from '@sindresorhus/is';
 import enLocale from 'date-fns/locale/en-US/index.js';
+import type { Just, Nothing } from 'true-myth/maybe';
 import type { PullRequest, PullRequestWithLabel } from './get-merged-pull-requests.js';
 
 function formatLinkToPullRequest(pullRequestId: number, repo: string): string {
@@ -22,25 +24,16 @@ function formatSection(displayLabel: string, pullRequests: readonly PullRequest[
     return `### ${displayLabel}\n\n${formatListOfPullRequests(pullRequests, repo)}\n`;
 }
 
-export type CreateChangelog = (
-    newVersionNumber: string,
-    validLabels: ReadonlyMap<string, string>,
-    mergedPullRequests: readonly PullRequestWithLabel[],
-    repo: string
-) => string;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null;
-}
+export type CreateChangelog = (options: ChangelogOptions) => string;
 
 type PackageInfo = Record<string, unknown>;
 
 function getConfigValueFromPackageInfo(packageInfo: PackageInfo, fieldName: string, fallback: string): string {
     const prLogConfig = packageInfo['pr-log'];
 
-    if (isRecord(prLogConfig)) {
+    if (isPlainObject(prLogConfig)) {
         const field = prLogConfig[fieldName];
-        if (typeof field === 'string') {
+        if (isString(field)) {
             return field;
         }
     }
@@ -53,7 +46,7 @@ function groupByLabel(pullRequests: readonly PullRequestWithLabel[]): Record<str
         const { label } = pullRequest;
         const group = groupedObject[label];
 
-        if (Array.isArray(group)) {
+        if (isArray(group)) {
             return {
                 ...groupedObject,
                 [label]: [...group, pullRequest]
@@ -72,24 +65,43 @@ type Dependencies = {
     getCurrentDate(): Readonly<Date>;
 };
 
+type ChangelogOptionsUnreleased = {
+    readonly unreleased: true;
+    readonly versionNumber: Nothing<string>;
+    readonly validLabels: ReadonlyMap<string, string>;
+    readonly mergedPullRequests: readonly PullRequestWithLabel[];
+    readonly githubRepo: string;
+};
+
+type ChangelogOptionsReleased = {
+    readonly unreleased: false;
+    readonly versionNumber: Just<string>;
+    readonly validLabels: ReadonlyMap<string, string>;
+    readonly mergedPullRequests: readonly PullRequestWithLabel[];
+    readonly githubRepo: string;
+};
+
+export type ChangelogOptions = ChangelogOptionsReleased | ChangelogOptionsUnreleased;
+
 const defaultDateFormat = 'MMMM d, yyyy';
 
 export function createChangelogFactory(dependencies: Dependencies): CreateChangelog {
     const { getCurrentDate, packageInfo } = dependencies;
     const dateFormat = getConfigValueFromPackageInfo(packageInfo, 'dateFormat', defaultDateFormat);
 
-    return function createChangelog(newVersionNumber, validLabels, mergedPullRequests, repo) {
+    return function createChangelog(options) {
+        const { validLabels, mergedPullRequests, githubRepo, unreleased } = options;
         const groupedPullRequests = groupByLabel(mergedPullRequests);
         const date = formatDate(getCurrentDate(), dateFormat, { locale: enLocale });
-        const title = `## ${newVersionNumber} (${date})`;
+        const title = unreleased ? `## Unreleased (${date})` : `## ${options.versionNumber.value} (${date})`;
 
         let changelog = `${title}\n\n`;
 
         for (const [label, displayLabel] of validLabels) {
             const pullRequests = groupedPullRequests[label];
 
-            if (pullRequests !== undefined) {
-                changelog += formatSection(displayLabel, pullRequests, repo);
+            if (isArray(pullRequests)) {
+                changelog += formatSection(displayLabel, pullRequests, githubRepo);
             }
         }
 
