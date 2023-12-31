@@ -49,7 +49,7 @@ program
     .storeOptionsAsProperties(false)
     .description(config.description ?? '')
     .version(config.version ?? '')
-    .argument('[version-number]', 'Desired version number. Optional when --unreleased was provided')
+    .argument('[version-number]', 'Desired version number. Must not be provided when --unreleased was specified')
     .option('--sloppy', 'skip ensuring clean local git state', false)
     .option('--trace', 'show stack traces for any error', false)
     .option('--default-branch <name>', 'set custom default branch', 'main')
