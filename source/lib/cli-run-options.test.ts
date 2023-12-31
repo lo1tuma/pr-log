@@ -24,7 +24,7 @@ const testCreateCliRunOptionsMacro = test.macro(
 );
 
 test(
-    'createCliRunOptions() returns an Result Error when "unreleased" command option exists and a version number was provided',
+    'createCliRunOptions() returns a Result Error when "unreleased" command option exists and a version number was provided',
     testCreateCliRunOptionsMacro,
     {
         commandOptions: {
@@ -38,7 +38,7 @@ test(
 );
 
 test(
-    'createCliRunOptions() returns an Result Ok when "unreleased" command option exists and no version number was provided',
+    'createCliRunOptions() returns a Result Ok when "unreleased" command option exists and no version number was provided',
     testCreateCliRunOptionsMacro,
     {
         commandOptions: {
@@ -56,7 +56,7 @@ test(
 );
 
 test(
-    'createCliRunOptions() returns an Result Error when "unreleased" command option does not exists and no version number was provided',
+    'createCliRunOptions() returns a Result Error when "unreleased" command option does not exists and no version number was provided',
     testCreateCliRunOptionsMacro,
     {
         commandOptions: {
@@ -68,7 +68,7 @@ test(
 );
 
 test(
-    'createCliRunOptions() returns an Result Error when "unreleased" command option is false and no version number was provided',
+    'createCliRunOptions() returns a Result Error when "unreleased" command option is false and no version number was provided',
     testCreateCliRunOptionsMacro,
     {
         commandOptions: {
@@ -80,7 +80,7 @@ test(
 );
 
 test(
-    'createCliRunOptions() returns an Result Ok when "unreleased" command option is false and a version number was provided',
+    'createCliRunOptions() returns a Result Ok when "unreleased" command option is false and a version number was provided',
     testCreateCliRunOptionsMacro,
     {
         commandOptions: {
@@ -98,7 +98,7 @@ test(
 );
 
 test(
-    'createCliRunOptions() returns an Result Ok and sets sloppy to true when command option sloppy was also set to true',
+    'createCliRunOptions() returns a Result Ok and sets sloppy to true when command option sloppy was also set to true',
     testCreateCliRunOptionsMacro,
     {
         commandOptions: {
@@ -117,7 +117,7 @@ test(
 );
 
 test(
-    'createCliRunOptions() returns an Result Ok and sets stdout to true when command option stdout was also set to true',
+    'createCliRunOptions() returns a Result Ok and sets stdout to true when command option stdout was also set to true',
     testCreateCliRunOptionsMacro,
     {
         commandOptions: {
