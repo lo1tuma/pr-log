@@ -11,7 +11,17 @@ export default [
     nodeConfig,
     {
         ...typescriptConfig,
-        files: ['**/*.ts']
+        files: ['**/*.ts'],
+        rules: {
+            ...typescriptConfig.rules,
+            'functional/prefer-immutable-types': [
+                'error',
+                {
+                    ...typescriptConfig.rules['functional/prefer-immutable-types'][1],
+                    ignoreTypePattern: ['Result']
+                }
+            ]
+        }
     },
     {
         ...avaConfig,

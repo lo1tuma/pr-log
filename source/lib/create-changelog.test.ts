@@ -1,21 +1,51 @@
 import test from 'ava';
-import { createChangelogFactory } from './create-changelog.js';
+import { Factory } from 'fishery';
+import Maybe, { type Just } from 'true-myth/maybe';
+import { createChangelogFactory, type ChangelogOptions } from './create-changelog.js';
 import { defaultValidLabels } from './valid-labels.js';
 
-test('contains a title with the version number and the formatted date', (t) => {
+const changelogOptionsFactory = Factory.define<ChangelogOptions>(() => {
+    return {
+        unreleased: false,
+        versionNumber: Maybe.just('1.0.0') as Just<string>,
+        validLabels: defaultValidLabels,
+        mergedPullRequests: [],
+        githubRepo: ''
+    };
+});
+
+test('contains "Unreleased" with no version number and the formatted date when version was released', (t) => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
         },
         packageInfo: {}
     });
-    const changelog = createChangelog('1.0.0', defaultValidLabels, [], '');
+    const options = changelogOptionsFactory.build({
+        unreleased: true,
+        versionNumber: Maybe.nothing()
+    });
+    const changelog = createChangelog(options);
+    const expectedTitle = '## Unreleased (January 1, 1970)';
+
+    t.true(changelog.includes(expectedTitle));
+});
+
+test('contains a title with the version number and the formatted date when version was released', (t) => {
+    const createChangelog = createChangelogFactory({
+        getCurrentDate: () => {
+            return new Date(0);
+        },
+        packageInfo: {}
+    });
+    const options = changelogOptionsFactory.build();
+    const changelog = createChangelog(options);
     const expectedTitle = '## 1.0.0 (January 1, 1970)';
 
     t.true(changelog.includes(expectedTitle));
 });
 
-test('format the date with a custom date format', (t) => {
+test('format the date with a custom date format when version was released', (t) => {
     const packageInfo = { 'pr-log': { dateFormat: 'dd.MM.yyyy' } };
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
@@ -23,13 +53,14 @@ test('format the date with a custom date format', (t) => {
         },
         packageInfo
     });
-    const changelog = createChangelog('1.0.0', defaultValidLabels, [], '');
+    const options = changelogOptionsFactory.build();
+    const changelog = createChangelog(options);
     const expectedTitle = '## 1.0.0 (01.01.1970)';
 
     t.true(changelog.includes(expectedTitle));
 });
 
-test('creates a formatted changelog', (t) => {
+test('creates a formatted changelog when version was released', (t) => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -66,12 +97,16 @@ test('creates a formatted changelog', (t) => {
         ''
     ].join('\n');
 
-    const changelog = createChangelog('1.0.0', defaultValidLabels, mergedPullRequests, 'any/repo');
+    const options = changelogOptionsFactory.build({
+        mergedPullRequests,
+        githubRepo: 'any/repo'
+    });
+    const changelog = createChangelog(options);
 
     t.true(changelog.includes(expectedChangelog));
 });
 
-test('uses custom labels when provided', (t) => {
+test('uses custom labels when provided and version was released', (t) => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -112,12 +147,17 @@ test('uses custom labels when provided', (t) => {
         ''
     ].join('\n');
 
-    const changelog = createChangelog('1.0.0', customValidLabels, mergedPullRequests, 'any/repo');
+    const options = changelogOptionsFactory.build({
+        validLabels: customValidLabels,
+        mergedPullRequests,
+        githubRepo: 'any/repo'
+    });
+    const changelog = createChangelog(options);
 
     t.true(changelog.includes(expectedChangelog));
 });
 
-test('uses the same order for the changelog sections as in validLabels', (t) => {
+test('uses the same order for the changelog sections as in validLabels when version was released', (t) => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -158,7 +198,12 @@ test('uses the same order for the changelog sections as in validLabels', (t) => 
         ''
     ].join('\n');
 
-    const changelog = createChangelog('1.0.0', customValidLabels, mergedPullRequests, 'any/repo');
+    const options = changelogOptionsFactory.build({
+        validLabels: customValidLabels,
+        mergedPullRequests,
+        githubRepo: 'any/repo'
+    });
+    const changelog = createChangelog(options);
 
     t.true(changelog.includes(expectedChangelog));
 });

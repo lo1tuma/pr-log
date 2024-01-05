@@ -7,7 +7,9 @@ import { Octokit } from '@octokit/rest';
 import prependFile from 'prepend-file';
 import { execaCommand } from 'execa';
 import loglevel from 'loglevel';
-import { createCliRunner, type CliRunnerDependencies, type RunOptions } from '../lib/cli.js';
+import { isString } from '@sindresorhus/is';
+import { createCliRunOptions } from '../lib/cli-run-options.js';
+import { createCliRunner, type CliRunnerDependencies } from '../lib/cli.js';
 import { ensureCleanLocalGitStateFactory } from '../lib/ensure-clean-local-git-state.js';
 import { getMergedPullRequestsFactory } from '../lib/get-merged-pull-requests.js';
 import { createChangelogFactory } from '../lib/create-changelog.js';
@@ -17,9 +19,9 @@ import { createGitCommandRunner } from '../lib/git-command-runner.js';
 
 loglevel.enableAll();
 
-async function readJson(filePath: string): Promise<unknown> {
+async function readJson(filePath: string): Promise<Record<string, unknown>> {
     const fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
-    return JSON.parse(fileContent) as unknown;
+    return JSON.parse(fileContent) as Record<string, unknown>;
 }
 
 const prLogPackageJsonURL = new URL('../../../../package.json', import.meta.url);
@@ -47,37 +49,42 @@ program
     .storeOptionsAsProperties(false)
     .description(config.description ?? '')
     .version(config.version ?? '')
-    .arguments('<version-number>')
-    .option('--sloppy', 'skip ensuring clean local git state')
-    .option('--trace', 'show stack traces for any error')
+    .argument('[version-number]', 'Desired version number. Must not be provided when --unreleased was specified')
+    .option('--sloppy', 'skip ensuring clean local git state', false)
+    .option('--trace', 'show stack traces for any error', false)
     .option('--default-branch <name>', 'set custom default branch', 'main')
-    .option('--stdout', 'output the changelog to stdout instead of writing to CHANGELOG.md')
-    .action(async (versionNumber: string, options: Record<string, unknown>) => {
-        const runOptions: RunOptions = {
-            sloppy: options.sloppy === true,
-            changelogPath,
-            stdout: options.stdout === true
-        };
+    .option('--stdout', 'output the changelog to stdout instead of writing to CHANGELOG.md', false)
+    .option('--unreleased', 'include section for unreleased changes', false)
+    .action(async (versionNumber: string | undefined, options: Record<string, unknown>) => {
         isTracingEnabled = options.trace === true;
-        const defaultBranch = options.defaultBranch as string;
-        if (GH_TOKEN !== undefined) {
-            await githubClient.auth();
-        }
-        const packageInfo = (await readJson(path.join(process.cwd(), 'package.json'))) as Record<string, unknown>;
-        const dependencies: CliRunnerDependencies = {
-            prependFile,
-            packageInfo,
-            logger: loglevel,
-            ensureCleanLocalGitState: ensureCleanLocalGitStateFactory(
-                { gitCommandRunner, findRemoteAlias },
-                { defaultBranch }
-            ),
-            getMergedPullRequests,
-            createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
-        };
-        const cliRunner = createCliRunner(dependencies);
 
-        await cliRunner.run(versionNumber, runOptions);
+        const runOptionsResult = createCliRunOptions({ versionNumber, changelogPath, commandOptions: options });
+
+        await runOptionsResult.match({
+            async Ok(runOptions) {
+                const defaultBranch = options.defaultBranch as string;
+                if (isString(GH_TOKEN)) {
+                    await githubClient.auth();
+                }
+                const packageInfo = await readJson(path.join(process.cwd(), 'package.json'));
+                const dependencies: CliRunnerDependencies = {
+                    prependFile,
+                    packageInfo,
+                    logger: loglevel,
+                    ensureCleanLocalGitState: ensureCleanLocalGitStateFactory(
+                        { gitCommandRunner, findRemoteAlias },
+                        { defaultBranch }
+                    ),
+                    getMergedPullRequests,
+                    createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
+                };
+                const cliRunner = createCliRunner(dependencies);
+                await cliRunner.run(runOptions);
+            },
+            Err(error) {
+                throw error;
+            }
+        });
     });
 
 function crash(error: Readonly<Error>): void {
