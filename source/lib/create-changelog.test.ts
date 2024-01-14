@@ -14,7 +14,7 @@ const changelogOptionsFactory = Factory.define<ChangelogOptions>(() => {
     };
 });
 
-test('contains "Unreleased" with no version number and the formatted date when version was released', (t) => {
+test('contains no title when version was not released', (t) => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -25,10 +25,11 @@ test('contains "Unreleased" with no version number and the formatted date when v
         unreleased: true,
         versionNumber: Maybe.nothing()
     });
-    const changelog = createChangelog(options);
-    const expectedTitle = '## Unreleased (January 1, 1970)';
 
-    t.true(changelog.includes(expectedTitle));
+    const changelog = createChangelog(options);
+    const expected = '';
+
+    t.is(changelog, expected);
 });
 
 test('contains a title with the version number and the formatted date when version was released', (t) => {
