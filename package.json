@@ -54,7 +54,7 @@
         "eslint": "8.56.0",
         "fishery": "2.2.2",
         "loglevel": "1.8.1",
-        "prettier": "3.2.1",
+        "prettier": "3.2.2",
         "sinon": "17.0.1",
         "typescript": "5.3.3"
     },
