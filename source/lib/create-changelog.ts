@@ -89,13 +89,24 @@ export function createChangelogFactory(dependencies: Dependencies): CreateChange
     const { getCurrentDate, packageInfo } = dependencies;
     const dateFormat = getConfigValueFromPackageInfo(packageInfo, 'dateFormat', defaultDateFormat);
 
-    return function createChangelog(options) {
-        const { validLabels, mergedPullRequests, githubRepo, unreleased } = options;
-        const groupedPullRequests = groupByLabel(mergedPullRequests);
-        const date = formatDate(getCurrentDate(), dateFormat, { locale: enLocale });
-        const title = unreleased ? `## Unreleased (${date})` : `## ${options.versionNumber.value} (${date})`;
+    function createChangelogTitle(options: ChangelogOptions): string {
+        const { unreleased } = options;
 
-        let changelog = `${title}\n\n`;
+        if (unreleased) {
+            return '';
+        }
+
+        const date = formatDate(getCurrentDate(), dateFormat, { locale: enLocale });
+        const title = `## ${options.versionNumber.value} (${date})`;
+
+        return `${title}\n\n`;
+    }
+
+    return function createChangelog(options) {
+        const { validLabels, mergedPullRequests, githubRepo } = options;
+        const groupedPullRequests = groupByLabel(mergedPullRequests);
+
+        let changelog = createChangelogTitle(options);
 
         for (const [label, displayLabel] of validLabels) {
             const pullRequests = groupedPullRequests[label];
