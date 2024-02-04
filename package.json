@@ -1,6 +1,6 @@
 {
     "name": "pr-log",
-    "version": "6.0.0",
+    "version": "6.1.0",
     "type": "module",
     "description": "Changelog generator based on GitHub Pull Requests",
     "bin": "target/build/source/bin/pr-log.js",

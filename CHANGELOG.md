@@ -1,3 +1,44 @@
+## 6.1.0 (February 4, 2024)
+
+### Bug Fixes
+
+* Remove "Unreleased" title when version was not released ([#351](https://github.com/lo1tuma/pr-log/pull/351))
+
+### Features
+
+* Introduce --unreleased CLI option ([#347](https://github.com/lo1tuma/pr-log/pull/347))
+* Introduce "--stdout" option to print the changelog ([#340](https://github.com/lo1tuma/pr-log/pull/340))
+
+### Documentation
+
+* Document --stdout option ([#341](https://github.com/lo1tuma/pr-log/pull/341))
+
+### Dependency Upgrades
+
+* ⬆️ Lock file maintenance ([#354](https://github.com/lo1tuma/pr-log/pull/354))
+* ⬆️ Lock file maintenance ([#353](https://github.com/lo1tuma/pr-log/pull/353))
+* ⬆️ Lock file maintenance ([#352](https://github.com/lo1tuma/pr-log/pull/352))
+* ⬆️ Update dependency git-url-parse to v14 ([#349](https://github.com/lo1tuma/pr-log/pull/349))
+* ⬆️ Update dependency c8 to v9 ([#350](https://github.com/lo1tuma/pr-log/pull/350))
+* ⬆️ Lock file maintenance ([#348](https://github.com/lo1tuma/pr-log/pull/348))
+* ⬆️ Lock file maintenance ([#346](https://github.com/lo1tuma/pr-log/pull/346))
+* ⬆️ Lock file maintenance ([#344](https://github.com/lo1tuma/pr-log/pull/344))
+* Disable Renovates dependency dashboard ([#342](https://github.com/lo1tuma/pr-log/pull/342))
+* ⬆️ Update dependency @types/sinon to v17 ([#331](https://github.com/lo1tuma/pr-log/pull/331))
+* ⬆️ Update dependency ava to v6 ([#338](https://github.com/lo1tuma/pr-log/pull/338))
+* ⬆️ Lock file maintenance ([#339](https://github.com/lo1tuma/pr-log/pull/339))
+* ⬆️ Lock file maintenance ([#337](https://github.com/lo1tuma/pr-log/pull/337))
+* ⬆️ Lock file maintenance ([#336](https://github.com/lo1tuma/pr-log/pull/336))
+* ⬆️ Lock file maintenance ([#335](https://github.com/lo1tuma/pr-log/pull/335))
+* ⬆️ Update dependency @types/node to v20.9.0 ([#333](https://github.com/lo1tuma/pr-log/pull/333))
+* ⬆️ Lock file maintenance ([#334](https://github.com/lo1tuma/pr-log/pull/334))
+* ⬆️ Lock file maintenance ([#332](https://github.com/lo1tuma/pr-log/pull/332))
+* ⬆️ Lock file maintenance ([#330](https://github.com/lo1tuma/pr-log/pull/330))
+
+### Build-Related
+
+* Check pull request labels ([#343](https://github.com/lo1tuma/pr-log/pull/343))
+
 ## 6.0.0 (October 24, 2023)
 
 ### Breaking Changes
