@@ -47,7 +47,7 @@
         "@types/git-url-parse": "9.0.3",
         "@types/node": "20.11.20",
         "@types/parse-github-repo-url": "1.4.2",
-        "@types/semver": "7.5.7",
+        "@types/semver": "7.5.8",
         "@types/sinon": "17.0.3",
         "ava": "6.1.1",
         "c8": "9.1.0",
