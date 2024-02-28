@@ -45,7 +45,7 @@
         "@enormora/eslint-config-typescript": "0.0.11",
         "@types/common-tags": "1.8.4",
         "@types/git-url-parse": "9.0.3",
-        "@types/node": "20.11.20",
+        "@types/node": "20.11.21",
         "@types/parse-github-repo-url": "1.4.2",
         "@types/semver": "7.5.8",
         "@types/sinon": "17.0.3",
