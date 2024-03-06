@@ -1,3 +1,21 @@
+## 6.1.1 (March 6, 2024)
+
+### Bug Fixes
+
+* Revert "⬆️ Update @enormora/eslint-config" ([#365](https://github.com/lo1tuma/pr-log/pull/365))
+* Move loglevel from development to runtime dependencies ([#363](https://github.com/lo1tuma/pr-log/pull/363))
+
+### Dependency Upgrades
+
+* ⬆️ Update @enormora/eslint-config ([#358](https://github.com/lo1tuma/pr-log/pull/358))
+* ⬆️ Lock file maintenance ([#364](https://github.com/lo1tuma/pr-log/pull/364))
+* ⬆️ Lock file maintenance ([#361](https://github.com/lo1tuma/pr-log/pull/361))
+* ⬆️ Lock file maintenance ([#360](https://github.com/lo1tuma/pr-log/pull/360))
+* ⬆️ Update dependency commander to v12 ([#355](https://github.com/lo1tuma/pr-log/pull/355))
+* ⬆️ Lock file maintenance ([#359](https://github.com/lo1tuma/pr-log/pull/359))
+* ⬆️ Lock file maintenance ([#357](https://github.com/lo1tuma/pr-log/pull/357))
+* Move @enormora dependencies to development dependencies ([#356](https://github.com/lo1tuma/pr-log/pull/356))
+
 ## 6.1.0 (February 4, 2024)
 
 ### Bug Fixes
