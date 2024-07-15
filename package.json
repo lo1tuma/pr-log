@@ -31,7 +31,7 @@
         "common-tags": "1.8.2",
         "date-fns": "2.30.0",
         "execa": "9.3.0",
-        "git-url-parse": "14.0.0",
+        "git-url-parse": "14.1.0",
         "loglevel": "1.9.1",
         "parse-github-repo-url": "1.4.1",
         "prepend-file": "2.0.1",
