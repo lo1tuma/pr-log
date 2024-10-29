@@ -30,7 +30,7 @@
         "commander": "12.1.0",
         "common-tags": "1.8.2",
         "date-fns": "2.30.0",
-        "execa": "9.5.0",
+        "execa": "9.5.1",
         "git-url-parse": "15.0.0",
         "loglevel": "1.9.2",
         "parse-github-repo-url": "1.4.1",
