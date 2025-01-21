@@ -27,7 +27,7 @@
     "dependencies": {
         "@octokit/rest": "21.1.0",
         "@sindresorhus/is": "7.0.1",
-        "commander": "13.0.0",
+        "commander": "13.1.0",
         "common-tags": "1.8.2",
         "date-fns": "2.30.0",
         "execa": "9.5.2",
