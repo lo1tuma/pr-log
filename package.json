@@ -25,7 +25,7 @@
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
     "dependencies": {
-        "@octokit/rest": "21.1.1",
+        "@octokit/rest": "22.0.0",
         "@sindresorhus/is": "7.0.2",
         "commander": "13.1.0",
         "common-tags": "1.8.2",
