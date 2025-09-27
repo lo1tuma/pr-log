@@ -36,7 +36,7 @@
         "parse-github-repo-url": "1.4.1",
         "prepend-file": "2.0.1",
         "semver": "7.7.2",
-        "true-myth": "8.6.0"
+        "true-myth": "9.2.0"
     },
     "devDependencies": {
         "@ava/typescript": "5.0.0",
