@@ -39,7 +39,7 @@
         "true-myth": "9.3.1"
     },
     "devDependencies": {
-        "@ava/typescript": "6.0.0",
+        "@ava/typescript": "7.0.0",
         "@enormora/eslint-config-ava": "0.0.12",
         "@enormora/eslint-config-base": "0.0.11",
         "@enormora/eslint-config-node": "0.0.10",
