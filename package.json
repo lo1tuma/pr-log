@@ -26,7 +26,7 @@
     "license": "MIT",
     "dependencies": {
         "@octokit/rest": "22.0.1",
-        "@sindresorhus/is": "7.2.0",
+        "@sindresorhus/is": "8.0.0",
         "commander": "14.0.3",
         "common-tags": "1.8.2",
         "date-fns": "2.30.0",
