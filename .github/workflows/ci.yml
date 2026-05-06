@@ -18,11 +18,11 @@ jobs:
             - name: Install dependencies
               run: npm clean-install
             - name: Static code analysis
-              run: npm run lint
+              run: npx just lint
             - name: Compile Typescript
-              run: npm run compile
+              run: npx just compile
             - name: Run tests
-              run: npm test
+              run: npx just test
             - name: Coveralls
               uses: coverallsapp/github-action@v2
               with:

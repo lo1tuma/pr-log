@@ -12,16 +12,7 @@
         "LICENSE",
         "README.md"
     ],
-    "scripts": {
-        "compile": "tsc --build",
-        "prettier": "prettier '**/*.(yml|json|yaml|md)'",
-        "eslint": "eslint . --max-warnings 0",
-        "lint": "npm run eslint && npm run prettier -- --check",
-        "lint:fix": "npm run eslint -- --fix && npm run prettier -- --write",
-        "test": "c8 npm run test:unit",
-        "pretest:unit": "npm run compile",
-        "test:unit": "ava"
-    },
+    "scripts": {},
     "author": "Mathias Schreck <schreck.mathias@gmail.com>",
     "license": "MIT",
     "dependencies": {
@@ -55,6 +46,7 @@
         "eslint": "8.57.1",
         "fishery": "2.4.0",
         "prettier": "3.3.3",
+        "rust-just": "1.50.0",
         "sinon": "22.0.0",
         "typescript": "5.9.3"
     },
