@@ -4,9 +4,9 @@ import type _prependFile from 'prepend-file';
 import type { Logger } from 'loglevel';
 import { Factory, type DeepPartial } from 'fishery';
 import Maybe, { type Just } from 'true-myth/maybe';
-import { createCliRunner, type CliRunner, type CliRunnerDependencies } from './cli.js';
-import type { CliRunOptions } from './cli-run-options.js';
-import { defaultValidLabels } from './valid-labels.js';
+import { createCliRunner, type CliRunner, type CliRunnerDependencies } from './cli.ts';
+import type { CliRunOptions } from './cli-run-options.ts';
+import { defaultValidLabels } from './valid-labels.ts';
 
 const cliRunOptionsFactory = Factory.define<CliRunOptions>(() => {
     return {

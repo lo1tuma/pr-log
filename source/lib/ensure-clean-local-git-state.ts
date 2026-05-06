@@ -1,6 +1,6 @@
 import { oneLine } from 'common-tags';
-import type { FindRemoteAlias } from './find-remote-alias.js';
-import type { GitCommandRunner } from './git-command-runner.js';
+import type { FindRemoteAlias } from './find-remote-alias.ts';
+import type { GitCommandRunner } from './git-command-runner.ts';
 
 type EnsureCleanLocalGitStateOptions = {
     readonly defaultBranch: string;

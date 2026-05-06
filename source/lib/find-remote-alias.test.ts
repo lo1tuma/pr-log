@@ -1,7 +1,7 @@
 import test from 'ava';
 import { fake } from 'sinon';
-import { findRemoteAliasFactory, type FindRemoteAliasDependencies, type FindRemoteAlias } from './find-remote-alias.js';
-import type { RemoteAlias } from './git-command-runner.js';
+import { findRemoteAliasFactory, type FindRemoteAliasDependencies, type FindRemoteAlias } from './find-remote-alias.ts';
+import type { RemoteAlias } from './git-command-runner.ts';
 
 const githubRepo = 'foo/bar';
 

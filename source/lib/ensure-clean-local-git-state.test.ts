@@ -4,7 +4,7 @@ import {
     ensureCleanLocalGitStateFactory,
     type EnsureCleanLocalGitState,
     type EnsureCleanLocalGitStateDependencies
-} from './ensure-clean-local-git-state.js';
+} from './ensure-clean-local-git-state.ts';
 
 const githubRepo = 'foo/bar';
 

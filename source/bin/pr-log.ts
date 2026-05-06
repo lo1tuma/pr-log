@@ -8,14 +8,14 @@ import prependFile from 'prepend-file';
 import { execaCommand } from 'execa';
 import loglevel from 'loglevel';
 import { isString } from '@sindresorhus/is';
-import { createCliRunOptions } from '../lib/cli-run-options.js';
-import { createCliRunner, type CliRunnerDependencies } from '../lib/cli.js';
-import { ensureCleanLocalGitStateFactory } from '../lib/ensure-clean-local-git-state.js';
-import { getMergedPullRequestsFactory } from '../lib/get-merged-pull-requests.js';
-import { createChangelogFactory } from '../lib/create-changelog.js';
-import { findRemoteAliasFactory } from '../lib/find-remote-alias.js';
-import { getPullRequestLabel } from '../lib/get-pull-request-label.js';
-import { createGitCommandRunner } from '../lib/git-command-runner.js';
+import { createCliRunOptions } from '../lib/cli-run-options.ts';
+import { createCliRunner, type CliRunnerDependencies } from '../lib/cli.ts';
+import { ensureCleanLocalGitStateFactory } from '../lib/ensure-clean-local-git-state.ts';
+import { getMergedPullRequestsFactory } from '../lib/get-merged-pull-requests.ts';
+import { createChangelogFactory } from '../lib/create-changelog.ts';
+import { findRemoteAliasFactory } from '../lib/find-remote-alias.ts';
+import { getPullRequestLabel } from '../lib/get-pull-request-label.ts';
+import { createGitCommandRunner } from '../lib/git-command-runner.ts';
 
 loglevel.enableAll();
 

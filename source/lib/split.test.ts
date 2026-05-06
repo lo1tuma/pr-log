@@ -1,5 +1,5 @@
 import test from 'ava';
-import { splitByString, splitByPattern } from './split.js';
+import { splitByString, splitByPattern } from './split.ts';
 
 test('splitByString() splits the given string by an empty string separator', (t) => {
     const result = splitByString('foo', '');

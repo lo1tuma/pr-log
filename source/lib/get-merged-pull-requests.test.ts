@@ -1,11 +1,11 @@
 import test from 'ava';
 import { fake, type SinonSpy } from 'sinon';
-import { defaultValidLabels } from './valid-labels.js';
+import { defaultValidLabels } from './valid-labels.ts';
 import {
     getMergedPullRequestsFactory,
     type GetMergedPullRequests,
     type GetMergedPullRequestsDependencies
-} from './get-merged-pull-requests.js';
+} from './get-merged-pull-requests.ts';
 
 const anyRepo = 'any/repo';
 const latestVersion = '1.2.3';

@@ -14,6 +14,13 @@ export default [
         files: ['**/*.ts'],
         rules: {
             ...typescriptConfig.rules,
+            'import/extensions': [
+                'error',
+                'always',
+                {
+                    ignorePackages: true
+                }
+            ],
             'functional/prefer-immutable-types': [
                 'error',
                 {
