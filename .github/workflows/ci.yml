@@ -5,13 +5,16 @@ on: [push, pull_request]
 jobs:
     build:
         runs-on: ubuntu-latest
-        name: Node v20
+        name: Node v${{ matrix.node-version }}
+        strategy:
+            matrix:
+                node-version: [20, 22, 24]
         steps:
             - uses: actions/checkout@v6
             - name: Use Node.js
               uses: actions/setup-node@v6
               with:
-                  node-version: 24
+                  node-version: ${{ matrix.node-version }}
             - name: Install dependencies
               run: npm clean-install
             - name: Static code analysis
