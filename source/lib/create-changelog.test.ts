@@ -1,4 +1,4 @@
-import test from 'ava';
+import assert from 'node:assert';
 import { Factory } from 'fishery';
 import Maybe, { type Just } from 'true-myth/maybe';
 import { createChangelogFactory, type ChangelogOptions } from './create-changelog.ts';
@@ -14,7 +14,7 @@ const changelogOptionsFactory = Factory.define<ChangelogOptions>(() => {
     };
 });
 
-test('contains no title when version was not released', (t) => {
+test('contains no title when version was not released', () => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -29,10 +29,10 @@ test('contains no title when version was not released', (t) => {
     const changelog = createChangelog(options);
     const expected = '';
 
-    t.is(changelog, expected);
+    assert.strictEqual(changelog, expected);
 });
 
-test('contains a title with the version number and the formatted date when version was released', (t) => {
+test('contains a title with the version number and the formatted date when version was released', () => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -43,10 +43,10 @@ test('contains a title with the version number and the formatted date when versi
     const changelog = createChangelog(options);
     const expectedTitle = '## 1.0.0 (January 1, 1970)';
 
-    t.true(changelog.includes(expectedTitle));
+    assert.ok(changelog.includes(expectedTitle));
 });
 
-test('format the date with a custom date format when version was released', (t) => {
+test('format the date with a custom date format when version was released', () => {
     const packageInfo = { 'pr-log': { dateFormat: 'dd.MM.yyyy' } };
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
@@ -58,10 +58,10 @@ test('format the date with a custom date format when version was released', (t) 
     const changelog = createChangelog(options);
     const expectedTitle = '## 1.0.0 (01.01.1970)';
 
-    t.true(changelog.includes(expectedTitle));
+    assert.ok(changelog.includes(expectedTitle));
 });
 
-test('creates a formatted changelog when version was released', (t) => {
+test('creates a formatted changelog when version was released', () => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -104,10 +104,10 @@ test('creates a formatted changelog when version was released', (t) => {
     });
     const changelog = createChangelog(options);
 
-    t.true(changelog.includes(expectedChangelog));
+    assert.ok(changelog.includes(expectedChangelog));
 });
 
-test('uses custom labels when provided and version was released', (t) => {
+test('uses custom labels when provided and version was released', () => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -155,10 +155,10 @@ test('uses custom labels when provided and version was released', (t) => {
     });
     const changelog = createChangelog(options);
 
-    t.true(changelog.includes(expectedChangelog));
+    assert.ok(changelog.includes(expectedChangelog));
 });
 
-test('uses the same order for the changelog sections as in validLabels when version was released', (t) => {
+test('uses the same order for the changelog sections as in validLabels when version was released', () => {
     const createChangelog = createChangelogFactory({
         getCurrentDate: () => {
             return new Date(0);
@@ -206,5 +206,5 @@ test('uses the same order for the changelog sections as in validLabels when vers
     });
     const changelog = createChangelog(options);
 
-    t.true(changelog.includes(expectedChangelog));
+    assert.ok(changelog.includes(expectedChangelog));
 });

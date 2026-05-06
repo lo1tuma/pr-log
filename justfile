@@ -22,8 +22,8 @@ lint: eslint prettier-check
 
 lint-fix: eslint-fix prettier-fix
 
-test-unit: compile
-    ava
+test-unit:
+    mocha --config mocha.config.json
 
 test:
     c8 just test-unit

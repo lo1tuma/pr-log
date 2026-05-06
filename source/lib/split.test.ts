@@ -1,38 +1,38 @@
-import test from 'ava';
+import assert from 'node:assert';
 import { splitByString, splitByPattern } from './split.ts';
 
-test('splitByString() splits the given string by an empty string separator', (t) => {
+test('splitByString() splits the given string by an empty string separator', () => {
     const result = splitByString('foo', '');
-    t.deepEqual(result, ['f', 'o', 'o']);
+    assert.deepStrictEqual(result, ['f', 'o', 'o']);
 });
 
-test('splitByString() splits the given string by an non empty string separator', (t) => {
+test('splitByString() splits the given string by an non empty string separator', () => {
     const result = splitByString('foo bar', ' ');
-    t.deepEqual(result, ['foo', 'bar']);
+    assert.deepStrictEqual(result, ['foo', 'bar']);
 });
 
-test('splitByString() splits an empty string by an empty string separator', (t) => {
+test('splitByString() splits an empty string by an empty string separator', () => {
     const result = splitByString('', '');
-    t.deepEqual(result, []);
+    assert.deepStrictEqual(result, []);
 });
 
-test('splitByString() splits an empty string by an non empty string separator', (t) => {
+test('splitByString() splits an empty string by an non empty string separator', () => {
     const result = splitByString('', ' ');
-    t.deepEqual(result, ['']);
+    assert.deepStrictEqual(result, ['']);
 });
 
-test('splitByPattern() splits the given string by the given regex pattern', (t) => {
+test('splitByPattern() splits the given string by the given regex pattern', () => {
     const result = splitByPattern('foo bar', / /);
-    t.deepEqual(result, ['foo', 'bar']);
+    assert.deepStrictEqual(result, ['foo', 'bar']);
 });
 
-test('splitByPattern() splits an empty string by the given regex pattern', (t) => {
+test('splitByPattern() splits an empty string by the given regex pattern', () => {
     const result = splitByPattern('', / /);
-    t.deepEqual(result, ['']);
+    assert.deepStrictEqual(result, ['']);
 });
 
-test('splitByPattern() throws when an empty pattern as literal is given', (t) => {
-    t.throws(
+test('splitByPattern() throws when an empty pattern as literal is given', () => {
+    assert.throws(
         () => {
             splitByPattern('foo', /(?:)/);
         },
@@ -40,8 +40,8 @@ test('splitByPattern() throws when an empty pattern as literal is given', (t) =>
     );
 });
 
-test('splitByPattern() throws when an empty pattern is given', (t) => {
-    t.throws(
+test('splitByPattern() throws when an empty pattern is given', () => {
+    assert.throws(
         () => {
             // eslint-disable-next-line prefer-regex-literals -- we want to test if the empty regex is detected correctly using the constructor
             splitByPattern('foo', new RegExp(''));

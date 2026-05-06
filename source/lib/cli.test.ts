@@ -1,5 +1,5 @@
+import assert from 'node:assert';
 import { stub } from 'sinon';
-import test from 'ava';
 import type _prependFile from 'prepend-file';
 import type { Logger } from 'loglevel';
 import { Factory, type DeepPartial } from 'fishery';
@@ -44,73 +44,92 @@ type TestThrowsTestCase = {
     readonly expectedErrorMessage: string;
 };
 
-const testThrowsMacro = test.macro(async (t, testCase: TestThrowsTestCase) => {
-    const { cliRunOptionsOverrides, dependenciesOverrides, expectedErrorMessage } = testCase;
-    const cli = createCli(dependenciesOverrides);
-    const options = cliRunOptionsFactory.build(cliRunOptionsOverrides);
-
-    await t.throwsAsync(cli.run(options), { message: expectedErrorMessage });
-});
-
-test('throws if the version was released but no version number was specified', testThrowsMacro, {
-    cliRunOptionsOverrides: {
-        unreleased: false,
-        versionNumber: Maybe.just('') as Just<string>
+const throwsTestCases: readonly { readonly testName: string; readonly testCase: TestThrowsTestCase }[] = [
+    {
+        testName: 'throws if the version was released but no version number was specified',
+        testCase: {
+            cliRunOptionsOverrides: {
+                unreleased: false,
+                versionNumber: Maybe.just('') as Just<string>
+            },
+            dependenciesOverrides: {},
+            expectedErrorMessage: 'version-number not specified'
+        }
     },
-    dependenciesOverrides: {},
-    expectedErrorMessage: 'version-number not specified'
-});
-
-test('throws if the version was released and an invalid version number was specified', testThrowsMacro, {
-    cliRunOptionsOverrides: {
-        unreleased: false,
-        versionNumber: Maybe.just('a.b.c') as Just<string>
+    {
+        testName: 'throws if the version was released and an invalid version number was specified',
+        testCase: {
+            cliRunOptionsOverrides: {
+                unreleased: false,
+                versionNumber: Maybe.just('a.b.c') as Just<string>
+            },
+            dependenciesOverrides: {},
+            expectedErrorMessage: 'version-number is invalid'
+        }
     },
-    dependenciesOverrides: {},
-    expectedErrorMessage: 'version-number is invalid'
-});
-
-test('throws when the repository entry in the given packageInfo is missing', testThrowsMacro, {
-    cliRunOptionsOverrides: {},
-    dependenciesOverrides: {
-        packageInfo: {}
+    {
+        testName: 'throws when the repository entry in the given packageInfo is missing',
+        testCase: {
+            cliRunOptionsOverrides: {},
+            dependenciesOverrides: {
+                packageInfo: {}
+            },
+            expectedErrorMessage: 'Repository information missing in package.json'
+        }
     },
-    expectedErrorMessage: 'Repository information missing in package.json'
-});
-
-test('throws when the repository entry in the given packageInfo is not an object', testThrowsMacro, {
-    cliRunOptionsOverrides: {},
-    dependenciesOverrides: {
-        packageInfo: { repository: 'foo' }
+    {
+        testName: 'throws when the repository entry in the given packageInfo is not an object',
+        testCase: {
+            cliRunOptionsOverrides: {},
+            dependenciesOverrides: {
+                packageInfo: { repository: 'foo' }
+            },
+            expectedErrorMessage: 'Repository information missing in package.json'
+        }
     },
-    expectedErrorMessage: 'Repository information missing in package.json'
-});
-
-test('throws when the repository.url entry in the given packageInfo is missing', testThrowsMacro, {
-    cliRunOptionsOverrides: {},
-    dependenciesOverrides: {
-        packageInfo: { repository: {} }
+    {
+        testName: 'throws when the repository.url entry in the given packageInfo is missing',
+        testCase: {
+            cliRunOptionsOverrides: {},
+            dependenciesOverrides: {
+                packageInfo: { repository: {} }
+            },
+            expectedErrorMessage: 'Repository url is not a string in package.json'
+        }
     },
-    expectedErrorMessage: 'Repository url is not a string in package.json'
-});
-
-test('throws when the repository.url entry in the given packageInfo is not a string', testThrowsMacro, {
-    cliRunOptionsOverrides: {},
-    dependenciesOverrides: {
-        packageInfo: { repository: { url: 42 } }
+    {
+        testName: 'throws when the repository.url entry in the given packageInfo is not a string',
+        testCase: {
+            cliRunOptionsOverrides: {},
+            dependenciesOverrides: {
+                packageInfo: { repository: { url: 42 } }
+            },
+            expectedErrorMessage: 'Repository url is not a string in package.json'
+        }
     },
-    expectedErrorMessage: 'Repository url is not a string in package.json'
-});
+    {
+        testName: 'throws if the repository is dirty',
+        testCase: {
+            cliRunOptionsOverrides: {},
+            dependenciesOverrides: {
+                ensureCleanLocalGitState: stub().rejects(new Error('Local copy is not clean'))
+            },
+            expectedErrorMessage: 'Local copy is not clean'
+        }
+    }
+];
 
-test('throws if the repository is dirty', testThrowsMacro, {
-    cliRunOptionsOverrides: {},
-    dependenciesOverrides: {
-        ensureCleanLocalGitState: stub().rejects(new Error('Local copy is not clean'))
-    },
-    expectedErrorMessage: 'Local copy is not clean'
-});
+for (const throwsTestCase of throwsTestCases) {
+    test(throwsTestCase.testName, async () => {
+        const { cliRunOptionsOverrides, dependenciesOverrides, expectedErrorMessage } = throwsTestCase.testCase;
+        const cli = createCli(dependenciesOverrides);
+        const options = cliRunOptionsFactory.build(cliRunOptionsOverrides);
 
-test('does not throw if the repository is dirty', async (t) => {
+        await assert.rejects(cli.run(options), { message: expectedErrorMessage });
+    });
+}
+
+test('does not throw if the repository is dirty', async () => {
     const ensureCleanLocalGitState = stub().rejects(new Error('Local copy is not clean'));
     const createChangelog = stub().returns('sloppy changelog');
     const prependFile = stub().resolves();
@@ -125,11 +144,11 @@ test('does not throw if the repository is dirty', async (t) => {
 
     await cli.run(options);
 
-    t.is(prependFile.callCount, 1);
-    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'sloppy changelog\n\n']);
+    assert.strictEqual(prependFile.callCount, 1);
+    assert.deepStrictEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'sloppy changelog\n\n']);
 });
 
-test('uses custom labels if they are provided in package.json', async (t) => {
+test('uses custom labels if they are provided in package.json', async () => {
     const packageInfo = {
         repository: { url: 'https://github.com/foo/bar.git' },
         'pr-log': {
@@ -149,11 +168,11 @@ test('uses custom labels if they are provided in package.json', async (t) => {
 
     await cli.run(cliRunOptionsFactory.build());
 
-    t.is(getMergedPullRequests.callCount, 1);
-    t.deepEqual(getMergedPullRequests.firstCall.args, ['foo/bar', expectedLabels]);
+    assert.strictEqual(getMergedPullRequests.callCount, 1);
+    assert.deepStrictEqual(getMergedPullRequests.firstCall.args, ['foo/bar', expectedLabels]);
 
-    t.is(createChangelog.callCount, 1);
-    t.deepEqual(createChangelog.firstCall.args[0], {
+    assert.strictEqual(createChangelog.callCount, 1);
+    assert.deepStrictEqual(createChangelog.firstCall.args[0], {
         validLabels: expectedLabels,
         mergedPullRequests: undefined,
         githubRepo: 'foo/bar',
@@ -162,7 +181,7 @@ test('uses custom labels if they are provided in package.json', async (t) => {
     });
 });
 
-test('calls ensureCleanLocalGitState with correct parameters', async (t) => {
+test('calls ensureCleanLocalGitState with correct parameters', async () => {
     const ensureCleanLocalGitState = stub().resolves();
 
     const cli = createCli({ ensureCleanLocalGitState });
@@ -172,11 +191,11 @@ test('calls ensureCleanLocalGitState with correct parameters', async (t) => {
 
     await cli.run(options);
 
-    t.is(ensureCleanLocalGitState.callCount, 1);
-    t.deepEqual(ensureCleanLocalGitState.firstCall.args, [expectedGithubRepo]);
+    assert.strictEqual(ensureCleanLocalGitState.callCount, 1);
+    assert.deepStrictEqual(ensureCleanLocalGitState.firstCall.args, [expectedGithubRepo]);
 });
 
-test('calls getMergedPullRequests with the correct repo', async (t) => {
+test('calls getMergedPullRequests with the correct repo', async () => {
     const getMergedPullRequests = stub().resolves();
 
     const cli = createCli({ getMergedPullRequests });
@@ -186,11 +205,11 @@ test('calls getMergedPullRequests with the correct repo', async (t) => {
 
     await cli.run(options);
 
-    t.is(getMergedPullRequests.callCount, 1);
-    t.is(getMergedPullRequests.firstCall.args[0], expectedGithubRepo);
+    assert.strictEqual(getMergedPullRequests.callCount, 1);
+    assert.strictEqual(getMergedPullRequests.firstCall.args[0], expectedGithubRepo);
 });
 
-test('reports the generated changelog to stdout and not to a file when stdout is set to true', async (t) => {
+test('reports the generated changelog to stdout and not to a file when stdout is set to true', async () => {
     const createChangelog = stub().returns('generated changelog');
     const prependFile = stub().resolves();
     const log = stub();
@@ -207,8 +226,8 @@ test('reports the generated changelog to stdout and not to a file when stdout is
         })
     );
 
-    t.is(createChangelog.callCount, 1);
-    t.deepEqual(createChangelog.firstCall.args[0], {
+    assert.strictEqual(createChangelog.callCount, 1);
+    assert.deepStrictEqual(createChangelog.firstCall.args[0], {
         validLabels: defaultValidLabels,
         mergedPullRequests: [],
         githubRepo: 'foo/bar',
@@ -216,13 +235,13 @@ test('reports the generated changelog to stdout and not to a file when stdout is
         versionNumber: Maybe.just('1.2.3')
     });
 
-    t.is(prependFile.callCount, 0);
+    assert.strictEqual(prependFile.callCount, 0);
 
-    t.is(log.callCount, 1);
-    t.deepEqual(log.firstCall.args, ['generated changelog']);
+    assert.strictEqual(log.callCount, 1);
+    assert.deepStrictEqual(log.firstCall.args, ['generated changelog']);
 });
 
-test('reports the generated changelog to a file when stdout is set to false', async (t) => {
+test('reports the generated changelog to a file when stdout is set to false', async () => {
     const createChangelog = stub().returns('generated changelog');
     const prependFile = stub().resolves();
 
@@ -236,8 +255,8 @@ test('reports the generated changelog to a file when stdout is set to false', as
 
     await cli.run(options);
 
-    t.is(createChangelog.callCount, 1);
-    t.deepEqual(createChangelog.firstCall.args[0], {
+    assert.strictEqual(createChangelog.callCount, 1);
+    assert.deepStrictEqual(createChangelog.firstCall.args[0], {
         validLabels: defaultValidLabels,
         mergedPullRequests: [],
         githubRepo: 'foo/bar',
@@ -245,11 +264,11 @@ test('reports the generated changelog to a file when stdout is set to false', as
         versionNumber: Maybe.just('1.2.3')
     });
 
-    t.is(prependFile.callCount, 1);
-    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'generated changelog\n\n']);
+    assert.strictEqual(prependFile.callCount, 1);
+    assert.deepStrictEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'generated changelog\n\n']);
 });
 
-test('reports the generated unreleased changelog to a file when stdout is set to false', async (t) => {
+test('reports the generated unreleased changelog to a file when stdout is set to false', async () => {
     const createChangelog = stub().returns('generated changelog');
     const prependFile = stub().resolves();
 
@@ -264,8 +283,8 @@ test('reports the generated unreleased changelog to a file when stdout is set to
 
     await cli.run(options);
 
-    t.is(createChangelog.callCount, 1);
-    t.deepEqual(createChangelog.firstCall.args[0], {
+    assert.strictEqual(createChangelog.callCount, 1);
+    assert.deepStrictEqual(createChangelog.firstCall.args[0], {
         validLabels: defaultValidLabels,
         mergedPullRequests: [],
         githubRepo: 'foo/bar',
@@ -273,11 +292,11 @@ test('reports the generated unreleased changelog to a file when stdout is set to
         versionNumber: Maybe.just('1.2.3')
     });
 
-    t.is(prependFile.callCount, 1);
-    t.deepEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'generated changelog\n\n']);
+    assert.strictEqual(prependFile.callCount, 1);
+    assert.deepStrictEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'generated changelog\n\n']);
 });
 
-test('strips trailing empty lines from the generated changelog', async (t) => {
+test('strips trailing empty lines from the generated changelog', async () => {
     const createChangelog = stub().returns('generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n\n\n\n');
     const prependFile = stub().resolves();
 
@@ -286,7 +305,7 @@ test('strips trailing empty lines from the generated changelog', async (t) => {
 
     await cli.run(options);
 
-    t.deepEqual(prependFile.firstCall.args, [
+    assert.deepStrictEqual(prependFile.firstCall.args, [
         '/foo/CHANGELOG.md',
         'generated\nchangelog\nwith\n\na\nlot\n\nof\nempty\nlines\n\n'
     ]);
