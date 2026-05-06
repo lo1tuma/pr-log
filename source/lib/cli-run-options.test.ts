@@ -3,7 +3,7 @@ import { Factory, type DeepPartial } from 'fishery';
 import Result from 'true-myth/result';
 import { InvalidArgumentError } from 'commander';
 import Maybe, { type Just } from 'true-myth/maybe';
-import { createCliRunOptions, type CliRunOptions, type CreateCliRunOptions } from './cli-run-options.js';
+import { createCliRunOptions, type CliRunOptions, type CreateCliRunOptions } from './cli-run-options.ts';
 
 const createCliRunOptionsFactory = Factory.define<CreateCliRunOptions>(() => {
     return {

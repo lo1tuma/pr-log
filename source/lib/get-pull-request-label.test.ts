@@ -2,8 +2,8 @@ import test from 'ava';
 import { fake, type SinonSpy } from 'sinon';
 import { oneLine } from 'common-tags';
 import type { Octokit } from '@octokit/rest';
-import { getPullRequestLabel } from './get-pull-request-label.js';
-import { defaultValidLabels } from './valid-labels.js';
+import { getPullRequestLabel } from './get-pull-request-label.ts';
+import { defaultValidLabels } from './valid-labels.ts';
 
 type Overrides = {
     readonly listLabelsOnIssue?: SinonSpy;

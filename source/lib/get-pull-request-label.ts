@@ -1,5 +1,5 @@
 import type { Octokit } from '@octokit/rest';
-import { splitByString } from './split.js';
+import { splitByString } from './split.ts';
 
 type Dependencies = {
     readonly githubClient: Octokit;

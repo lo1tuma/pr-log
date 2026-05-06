@@ -4,7 +4,7 @@ import {
     createGitCommandRunner,
     type GitCommandRunner,
     type GitCommandRunnerDependencies
-} from './git-command-runner.js';
+} from './git-command-runner.ts';
 
 type Overrides = {
     readonly execute?: SinonSpy;

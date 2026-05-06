@@ -1,6 +1,6 @@
 import parseGitUrl from 'git-url-parse';
 import { isUndefined } from '@sindresorhus/is';
-import type { GitCommandRunner } from './git-command-runner.js';
+import type { GitCommandRunner } from './git-command-runner.ts';
 
 function isSameGitUrl(gitUrlA: string, gitUrlB: string): boolean {
     const parsedUrlA = parseGitUrl(gitUrlA);

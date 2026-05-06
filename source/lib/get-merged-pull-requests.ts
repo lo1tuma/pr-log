@@ -1,8 +1,8 @@
 import semver from 'semver';
 import type { Octokit } from '@octokit/rest';
 import { isUndefined } from '@sindresorhus/is';
-import type { GetPullRequestLabel } from './get-pull-request-label.js';
-import type { GitCommandRunner } from './git-command-runner.js';
+import type { GetPullRequestLabel } from './get-pull-request-label.ts';
+import type { GitCommandRunner } from './git-command-runner.ts';
 
 export type PullRequest = {
     readonly id: number;

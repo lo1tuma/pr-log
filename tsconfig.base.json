@@ -22,6 +22,8 @@
         "noUnusedParameters": true,
         "noUncheckedIndexedAccess": true,
         "verbatimModuleSyntax": true,
-        "outDir": "./target/build"
+        "outDir": "./target/build",
+        "rewriteRelativeImportExtensions": true,
+        "erasableSyntaxOnly": true
     }
 }

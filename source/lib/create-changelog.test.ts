@@ -1,8 +1,8 @@
 import test from 'ava';
 import { Factory } from 'fishery';
 import Maybe, { type Just } from 'true-myth/maybe';
-import { createChangelogFactory, type ChangelogOptions } from './create-changelog.js';
-import { defaultValidLabels } from './valid-labels.js';
+import { createChangelogFactory, type ChangelogOptions } from './create-changelog.ts';
+import { defaultValidLabels } from './valid-labels.ts';
 
 const changelogOptionsFactory = Factory.define<ChangelogOptions>(() => {
     return {

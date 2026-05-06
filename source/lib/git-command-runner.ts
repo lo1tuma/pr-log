@@ -1,6 +1,6 @@
 import type { execaCommand } from 'execa';
 import { oneLine } from 'common-tags';
-import { splitByString, splitByPattern } from './split.js';
+import { splitByString, splitByPattern } from './split.ts';
 
 export type RemoteAlias = {
     readonly alias: string;

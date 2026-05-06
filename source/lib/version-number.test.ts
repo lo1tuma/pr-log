@@ -2,7 +2,7 @@ import test from 'ava';
 import { Factory, type DeepPartial } from 'fishery';
 import { Maybe, Result, Unit } from 'true-myth';
 import type { Just } from 'true-myth/maybe';
-import { validateVersionNumber, type ValidateVersionNumberOptions } from './version-number.js';
+import { validateVersionNumber, type ValidateVersionNumberOptions } from './version-number.ts';
 
 const validateVersionNumberOptionsFactory = Factory.define<ValidateVersionNumberOptions>(() => {
     return {

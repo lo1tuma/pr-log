@@ -1,13 +1,13 @@
 import type _prependFile from 'prepend-file';
 import type { Logger } from 'loglevel';
 import { isPlainObject, isString } from '@sindresorhus/is';
-import type { CliRunOptions } from './cli-run-options.js';
-import type { CreateChangelog } from './create-changelog.js';
-import type { GetMergedPullRequests } from './get-merged-pull-requests.js';
-import type { EnsureCleanLocalGitState } from './ensure-clean-local-git-state.js';
-import { validateVersionNumber } from './version-number.js';
-import { getGithubRepo } from './get-github-repo.js';
-import { defaultValidLabels } from './valid-labels.js';
+import type { CliRunOptions } from './cli-run-options.ts';
+import type { CreateChangelog } from './create-changelog.ts';
+import type { GetMergedPullRequests } from './get-merged-pull-requests.ts';
+import type { EnsureCleanLocalGitState } from './ensure-clean-local-git-state.ts';
+import { validateVersionNumber } from './version-number.ts';
+import { getGithubRepo } from './get-github-repo.ts';
+import { defaultValidLabels } from './valid-labels.ts';
 
 function stripTrailingEmptyLine(text: string): string {
     if (text.endsWith('\n\n')) {
