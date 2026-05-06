@@ -1,11 +1,11 @@
 import { baseConfig } from '@enormora/eslint-config-base';
 import { nodeConfig } from '@enormora/eslint-config-node';
-import { avaConfig } from '@enormora/eslint-config-ava';
+import { mochaConfig } from '@enormora/eslint-config-mocha';
 import { typescriptConfig } from '@enormora/eslint-config-typescript';
 
 export default [
     {
-        ignores: ['target/**']
+        ignores: ['target/**', 'mocha.config.json']
     },
     baseConfig,
     nodeConfig,
@@ -31,8 +31,13 @@ export default [
         }
     },
     {
-        ...avaConfig,
-        files: ['**/*.test.ts']
+        ...mochaConfig,
+        files: ['**/*.test.ts'],
+        rules: {
+            ...mochaConfig.rules,
+            'mocha/no-global-tests': 'off',
+            'mocha/no-mocha-arrows': 'off'
+        }
     },
     {
         rules: {
@@ -40,7 +45,7 @@ export default [
         }
     },
     {
-        files: ['eslint.config.js', 'ava.config.js', 'prettier.config.js'],
+        files: ['eslint.config.js', 'mocha.config.json', 'prettier.config.js'],
         rules: {
             'import/no-default-export': 'off'
         }

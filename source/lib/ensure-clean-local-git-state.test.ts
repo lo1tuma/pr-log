@@ -1,4 +1,4 @@
-import test from 'ava';
+import assert from 'node:assert';
 import { fake, type SinonSpy } from 'sinon';
 import {
     ensureCleanLocalGitStateFactory,
@@ -37,50 +37,50 @@ function factory(overrides: Overrides = {}): EnsureCleanLocalGitState {
     return ensureCleanLocalGitStateFactory(fakeDependencies, { defaultBranch: 'master' });
 }
 
-test('rejects if git status is not empty', async (t) => {
+test('rejects if git status is not empty', async () => {
     const ensureCleanLocalGitState = factory({ getShortStatus: fake.resolves('M foobar') });
 
-    await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: 'Local copy is not clean' });
+    await assert.rejects(ensureCleanLocalGitState(githubRepo), { message: 'Local copy is not clean' });
 });
 
-test('rejects if current branch is not default branch', async (t) => {
+test('rejects if current branch is not default branch', async () => {
     const ensureCleanLocalGitState = factory({ getCurrentBranchName: fake.resolves('feature-foo') });
 
-    await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: 'Not on master branch' });
+    await assert.rejects(ensureCleanLocalGitState(githubRepo), { message: 'Not on master branch' });
 });
 
-test('rejects if the local branch is ahead of the remote', async (t) => {
+test('rejects if the local branch is ahead of the remote', async () => {
     const ensureCleanLocalGitState = factory({
         getSymmetricDifferencesBetweenBranches: fake.resolves(['<commit-sha1'])
     });
     const expectedMessage = 'Local git master branch is 1 commits ahead and 0 commits behind of origin/master';
 
-    await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: expectedMessage });
+    await assert.rejects(ensureCleanLocalGitState(githubRepo), { message: expectedMessage });
 });
 
-test('rejects if the local branch is behind the remote', async (t) => {
+test('rejects if the local branch is behind the remote', async () => {
     const ensureCleanLocalGitState = factory({
         getSymmetricDifferencesBetweenBranches: fake.resolves(['>commit-sha1'])
     });
     const expectedMessage = 'Local git master branch is 0 commits ahead and 1 commits behind of origin/master';
 
-    await t.throwsAsync(ensureCleanLocalGitState(githubRepo), { message: expectedMessage });
+    await assert.rejects(ensureCleanLocalGitState(githubRepo), { message: expectedMessage });
 });
 
-test('fetches the remote repository', async (t) => {
+test('fetches the remote repository', async () => {
     const fetchRemote = fake.resolves(undefined);
     const ensureCleanLocalGitState = factory({ fetchRemote });
 
     await ensureCleanLocalGitState(githubRepo);
 
-    t.is(fetchRemote.callCount, 1);
-    t.deepEqual(fetchRemote.firstCall.args, ['origin']);
+    assert.strictEqual(fetchRemote.callCount, 1);
+    assert.deepStrictEqual(fetchRemote.firstCall.args, ['origin']);
 });
 
-test('fulfills if the local git state is clean', async (t) => {
+test('fulfills if the local git state is clean', async () => {
     const ensureCleanLocalGitState = factory();
 
     await ensureCleanLocalGitState(githubRepo);
 
-    t.pass();
+    assert.ok(true);
 });

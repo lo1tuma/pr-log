@@ -6,10 +6,10 @@
     "lines": 100,
     "instrument": true,
     "check-coverage": true,
-    "extension": [".js"],
-    "src": "target/build/source",
+    "extension": [".ts"],
+    "src": "source",
     "reporter": ["lcov", "text-summary", "cobertura"],
     "reportDir": "./target/coverage",
     "tempDirectory": "./target/c8_output",
-    "exclude": ["target/build/source/**/*.test.js", "target/build/source/bin/**/*"]
+    "exclude": ["source/**/*.test.ts", "source/bin/**/*"]
 }
