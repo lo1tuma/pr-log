@@ -25,7 +25,7 @@ function getDefaultVersionBumpConfig(validLabels: ReadonlyMap<string, string>): 
 }
 
 function assertValidConfiguredLabels(
-    versionBumps: Partial<Record<VersionBumpLevel, readonly string[]>>,
+    versionBumps: Readonly<Partial<Record<VersionBumpLevel, readonly string[]>>>,
     validLabels: ReadonlyMap<string, string>
 ): void {
     const configuredLabels = Object.values(versionBumps).flat();
@@ -57,6 +57,22 @@ function parseVersionBumpLabels(
     return value;
 }
 
+function parseConfiguredVersionBumps(versionBumps: Record<string, unknown>): VersionBumpConfig {
+    return {
+        major: parseVersionBumpLabels(versionBumps, 'major') ?? [],
+        minor: parseVersionBumpLabels(versionBumps, 'minor') ?? [],
+        patch: parseVersionBumpLabels(versionBumps, 'patch') ?? []
+    };
+}
+
+function assertSupportedVersionBumpLevels(versionBumps: Record<string, unknown>): void {
+    for (const key of Object.keys(versionBumps)) {
+        if (!versionBumpLevels.includes(key as VersionBumpLevel)) {
+            throw new TypeError(`Configured version bump level "${key}" is not supported`);
+        }
+    }
+}
+
 export function getVersionBumpConfig(
     packageInfo: PackageInfo,
     validLabels: ReadonlyMap<string, string>
@@ -67,23 +83,15 @@ export function getVersionBumpConfig(
         return getDefaultVersionBumpConfig(validLabels);
     }
 
-    const versionBumps = prLogConfig.versionBumps;
+    const { versionBumps } = prLogConfig;
 
     if (!isPlainObject(versionBumps)) {
         throw new TypeError('Configured version bumps must be an object');
     }
 
-    for (const key of Object.keys(versionBumps)) {
-        if (!versionBumpLevels.includes(key as VersionBumpLevel)) {
-            throw new TypeError(`Configured version bump level "${key}" is not supported`);
-        }
-    }
+    assertSupportedVersionBumpLevels(versionBumps);
 
-    const parsedVersionBumps = {
-        major: parseVersionBumpLabels(versionBumps, 'major') ?? [],
-        minor: parseVersionBumpLabels(versionBumps, 'minor') ?? [],
-        patch: parseVersionBumpLabels(versionBumps, 'patch') ?? []
-    } satisfies VersionBumpConfig;
+    const parsedVersionBumps = parseConfiguredVersionBumps(versionBumps);
 
     assertValidConfiguredLabels(parsedVersionBumps, validLabels);
 

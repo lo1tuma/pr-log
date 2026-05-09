@@ -307,9 +307,7 @@ test('derives the version number automatically from merged pull request labels',
     const createChangelog = stub().returns('generated changelog');
     const prependFile = stub().resolves();
     const getLatestVersionTag = stub().resolves('1.2.3');
-    const getMergedPullRequests = stub().resolves([
-        { id: 1, title: 'Add thing', label: 'feature' }
-    ]);
+    const getMergedPullRequests = stub().resolves([{ id: 1, title: 'Add thing', label: 'feature' }]);
     const cli = createCli({
         createChangelog,
         prependFile: prependFile as unknown as typeof _prependFile,
@@ -341,9 +339,7 @@ test('uses configured version bump labels for auto-versioning', async () => {
     const createChangelog = stub().returns('generated changelog');
     const prependFile = stub().resolves();
     const getLatestVersionTag = stub().resolves('1.2.3');
-    const getMergedPullRequests = stub().resolves([
-        { id: 1, title: 'Docs', label: 'documentation' }
-    ]);
+    const getMergedPullRequests = stub().resolves([{ id: 1, title: 'Docs', label: 'documentation' }]);
     const packageInfo = {
         repository: { url: 'https://github.com/foo/bar.git' },
         'pr-log': {

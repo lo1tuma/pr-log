@@ -22,8 +22,8 @@ type ValidateVersionNumberOptionsReleased = {
 };
 
 export type ValidateVersionNumberOptions =
-    | ValidateVersionNumberOptionsReleased
     | ValidateVersionNumberOptionsAuto
+    | ValidateVersionNumberOptionsReleased
     | ValidateVersionNumberOptionsUnreleased;
 
 export function validateVersionNumber(options: ValidateVersionNumberOptions): Result<Unit, Error> {

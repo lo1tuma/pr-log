@@ -29,11 +29,7 @@ test('proposes a minor version when a feature is present without a breaking chan
 });
 
 test('proposes a patch version for patch labels', () => {
-    const actual = proposeVersionNumber(
-        '1.2.3',
-        [{ id: 1, title: 'Fix', label: 'bug' }],
-        defaultVersionBumpConfig
-    );
+    const actual = proposeVersionNumber('1.2.3', [{ id: 1, title: 'Fix', label: 'bug' }], defaultVersionBumpConfig);
 
     assert.strictEqual(actual, '1.2.4');
 });
@@ -63,11 +59,11 @@ test('throws when no merged pull requests are available', () => {
 test('throws when no labels match the configured version bumps', () => {
     assert.throws(
         () => {
-            proposeVersionNumber(
-                '1.2.3',
-                [{ id: 1, title: 'Docs', label: 'documentation' }],
-                { major: ['breaking'], minor: ['feature'], patch: [] }
-            );
+            proposeVersionNumber('1.2.3', [{ id: 1, title: 'Docs', label: 'documentation' }], {
+                major: ['breaking'],
+                minor: ['feature'],
+                patch: []
+            });
         },
         { message: 'Failed to propose next version number because no merged pull request labels match version bumps' }
     );
