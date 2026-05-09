@@ -11,6 +11,7 @@ import { defaultValidLabels } from './valid-labels.ts';
 const cliRunOptionsFactory = Factory.define<CliRunOptions>(() => {
     return {
         unreleased: false,
+        autoVersion: false,
         versionNumber: Maybe.just('1.2.3') as Just<string>,
         changelogPath: '/foo/CHANGELOG.md',
         sloppy: false,
@@ -21,6 +22,7 @@ const cliRunOptionsFactory = Factory.define<CliRunOptions>(() => {
 function createCli(dependencies: Partial<CliRunnerDependencies> = {}): CliRunner {
     const {
         ensureCleanLocalGitState = stub().resolves(),
+        getLatestVersionTag = stub().resolves('1.2.2'),
         getMergedPullRequests = stub().resolves([]),
         createChangelog = stub().returns(''),
         prependFile = stub().resolves() as unknown as typeof _prependFile,
@@ -30,6 +32,7 @@ function createCli(dependencies: Partial<CliRunnerDependencies> = {}): CliRunner
 
     return createCliRunner({
         ensureCleanLocalGitState,
+        getLatestVersionTag,
         getMergedPullRequests,
         createChangelog,
         prependFile,
@@ -276,10 +279,14 @@ test('reports the generated unreleased changelog to a file when stdout is set to
         createChangelog,
         prependFile: prependFile as unknown as typeof _prependFile
     });
-    const options = cliRunOptionsFactory.build({
+    const options: CliRunOptions = {
         unreleased: true,
+        autoVersion: false,
+        versionNumber: Maybe.nothing(),
+        changelogPath: '/foo/CHANGELOG.md',
+        sloppy: false,
         stdout: false
-    });
+    };
 
     await cli.run(options);
 
@@ -289,11 +296,87 @@ test('reports the generated unreleased changelog to a file when stdout is set to
         mergedPullRequests: [],
         githubRepo: 'foo/bar',
         unreleased: true,
-        versionNumber: Maybe.just('1.2.3')
+        versionNumber: Maybe.nothing()
     });
 
     assert.strictEqual(prependFile.callCount, 1);
     assert.deepStrictEqual(prependFile.firstCall.args, ['/foo/CHANGELOG.md', 'generated changelog\n\n']);
+});
+
+test('derives the version number automatically from merged pull request labels', async () => {
+    const createChangelog = stub().returns('generated changelog');
+    const prependFile = stub().resolves();
+    const getLatestVersionTag = stub().resolves('1.2.3');
+    const getMergedPullRequests = stub().resolves([
+        { id: 1, title: 'Add thing', label: 'feature' }
+    ]);
+    const cli = createCli({
+        createChangelog,
+        prependFile: prependFile as unknown as typeof _prependFile,
+        getLatestVersionTag,
+        getMergedPullRequests
+    });
+    const options: CliRunOptions = {
+        unreleased: false,
+        autoVersion: true,
+        versionNumber: Maybe.nothing(),
+        changelogPath: '/foo/CHANGELOG.md',
+        sloppy: false,
+        stdout: false
+    };
+
+    await cli.run(options);
+
+    assert.strictEqual(getLatestVersionTag.callCount, 1);
+    assert.deepStrictEqual(createChangelog.firstCall.args[0], {
+        validLabels: defaultValidLabels,
+        mergedPullRequests: [{ id: 1, title: 'Add thing', label: 'feature' }],
+        githubRepo: 'foo/bar',
+        unreleased: false,
+        versionNumber: Maybe.just('1.3.0')
+    });
+});
+
+test('uses configured version bump labels for auto-versioning', async () => {
+    const createChangelog = stub().returns('generated changelog');
+    const prependFile = stub().resolves();
+    const getLatestVersionTag = stub().resolves('1.2.3');
+    const getMergedPullRequests = stub().resolves([
+        { id: 1, title: 'Docs', label: 'documentation' }
+    ]);
+    const packageInfo = {
+        repository: { url: 'https://github.com/foo/bar.git' },
+        'pr-log': {
+            versionBumps: {
+                patch: ['documentation']
+            }
+        }
+    };
+    const cli = createCli({
+        createChangelog,
+        prependFile: prependFile as unknown as typeof _prependFile,
+        getLatestVersionTag,
+        getMergedPullRequests,
+        packageInfo
+    });
+    const options: CliRunOptions = {
+        unreleased: false,
+        autoVersion: true,
+        versionNumber: Maybe.nothing(),
+        changelogPath: '/foo/CHANGELOG.md',
+        sloppy: false,
+        stdout: false
+    };
+
+    await cli.run(options);
+
+    assert.deepStrictEqual(createChangelog.firstCall.args[0], {
+        validLabels: defaultValidLabels,
+        mergedPullRequests: [{ id: 1, title: 'Docs', label: 'documentation' }],
+        githubRepo: 'foo/bar',
+        unreleased: false,
+        versionNumber: Maybe.just('1.2.4')
+    });
 });
 
 test('strips trailing empty lines from the generated changelog', async () => {

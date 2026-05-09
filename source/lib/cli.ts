@@ -1,5 +1,6 @@
 import type _prependFile from 'prepend-file';
 import type { Logger } from 'loglevel';
+import Maybe, { type Just } from 'true-myth/maybe';
 import { isPlainObject, isString } from '@sindresorhus/is';
 import type { CliRunOptions } from './cli-run-options.ts';
 import type { CreateChangelog } from './create-changelog.ts';
@@ -8,6 +9,10 @@ import type { EnsureCleanLocalGitState } from './ensure-clean-local-git-state.ts
 import { validateVersionNumber } from './version-number.ts';
 import { getGithubRepo } from './get-github-repo.ts';
 import { defaultValidLabels } from './valid-labels.ts';
+import { getVersionBumpConfig } from './version-bump-config.ts';
+import { proposeVersionNumber } from './propose-version-number.ts';
+
+export type GetLatestVersionTag = () => Promise<string>;
 
 function stripTrailingEmptyLine(text: string): string {
     if (text.endsWith('\n\n')) {
@@ -28,6 +33,7 @@ function getValidLabels(packageInfo: Record<string, unknown>): ReadonlyMap<strin
 
 export type CliRunnerDependencies = {
     readonly ensureCleanLocalGitState: EnsureCleanLocalGitState;
+    readonly getLatestVersionTag: GetLatestVersionTag;
     readonly getMergedPullRequests: GetMergedPullRequests;
     readonly createChangelog: CreateChangelog;
     readonly packageInfo: Record<string, unknown>;
@@ -40,23 +46,53 @@ export type CliRunner = {
 };
 
 export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner {
-    const { ensureCleanLocalGitState, getMergedPullRequests, createChangelog, packageInfo, prependFile, logger } =
-        dependencies;
+    const {
+        ensureCleanLocalGitState,
+        getLatestVersionTag,
+        getMergedPullRequests,
+        createChangelog,
+        packageInfo,
+        prependFile,
+        logger
+    } = dependencies;
+
+    async function ensureCleanState(options: CliRunOptions, githubRepo: string): Promise<void> {
+        if (!options.sloppy) {
+            await ensureCleanLocalGitState(githubRepo);
+        }
+    }
 
     async function generateChangelog(
         options: CliRunOptions,
         githubRepo: string,
         validLabels: ReadonlyMap<string, string>
     ): Promise<string> {
-        if (!options.sloppy) {
-            await ensureCleanLocalGitState(githubRepo);
-        }
+        await ensureCleanState(options, githubRepo);
 
         const mergedPullRequests = await getMergedPullRequests(githubRepo, validLabels);
         const commonChangelogOptions = { validLabels, mergedPullRequests, githubRepo };
-        const changelogOptions = options.unreleased
-            ? ({ ...commonChangelogOptions, unreleased: true, versionNumber: options.versionNumber } as const)
-            : ({ ...commonChangelogOptions, unreleased: false, versionNumber: options.versionNumber } as const);
+
+        if (options.unreleased) {
+            const changelog = createChangelog({
+                ...commonChangelogOptions,
+                unreleased: true,
+                versionNumber: options.versionNumber
+            });
+
+            return stripTrailingEmptyLine(changelog);
+        }
+
+        const versionNumber = options.autoVersion
+            ? (Maybe.just(
+                  proposeVersionNumber(
+                      await getLatestVersionTag(),
+                      mergedPullRequests,
+                      getVersionBumpConfig(packageInfo, validLabels)
+                  )
+              ) as Just<string>)
+            : options.versionNumber;
+
+        const changelogOptions = { ...commonChangelogOptions, unreleased: false, versionNumber } as const;
         const changelog = createChangelog(changelogOptions);
 
         return stripTrailingEmptyLine(changelog);

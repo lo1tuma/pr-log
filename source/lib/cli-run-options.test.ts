@@ -28,6 +28,7 @@ const createCliRunOptionsTestCases = [
         optionsOverrides: { commandOptions: { unreleased: true }, versionNumber: undefined },
         expectedResult: Result.ok<CliRunOptions, InvalidArgumentError>({
             unreleased: true,
+            autoVersion: false,
             versionNumber: Maybe.nothing<string>(),
             sloppy: false,
             changelogPath: '',
@@ -56,6 +57,7 @@ const createCliRunOptionsTestCases = [
         optionsOverrides: { commandOptions: { unreleased: false }, versionNumber: '1.2.3' },
         expectedResult: Result.ok<CliRunOptions, InvalidArgumentError>({
             unreleased: false,
+            autoVersion: false,
             versionNumber: Maybe.just('1.2.3') as Just<string>,
             sloppy: false,
             changelogPath: '',
@@ -68,6 +70,7 @@ const createCliRunOptionsTestCases = [
         optionsOverrides: { commandOptions: { unreleased: false, sloppy: true }, versionNumber: '1.2.3' },
         expectedResult: Result.ok<CliRunOptions, InvalidArgumentError>({
             unreleased: false,
+            autoVersion: false,
             versionNumber: Maybe.just('1.2.3') as Just<string>,
             sloppy: true,
             changelogPath: '',
@@ -80,11 +83,41 @@ const createCliRunOptionsTestCases = [
         optionsOverrides: { commandOptions: { unreleased: false, stdout: true }, versionNumber: '1.2.3' },
         expectedResult: Result.ok<CliRunOptions, InvalidArgumentError>({
             unreleased: false,
+            autoVersion: false,
             versionNumber: Maybe.just('1.2.3') as Just<string>,
             sloppy: false,
             changelogPath: '',
             stdout: true
         })
+    },
+    {
+        testName:
+            'createCliRunOptions() returns a Result Ok when "autoVersion" command option is true and no version number was provided',
+        optionsOverrides: { commandOptions: { autoVersion: true }, versionNumber: undefined },
+        expectedResult: Result.ok<CliRunOptions, InvalidArgumentError>({
+            unreleased: false,
+            autoVersion: true,
+            versionNumber: Maybe.nothing<string>(),
+            sloppy: false,
+            changelogPath: '',
+            stdout: false
+        })
+    },
+    {
+        testName:
+            'createCliRunOptions() returns a Result Error when "autoVersion" command option is true and a version number was provided',
+        optionsOverrides: { commandOptions: { autoVersion: true }, versionNumber: '1.2.3' },
+        expectedResult: Result.err<CliRunOptions, InvalidArgumentError>(
+            new InvalidArgumentError('A version number is not allowed when --auto-version was provided')
+        )
+    },
+    {
+        testName:
+            'createCliRunOptions() returns a Result Error when "autoVersion" and "unreleased" command options are both true',
+        optionsOverrides: { commandOptions: { autoVersion: true, unreleased: true }, versionNumber: undefined },
+        expectedResult: Result.err<CliRunOptions, InvalidArgumentError>(
+            new InvalidArgumentError('A version number must not be auto-derived when --unreleased was provided')
+        )
     }
 ] as const;
 
