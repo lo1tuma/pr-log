@@ -68,3 +68,12 @@ test('throws when no labels match the configured version bumps', () => {
         { message: 'Failed to propose next version number because no merged pull request labels match version bumps' }
     );
 });
+
+test('throws when the latest version tag cannot be incremented', () => {
+    assert.throws(
+        () => {
+            proposeVersionNumber('invalid', [{ id: 1, title: 'Feature', label: 'feature' }], defaultVersionBumpConfig);
+        },
+        { message: 'Failed to increment version number' }
+    );
+});

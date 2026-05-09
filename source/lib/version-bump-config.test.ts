@@ -31,6 +31,25 @@ test('uses the configured version bump config', () => {
     });
 });
 
+test('falls back to empty arrays for omitted configured bump levels', () => {
+    const packageInfo = {
+        'pr-log': {
+            versionBumps: {
+                major: ['breaking'],
+                minor: ['feature']
+            }
+        }
+    };
+
+    const actual = getVersionBumpConfig(packageInfo, defaultValidLabels);
+
+    assert.deepStrictEqual(actual, {
+        major: ['breaking'],
+        minor: ['feature'],
+        patch: []
+    });
+});
+
 test('throws when configured version bumps is not an object', () => {
     assert.throws(
         () => {
