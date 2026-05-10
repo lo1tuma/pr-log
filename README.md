@@ -105,6 +105,13 @@ To create or update your changelog run
 
 `pr-log [options] <version-number>` where `version-number` is the name of this release
 
+You can also run `pr-log --auto-version` to derive the next version number from the labels of merged pull requests since the latest stable semver tag.
+The default bump precedence is:
+
+-   `breaking` -> major
+-   `feature` -> minor
+-   any other valid label -> patch
+
 Example:
 
 Given the following setup:
@@ -140,6 +147,25 @@ When enabled this option outputs the stacktrace of an error additionally to the 
 #### --stdout
 
 This option disables writing the changelog into the file `CHANGELOG.md`. Instead it prints the changelog to `stdout`.
+
+#### --auto-version
+
+This option derives the release version from merged pull request labels since the latest stable semver tag.
+It must not be combined with `--unreleased` or an explicit `version-number`.
+
+You can customize the label-to-version mapping in `package.json`:
+
+```json
+{
+    "pr-log": {
+        "versionBumps": {
+            "major": ["breaking"],
+            "minor": ["feature"],
+            "patch": ["bug", "documentation", "upgrade"]
+        }
+    }
+}
+```
 
 ### Correct usage makes a clean and complete changelog
 

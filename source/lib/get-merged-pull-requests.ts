@@ -1,8 +1,8 @@
-import semver from 'semver';
 import type { Octokit } from '@octokit/rest';
 import { isUndefined } from '@sindresorhus/is';
 import type { GetPullRequestLabel } from './get-pull-request-label.ts';
 import type { GitCommandRunner } from './git-command-runner.ts';
+import { determineLatestVersionTag } from './latest-version-tag.ts';
 
 export type PullRequest = {
     readonly id: number;
@@ -29,17 +29,7 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
 
     async function getLatestVersionTag(): Promise<string> {
         const tags = await gitCommandRunner.listTags();
-        const versionTags = tags.filter((tag: string) => {
-            return semver.valid(tag) !== null && semver.prerelease(tag) === null;
-        });
-        const orderedVersionTags = versionTags.sort(semver.compare);
-        const latestTag = orderedVersionTags.at(-1);
-
-        if (isUndefined(latestTag)) {
-            throw new TypeError('Failed to determine latest version number git tag');
-        }
-
-        return latestTag;
+        return determineLatestVersionTag(tags);
     }
 
     async function getPullRequests(fromTag: string): Promise<readonly PullRequest[]> {

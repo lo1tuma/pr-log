@@ -16,6 +16,7 @@ import { createChangelogFactory } from '../lib/create-changelog.ts';
 import { findRemoteAliasFactory } from '../lib/find-remote-alias.ts';
 import { getPullRequestLabel } from '../lib/get-pull-request-label.ts';
 import { createGitCommandRunner } from '../lib/git-command-runner.ts';
+import { determineLatestVersionTag } from '../lib/latest-version-tag.ts';
 
 loglevel.enableAll();
 
@@ -40,6 +41,9 @@ const getMergedPullRequests = getMergedPullRequestsFactory({
     gitCommandRunner,
     getPullRequestLabel
 });
+const getLatestVersionTag = async (): Promise<string> => {
+    return determineLatestVersionTag(await gitCommandRunner.listTags());
+};
 const getCurrentDate = (): Readonly<Date> => {
     return new Date();
 };
@@ -54,6 +58,7 @@ program
     .option('--trace', 'show stack traces for any error', false)
     .option('--default-branch <name>', 'set custom default branch', 'main')
     .option('--stdout', 'output the changelog to stdout instead of writing to CHANGELOG.md', false)
+    .option('--auto-version', 'derive the release version from merged pull request labels', false)
     .option('--unreleased', 'include section for unreleased changes', false)
     .action(async (versionNumber: string | undefined, options: Record<string, unknown>) => {
         isTracingEnabled = options.trace === true;
@@ -75,6 +80,7 @@ program
                         { gitCommandRunner, findRemoteAlias },
                         { defaultBranch }
                     ),
+                    getLatestVersionTag,
                     getMergedPullRequests,
                     createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
                 };
