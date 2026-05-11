@@ -46,7 +46,7 @@
         "fishery": "2.4.0",
         "mocha": "11.7.5",
         "prettier": "3.3.3",
-        "rust-just": "1.50.0",
+        "rust-just": "1.51.0",
         "sinon": "22.0.0",
         "typescript": "5.9.3"
     },
