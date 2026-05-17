@@ -3,6 +3,8 @@ import { nodeConfig } from '@enormora/eslint-config-node';
 import { mochaConfig } from '@enormora/eslint-config-mocha';
 import { typescriptConfig } from '@enormora/eslint-config-typescript';
 
+// cspell:ignore sonarjs
+
 export default [
     {
         ignores: ['target/**', 'mocha.config.json']
@@ -33,14 +35,26 @@ export default [
     {
         ...mochaConfig,
         files: ['**/*.test.ts'],
+        languageOptions: {
+            globals: {
+                test: 'readonly'
+            }
+        },
         rules: {
             ...mochaConfig.rules,
+            'sonarjs/no-empty-group': 'off',
+            complexity: 'off',
             'mocha/no-global-tests': 'off',
             'mocha/no-mocha-arrows': 'off'
         }
     },
     {
         rules: {
+            '@typescript-eslint/method-signature-style': 'off',
+            '@typescript-eslint/no-unsafe-type-assertion': 'off',
+            '@stylistic/operator-linebreak': 'off',
+            'import/no-named-as-default': 'off',
+            'import/no-named-as-default-member': 'off',
             'max-lines-per-function': ['error', { max: 50, skipBlankLines: true, skipComments: true }]
         }
     },

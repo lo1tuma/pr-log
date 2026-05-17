@@ -34,7 +34,7 @@ test('splitByPattern() splits an empty string by the given regex pattern', () =>
 test('splitByPattern() throws when an empty pattern as literal is given', () => {
     assert.throws(
         () => {
-            splitByPattern('foo', /(?:)/);
+            splitByPattern('foo', /(?=)/u);
         },
         { message: 'The given regex pattern was empty and can’t be used to split a string value' }
     );
