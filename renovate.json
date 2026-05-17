@@ -10,8 +10,8 @@
     },
     "packageRules": [
         {
-            "matchPackagePatterns": ["^@enormora/eslint-config"],
-            "groupName": "@enormora/eslint-config"
+            "matchPackagePatterns": ["^@enormora/eslint-config", "^eslint$"],
+            "groupName": "eslint"
         },
         {
             "depTypeList": ["dependencies", "devDependencies"],
