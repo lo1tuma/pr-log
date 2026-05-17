@@ -36,7 +36,7 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
         const mergeCommits = await gitCommandRunner.getMergeCommitLogs(fromTag);
 
         return mergeCommits.map((log) => {
-            const matches = /^Merge pull request #(?<id>\d+) from .*?$/u.exec(log.subject);
+            const matches = /^Merge pull request #(?<id>\d+) from .*$/u.exec(log.subject);
             if (isUndefined(matches?.groups?.id)) {
                 throw new TypeError('Failed to extract pull request id from merge commit log');
             }
