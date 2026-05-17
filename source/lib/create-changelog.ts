@@ -1,6 +1,6 @@
 import { format as formatDate } from 'date-fns';
 import { isPlainObject, isArray, isString } from '@sindresorhus/is';
-import enLocale from 'date-fns/locale/en-US/index.js';
+import { enUS as enLocale } from 'date-fns/locale/en-US';
 import type { Just, Nothing } from 'true-myth/maybe';
 import type { PullRequest, PullRequestWithLabel } from './get-merged-pull-requests.ts';
 
