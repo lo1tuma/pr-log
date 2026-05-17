@@ -63,7 +63,7 @@
     ],
     "contributors": [
         "Alexander Schmidt <alexanderschmidt1@gmail.com>",
-        "Christian Rackerseder <github@echooff.de>"
+        "Christian Rackerseder <git@echooff.de>"
     ],
     "engines": {
         "node": "^24.0.0 || ^26.0.0"
