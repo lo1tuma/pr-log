@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { fake, type SinonSpy } from 'sinon';
+import { fake, spy, type SinonSpy } from 'sinon';
 import { defaultValidLabels } from './valid-labels.ts';
 import {
     getMergedPullRequestsFactory,
@@ -18,6 +18,12 @@ type Overrides = {
     readonly getPullRequestLabel?: SinonSpy;
 };
 
+type ControlledLabelLookup = {
+    readonly getPullRequestLabel: SinonSpy;
+    readonly firstLabelLookupStarted: Promise<void>;
+    resolveFirstLabelLookup(label: string): void;
+};
+
 function factory(overrides: Overrides = {}): GetMergedPullRequests {
     const {
         listTags = fake.resolves([latestVersion]),
@@ -31,6 +37,41 @@ function factory(overrides: Overrides = {}): GetMergedPullRequests {
     } as unknown as GetMergedPullRequestsDependencies;
 
     return getMergedPullRequestsFactory(dependencies);
+}
+
+function failUninitializedControlledLabelLookupResolver(): never {
+    throw new Error('Controlled label lookup resolver was called before initialization');
+}
+
+function createControlledLabelLookup(): ControlledLabelLookup {
+    let resolveFirstLabelLookup: (label: string) => void = failUninitializedControlledLabelLookupResolver;
+    const firstLabelLookup = new Promise<string>((resolve) => {
+        resolveFirstLabelLookup = resolve;
+    });
+    let resolveFirstLabelLookupStarted: () => void = failUninitializedControlledLabelLookupResolver;
+    const firstLabelLookupStarted = new Promise<void>((resolve) => {
+        resolveFirstLabelLookupStarted = resolve;
+    });
+    const getPullRequestLabel = spy(async (_githubRepo, _validLabels, pullRequestId: number): Promise<string> => {
+        if (pullRequestId === 1) {
+            resolveFirstLabelLookupStarted();
+            return firstLabelLookup;
+        }
+
+        return 'documentation';
+    });
+
+    return { getPullRequestLabel, firstLabelLookupStarted, resolveFirstLabelLookup };
+}
+
+function assertFirstPullRequestLabelLookup(callCount: number, comparedArguments: readonly unknown[]): void {
+    assert.strictEqual(callCount, 1);
+    assert.deepStrictEqual(comparedArguments, ['any/repo', defaultValidLabels, 1]);
+}
+
+function assertSecondPullRequestLabelLookup(callCount: number, comparedArguments: readonly unknown[]): void {
+    assert.strictEqual(callCount, expectedPullRequestLabelCallCount);
+    assert.deepStrictEqual(comparedArguments, ['any/repo', defaultValidLabels, expectedPullRequestLabelCallCount]);
 }
 
 test('throws when there is no tag at all', async () => {
@@ -140,4 +181,36 @@ test('extracts id, title and label for merged pull requests', async () => {
     ]);
 
     assert.deepStrictEqual(pullRequests, [firstExpectedPullRequest, secondExpectedPullRequest]);
+});
+
+test('looks up pull request labels sequentially', async () => {
+    const getMergeCommitLogs = fake.resolves([
+        {
+            subject: 'Merge pull request #1 from branch',
+            body: 'pr-1 message'
+        },
+        { subject: 'Merge pull request #2 from other', body: 'pr-2 message' }
+    ]);
+    const { getPullRequestLabel, firstLabelLookupStarted, resolveFirstLabelLookup } = createControlledLabelLookup();
+    const getMergedPullRequests = factory({ getMergeCommitLogs, getPullRequestLabel });
+    const mergedPullRequests = getMergedPullRequests(anyRepo, defaultValidLabels);
+
+    await firstLabelLookupStarted;
+
+    assertFirstPullRequestLabelLookup(
+        getPullRequestLabel.callCount,
+        getPullRequestLabel.firstCall.args.slice(0, comparedArgumentCount)
+    );
+
+    resolveFirstLabelLookup('bug');
+    const pullRequests = await mergedPullRequests;
+
+    assertSecondPullRequestLabelLookup(
+        getPullRequestLabel.callCount,
+        getPullRequestLabel.secondCall.args.slice(0, comparedArgumentCount)
+    );
+    assert.deepStrictEqual(pullRequests, [
+        { id: 1, title: 'pr-1 message', label: 'bug' },
+        { id: 2, title: 'pr-2 message', label: 'documentation' }
+    ]);
 });
