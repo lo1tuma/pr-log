@@ -54,17 +54,19 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
         validLabels: ReadonlyMap<string, string>,
         pullRequests: readonly PullRequest[]
     ): Promise<readonly PullRequestWithLabel[]> {
-        const promises = pullRequests.map(async (pullRequest): Promise<PullRequestWithLabel> => {
+        const pullRequestsWithLabels: PullRequestWithLabel[] = [];
+
+        for (const pullRequest of pullRequests) {
             const label = await getPullRequestLabel(githubRepo, validLabels, pullRequest.id, dependencies);
 
-            return {
+            pullRequestsWithLabels.push({
                 id: pullRequest.id,
                 title: pullRequest.title,
                 label
-            };
-        });
+            });
+        }
 
-        return Promise.all(promises);
+        return pullRequestsWithLabels;
     }
 
     return async function getMergedPullRequests(githubRepo: string, validLabels: ReadonlyMap<string, string>) {
