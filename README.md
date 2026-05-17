@@ -10,19 +10,19 @@
 
 The main features:
 
--   Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag (as long as [--stdout](#options) is not provided). This works by
-    -   first getting a list of all tags
-    -   than removing all tags that are not compatible to [semver versioning](http://semver.org/)
-    -   sort the tags
-    -   getting the git log from the last tag until now
-    -   If no `CHANGELOG.md` existed, it will create the file else it will write prepending to it
--   Friendly CLI
-    -   Get usage by running `pr-log --help`
-    -   Error messages that help correcting usage mistakes. E.g.
-        -   Missing first command line argument: `Error: version-number not specified`
-        -   Local branch is outdated compared to the remote branch: `Error: Local git main branch is 0 commits ahead and 2 commits behind of origin/main`
-        -   The current working directory is not clean (e.g. contains files that are modified): `Error: Local copy is not clean`
--   Well tested
+- Writes in a `CHANGELOG.md` from merged GitHub pull requests since the last tag (as long as [--stdout](#options) is not provided). This works by
+    - first getting a list of all tags
+    - than removing all tags that are not compatible to [semver versioning](http://semver.org/)
+    - sort the tags
+    - getting the git log from the last tag until now
+    - If no `CHANGELOG.md` existed, it will create the file else it will write prepending to it
+- Friendly CLI
+    - Get usage by running `pr-log --help`
+    - Error messages that help correcting usage mistakes. E.g.
+        - Missing first command line argument: `Error: version-number not specified`
+        - Local branch is outdated compared to the remote branch: `Error: Local git main branch is 0 commits ahead and 2 commits behind of origin/main`
+        - The current working directory is not clean (e.g. contains files that are modified): `Error: Local copy is not clean`
+- Well tested
 
 ## Install
 
@@ -68,9 +68,9 @@ For example:
 
 To use `pr-log` your GitHub project needs some small configuration:
 
--   Create the labels mentioned above (you can create GitHub labels from `Issues -> Labels -> New Label`)
--   Set the correct label on your pull requests - you need to set exactly one label, multiple labels or one that is not recognized will throw an error
--   Use correct semver versioning for your tags (e.g. `2.4.7`)
+- Create the labels mentioned above (you can create GitHub labels from `Issues -> Labels -> New Label`)
+- Set the correct label on your pull requests - you need to set exactly one label, multiple labels or one that is not recognized will throw an error
+- Use correct semver versioning for your tags (e.g. `2.4.7`)
 
 ### Project
 
@@ -108,17 +108,17 @@ To create or update your changelog run
 You can also run `pr-log --auto-version` to derive the next version number from the labels of merged pull requests since the latest stable semver tag.
 The default bump precedence is:
 
--   `breaking` -> major
--   `feature` -> minor
--   any other valid label -> patch
+- `breaking` -> major
+- `feature` -> minor
+- any other valid label -> patch
 
 Example:
 
 Given the following setup:
 
--   In GitHub a tag named `2.0.0` exists that is behind `main`
--   A pull request (#13) was created since the last tag that has the label `breaking`
--   A pull request (#22) was created since the last tag that has the label `documentation`
+- In GitHub a tag named `2.0.0` exists that is behind `main`
+- A pull request (#13) was created since the last tag that has the label `breaking`
+- A pull request (#22) was created since the last tag that has the label `documentation`
 
 `pr-log 2.0.0` creates a changelog with the following example content:
 
@@ -127,11 +127,11 @@ Given the following setup:
 
 ### Breaking Changes
 
--   Use new (backwards incompatible) version of module XYZ (#13)
+- Use new (backwards incompatible) version of module XYZ (#13)
 
 ### Documentation
 
--   Fix some spelling mistakes in documentation. (#22)
+- Fix some spelling mistakes in documentation. (#22)
 ```
 
 ### Options
@@ -185,13 +185,13 @@ If you need to authenticate `pr-log`, e.g. to access a private repo, you can set
 
 Many projects have problems with their changelogs. Most of them try one of the following ways
 
--   manually write change logs: This is error-prone and the log will not be consistent
--   generating it from commit messages: As there are often far more commits than useful messages for the changelog, this will hide important features because there are too many to read everything
+- manually write change logs: This is error-prone and the log will not be consistent
+- generating it from commit messages: As there are often far more commits than useful messages for the changelog, this will hide important features because there are too many to read everything
 
 Other challenges for good changelogs:
 
--   Different categories (e.g. breaking changes)
--   Only include changes starting from a certain tag
+- Different categories (e.g. breaking changes)
+- Only include changes starting from a certain tag
 
 ### More complete example `CHANGELOG.md`
 
@@ -202,16 +202,16 @@ After working for some time with the tool and having e.g. two releases, the file
 
 ### Breaking Changes
 
--   Use new (backwards incompatible) version of module XYZ (#13)
+- Use new (backwards incompatible) version of module XYZ (#13)
 
 ### Features
 
--   Add fancy feature (#2)
+- Add fancy feature (#2)
 -
 
 ### Documentation
 
--   Fix some spelling mistakes in documentation. (#22)
+- Fix some spelling mistakes in documentation. (#22)
 
 ## 1.1.0 (November 3, 2014)
 ```
