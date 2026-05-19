@@ -10,12 +10,15 @@ import {
 const anyRepo = 'any/repo';
 const latestVersion = '1.2.3';
 const expectedPullRequestLabelCallCount = 2;
+const expectedWaitForMillisecondsCallCount = 2;
 const comparedArgumentCount = 3;
 
 type Overrides = {
     readonly listTags?: SinonSpy;
     readonly getMergeCommitLogs?: SinonSpy;
     readonly getPullRequestLabel?: SinonSpy;
+    readonly waitForMilliseconds?: SinonSpy;
+    readonly labelLookupIntervalMilliseconds?: number;
 };
 
 type ControlledLabelLookup = {
@@ -28,12 +31,16 @@ function factory(overrides: Overrides = {}): GetMergedPullRequests {
     const {
         listTags = fake.resolves([latestVersion]),
         getMergeCommitLogs = fake.resolves([]),
-        getPullRequestLabel = fake.resolves('bug')
+        getPullRequestLabel = fake.resolves('bug'),
+        waitForMilliseconds = fake.resolves(undefined),
+        labelLookupIntervalMilliseconds
     } = overrides;
 
     const dependencies = {
         getPullRequestLabel,
-        gitCommandRunner: { listTags, getMergeCommitLogs }
+        gitCommandRunner: { listTags, getMergeCommitLogs },
+        waitForMilliseconds,
+        labelLookupIntervalMilliseconds
     } as unknown as GetMergedPullRequestsDependencies;
 
     return getMergedPullRequestsFactory(dependencies);
@@ -213,4 +220,28 @@ test('looks up pull request labels sequentially', async () => {
         { id: 1, title: 'pr-1 message', label: 'bug' },
         { id: 2, title: 'pr-2 message', label: 'documentation' }
     ]);
+});
+
+test('waits between pull request label lookups', async () => {
+    const getMergeCommitLogs = fake.resolves([
+        {
+            subject: 'Merge pull request #1 from branch',
+            body: 'pr-1 message'
+        },
+        { subject: 'Merge pull request #2 from other', body: 'pr-2 message' },
+        { subject: 'Merge pull request #3 from third', body: 'pr-3 message' }
+    ]);
+    const waitForMilliseconds = fake.resolves(undefined);
+    const labelLookupIntervalMilliseconds = 123;
+    const getMergedPullRequests = factory({
+        getMergeCommitLogs,
+        waitForMilliseconds,
+        labelLookupIntervalMilliseconds
+    });
+
+    await getMergedPullRequests(anyRepo, defaultValidLabels);
+
+    assert.strictEqual(waitForMilliseconds.callCount, expectedWaitForMillisecondsCallCount);
+    assert.deepStrictEqual(waitForMilliseconds.firstCall.args, [labelLookupIntervalMilliseconds]);
+    assert.deepStrictEqual(waitForMilliseconds.secondCall.args, [labelLookupIntervalMilliseconds]);
 });

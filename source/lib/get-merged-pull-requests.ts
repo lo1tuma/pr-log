@@ -17,6 +17,8 @@ export type GetMergedPullRequestsDependencies = {
     readonly gitCommandRunner: GitCommandRunner;
     readonly getPullRequestLabel: GetPullRequestLabel;
     readonly githubClient: Octokit;
+    readonly waitForMilliseconds: (durationMilliseconds: number) => Promise<void>;
+    readonly labelLookupIntervalMilliseconds: number;
 };
 
 export type GetMergedPullRequests = (
@@ -25,7 +27,8 @@ export type GetMergedPullRequests = (
 ) => Promise<readonly PullRequestWithLabel[]>;
 
 export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequestsDependencies): GetMergedPullRequests {
-    const { gitCommandRunner, getPullRequestLabel } = dependencies;
+    const { gitCommandRunner, getPullRequestLabel, waitForMilliseconds, labelLookupIntervalMilliseconds } =
+        dependencies;
 
     async function getLatestVersionTag(): Promise<string> {
         const tags = await gitCommandRunner.listTags();
@@ -56,7 +59,11 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
     ): Promise<readonly PullRequestWithLabel[]> {
         const pullRequestsWithLabels: PullRequestWithLabel[] = [];
 
-        for (const pullRequest of pullRequests) {
+        for (const [pullRequestIndex, pullRequest] of pullRequests.entries()) {
+            if (pullRequestIndex > 0 && labelLookupIntervalMilliseconds > 0) {
+                await waitForMilliseconds(labelLookupIntervalMilliseconds);
+            }
+
             const label = await getPullRequestLabel(githubRepo, validLabels, pullRequest.id, dependencies);
 
             pullRequestsWithLabels.push({
