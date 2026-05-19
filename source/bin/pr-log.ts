@@ -2,6 +2,7 @@
 
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { setTimeout as waitForTimeout } from 'node:timers/promises';
 import { createCommand } from 'commander';
 import { Octokit } from '@octokit/rest';
 import prependFile from 'prepend-file';
@@ -30,6 +31,7 @@ const config = (await readJson(prLogPackageJsonURL.pathname)) as Record<string, 
 
 const { GH_TOKEN } = process.env;
 const githubClient = new Octokit({ auth: GH_TOKEN });
+const labelLookupIntervalMilliseconds = 250;
 
 let isTracingEnabled = false;
 
@@ -39,7 +41,11 @@ const findRemoteAlias = findRemoteAliasFactory({ gitCommandRunner });
 const getMergedPullRequests = getMergedPullRequestsFactory({
     githubClient,
     gitCommandRunner,
-    getPullRequestLabel
+    getPullRequestLabel,
+    waitForMilliseconds: async (durationMilliseconds) => {
+        await waitForTimeout(durationMilliseconds);
+    },
+    labelLookupIntervalMilliseconds
 });
 const getLatestVersionTag = async (): Promise<string> => {
     return determineLatestVersionTag(await gitCommandRunner.listTags());
