@@ -32,6 +32,11 @@ const config = (await readJson(prLogPackageJsonURL.pathname)) as Record<string, 
 const { GH_TOKEN } = process.env;
 const githubClient = new Octokit({ auth: GH_TOKEN });
 const labelLookupIntervalMilliseconds = 250;
+const maximumRateLimitRetryCount = 3;
+
+function getCurrentDate(): Readonly<Date> {
+    return new Date();
+}
 
 let isTracingEnabled = false;
 
@@ -45,13 +50,12 @@ const getMergedPullRequests = getMergedPullRequestsFactory({
     waitForMilliseconds: async (durationMilliseconds) => {
         await waitForTimeout(durationMilliseconds);
     },
-    labelLookupIntervalMilliseconds
+    labelLookupIntervalMilliseconds,
+    getCurrentDate,
+    maximumRateLimitRetryCount
 });
 const getLatestVersionTag = async (): Promise<string> => {
     return determineLatestVersionTag(await gitCommandRunner.listTags());
-};
-const getCurrentDate = (): Readonly<Date> => {
-    return new Date();
 };
 
 const program = createCommand(config.name ?? '');

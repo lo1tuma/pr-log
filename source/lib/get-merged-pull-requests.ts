@@ -19,6 +19,8 @@ export type GetMergedPullRequestsDependencies = {
     readonly githubClient: Octokit;
     readonly waitForMilliseconds: (durationMilliseconds: number) => Promise<void>;
     readonly labelLookupIntervalMilliseconds: number;
+    readonly getCurrentDate: () => Readonly<Date>;
+    readonly maximumRateLimitRetryCount: number;
 };
 
 export type GetMergedPullRequests = (
