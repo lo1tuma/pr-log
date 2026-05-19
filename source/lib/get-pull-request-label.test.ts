@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import { fake, type SinonSpy } from 'sinon';
+import { fake, stub, type SinonSpy } from 'sinon';
 import { oneLine } from 'common-tags';
 import type { Octokit } from '@octokit/rest';
 import { getPullRequestLabel } from './get-pull-request-label.ts';
@@ -7,32 +7,119 @@ import { defaultValidLabels } from './valid-labels.ts';
 
 type Overrides = {
     readonly listLabelsOnIssue?: SinonSpy;
+    readonly waitForMilliseconds?: SinonSpy;
+    readonly getCurrentDate?: SinonSpy;
+    readonly maximumRateLimitRetryCount?: number;
 };
 
-function createGithubClient(overrides: Overrides = {}): Readonly<Octokit> {
-    const { listLabelsOnIssue = fake.resolves({ data: [] }) } = overrides;
+type TestDependencies = {
+    readonly githubClient: Readonly<Octokit>;
+    readonly waitForMilliseconds: SinonSpy;
+    readonly getCurrentDate: SinonSpy;
+    readonly maximumRateLimitRetryCount: number;
+};
 
-    return {
+type GitHubRateLimitError = {
+    readonly message: string;
+    readonly status: number;
+    readonly response: {
+        readonly headers: Readonly<Record<string, number | string>>;
+    };
+};
+type GitHubErrorWithStatus = {
+    readonly message: string;
+    readonly status: number;
+};
+
+type GitHubRateLimitErrorWithoutHeaders = {
+    readonly message: string;
+    readonly status: number;
+    readonly response: Record<string, never>;
+};
+
+const currentTimeMilliseconds = 1000;
+const currentDate = new Date(currentTimeMilliseconds);
+const millisecondsPerSecond = 1000;
+const retryAfterSeconds = 60;
+const internalServerErrorStatus = 500;
+const expectedRequestAttemptCount = 2;
+const expectedRetryAfterDelayMilliseconds = retryAfterSeconds * millisecondsPerSecond;
+const expectedRateLimitResetDelayMilliseconds = 4000;
+const rateLimitResetSeconds =
+    (currentTimeMilliseconds + expectedRateLimitResetDelayMilliseconds) / millisecondsPerSecond;
+
+function createGitHubRateLimitError(
+    message: string,
+    headers: Readonly<Record<string, number | string>>
+): GitHubRateLimitError {
+    const error = new Error(message) as Error & {
+        status: number;
+        response: { headers: Readonly<Record<string, number | string>> };
+    };
+    error.status = 403;
+    error.response = { headers };
+
+    return error;
+}
+
+function createGitHubErrorWithStatus(status: number, message: string): GitHubErrorWithStatus {
+    const error = new Error(message) as Error & { status: number };
+    error.status = status;
+
+    return error;
+}
+
+function createGitHubRateLimitErrorWithoutHeaders(message: string): GitHubRateLimitErrorWithoutHeaders {
+    const error = new Error(message) as Error & { status: number; response: Record<string, never> };
+    error.status = 403;
+    error.response = {};
+
+    return error;
+}
+
+function createDependencies(overrides: Overrides = {}): TestDependencies {
+    const { listLabelsOnIssue = fake.resolves({ data: [] }) } = overrides;
+    const { waitForMilliseconds = fake.resolves(undefined) } = overrides;
+    const { getCurrentDate = fake.returns(currentDate) } = overrides;
+    const { maximumRateLimitRetryCount = 1 } = overrides;
+    const githubClient = {
         issues: { listLabelsOnIssue }
     } as unknown as Octokit;
+
+    return { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount };
 }
 
 const anyRepo = 'any/repo';
 const anyPullRequestId = 123;
 
 test('throws when the given repo doesn’t have a "/"', async () => {
-    const githubClient = createGithubClient();
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies();
 
-    await assert.rejects(getPullRequestLabel('foo', defaultValidLabels, anyPullRequestId, { githubClient }), {
-        message: 'Could not find a repository'
-    });
+    await assert.rejects(
+        getPullRequestLabel('foo', defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
+        {
+            message: 'Could not find a repository'
+        }
+    );
 });
 
 test('requests the labels for the correct repo and pull request', async () => {
     const listLabelsOnIssue = fake.resolves({ data: [{ name: 'bug' }] });
-    const githubClient = createGithubClient({ listLabelsOnIssue });
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
 
-    await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient });
+    await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+        githubClient,
+        waitForMilliseconds,
+        getCurrentDate,
+        maximumRateLimitRetryCount
+    });
 
     assert.strictEqual(listLabelsOnIssue.callCount, 1);
     assert.deepStrictEqual(listLabelsOnIssue.firstCall.args, [{ owner: 'any', repo: 'repo', issue_number: 123 }]);
@@ -40,47 +127,270 @@ test('requests the labels for the correct repo and pull request', async () => {
 
 test('fulfills with the correct label name', async () => {
     const listLabelsOnIssue = fake.resolves({ data: [{ name: 'bug' }] });
-    const githubClient = createGithubClient({ listLabelsOnIssue });
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
 
     const expectedLabelName = 'bug';
 
     assert.strictEqual(
-        await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }),
+        await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
         expectedLabelName
     );
 });
 
 test('uses custom labels when provided', async () => {
     const listLabelsOnIssue = fake.resolves({ data: [{ name: 'addons' }] });
-    const githubClient = createGithubClient({ listLabelsOnIssue });
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
 
     const expectedLabelName = 'addons';
     const customValidLabels = new Map([['addons', 'Addons']]);
 
     assert.strictEqual(
-        await getPullRequestLabel(anyRepo, customValidLabels, anyPullRequestId, { githubClient }),
+        await getPullRequestLabel(anyRepo, customValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
         expectedLabelName
     );
 });
 
 test('rejects if the pull request doesn’t have one valid label', async () => {
-    const githubClient = createGithubClient();
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies();
 
     const expectedErrorMessage = oneLine`Pull Request #123 has no label of breaking, bug,
         feature, enhancement, documentation, upgrade, refactor, build`;
 
-    await assert.rejects(getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }), {
-        message: expectedErrorMessage
-    });
+    await assert.rejects(
+        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
+        {
+            message: expectedErrorMessage
+        }
+    );
 });
 
 test('rejects if the pull request has more than one valid label', async () => {
     const listLabelsOnIssue = fake.resolves({ data: [{ name: 'bug' }, { name: 'documentation' }] });
-    const githubClient = createGithubClient({ listLabelsOnIssue });
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
     const expectedErrorMessage = oneLine`Pull Request #123 has multiple labels of breaking,
         bug, feature, enhancement, documentation, upgrade, refactor, build`;
 
-    await assert.rejects(getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, { githubClient }), {
-        message: expectedErrorMessage
+    await assert.rejects(
+        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
+        {
+            message: expectedErrorMessage
+        }
+    );
+});
+
+test('retries using the retry-after header', async () => {
+    const listLabelsOnIssue = stub()
+        .onFirstCall()
+        .rejects(
+            createGitHubRateLimitError('You have exceeded a secondary rate limit.', {
+                'retry-after': retryAfterSeconds
+            })
+        );
+    listLabelsOnIssue.onSecondCall().resolves({ data: [{ name: 'bug' }] });
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
     });
+
+    const labelName = await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+        githubClient,
+        waitForMilliseconds,
+        getCurrentDate,
+        maximumRateLimitRetryCount
+    });
+
+    assert.strictEqual(labelName, 'bug');
+    assert.strictEqual(listLabelsOnIssue.callCount, expectedRequestAttemptCount);
+    assert.strictEqual(waitForMilliseconds.callCount, 1);
+    assert.deepStrictEqual(waitForMilliseconds.firstCall.args, [expectedRetryAfterDelayMilliseconds]);
+});
+
+test('retries using the rate limit reset header when retry-after is missing', async () => {
+    const listLabelsOnIssue = stub()
+        .onFirstCall()
+        .rejects(
+            createGitHubRateLimitError('API rate limit exceeded.', {
+                'x-ratelimit-reset': rateLimitResetSeconds
+            })
+        );
+    listLabelsOnIssue.onSecondCall().resolves({ data: [{ name: 'bug' }] });
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
+
+    const labelName = await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+        githubClient,
+        waitForMilliseconds,
+        getCurrentDate,
+        maximumRateLimitRetryCount
+    });
+
+    assert.strictEqual(labelName, 'bug');
+    assert.strictEqual(listLabelsOnIssue.callCount, expectedRequestAttemptCount);
+    assert.strictEqual(waitForMilliseconds.callCount, 1);
+    assert.deepStrictEqual(waitForMilliseconds.firstCall.args, [expectedRateLimitResetDelayMilliseconds]);
+});
+
+test('rejects immediately when a non-error value was thrown', async () => {
+    const rejectedValue = { boom: true };
+    const listLabelsOnIssue = stub().rejects(rejectedValue);
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
+
+    await assert.rejects(
+        async () => {
+            await getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+                githubClient,
+                waitForMilliseconds,
+                getCurrentDate,
+                maximumRateLimitRetryCount
+            });
+        },
+        (error: unknown) => {
+            assert.deepStrictEqual(error, rejectedValue);
+            return true;
+        }
+    );
+
+    assert.strictEqual(waitForMilliseconds.callCount, 0);
+});
+
+test('rejects immediately when the error is not a rate limit error', async () => {
+    const listLabelsOnIssue = stub().rejects(
+        createGitHubErrorWithStatus(internalServerErrorStatus, 'Internal Server Error')
+    );
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
+
+    await assert.rejects(
+        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
+        {
+            message: 'Internal Server Error'
+        }
+    );
+
+    assert.strictEqual(waitForMilliseconds.callCount, 0);
+});
+
+test('rejects immediately when a rate limit error does not include retry headers', async () => {
+    const listLabelsOnIssue = stub().rejects(createGitHubRateLimitError('API rate limit exceeded.', {}));
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
+
+    await assert.rejects(
+        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
+        {
+            message: 'API rate limit exceeded.'
+        }
+    );
+
+    assert.strictEqual(waitForMilliseconds.callCount, 0);
+});
+
+test('rejects immediately when a rate limit error does not include a headers object', async () => {
+    const listLabelsOnIssue = stub().rejects(createGitHubRateLimitErrorWithoutHeaders('API rate limit exceeded.'));
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
+
+    await assert.rejects(
+        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
+        {
+            message: 'API rate limit exceeded.'
+        }
+    );
+
+    assert.strictEqual(waitForMilliseconds.callCount, 0);
+});
+
+test('rejects immediately when retry headers are not numeric', async () => {
+    const listLabelsOnIssue = stub().rejects(
+        createGitHubRateLimitError('API rate limit exceeded.', { 'retry-after': 'not-a-number' })
+    );
+    const { githubClient, waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = createDependencies({
+        listLabelsOnIssue
+    });
+
+    await assert.rejects(
+        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount
+        }),
+        {
+            message: 'API rate limit exceeded.'
+        }
+    );
+
+    assert.strictEqual(waitForMilliseconds.callCount, 0);
+});
+
+test('rejects immediately when the retry budget is exhausted', async () => {
+    const listLabelsOnIssue = stub().rejects(
+        createGitHubRateLimitError('You have exceeded a secondary rate limit.', {
+            'retry-after': retryAfterSeconds
+        })
+    );
+    const { githubClient, waitForMilliseconds, getCurrentDate } = createDependencies({
+        listLabelsOnIssue,
+        maximumRateLimitRetryCount: 0
+    });
+
+    await assert.rejects(
+        getPullRequestLabel(anyRepo, defaultValidLabels, anyPullRequestId, {
+            githubClient,
+            waitForMilliseconds,
+            getCurrentDate,
+            maximumRateLimitRetryCount: 0
+        }),
+        {
+            message: 'You have exceeded a secondary rate limit.'
+        }
+    );
+
+    assert.strictEqual(waitForMilliseconds.callCount, 0);
 });
