@@ -1,5 +1,6 @@
 import assert from 'node:assert';
-import { fake, spy, type SinonSpy } from 'sinon';
+import type { Octokit } from '@octokit/rest';
+import { fake, spy, stub, type SinonSpy } from 'sinon';
 import { defaultValidLabels } from './valid-labels.ts';
 import {
     getMergedPullRequestsFactory,
@@ -17,6 +18,7 @@ type Overrides = {
     readonly listTags?: SinonSpy;
     readonly getMergeCommitLogs?: SinonSpy;
     readonly getPullRequestLabel?: SinonSpy;
+    readonly githubClient?: Octokit;
     readonly waitForMilliseconds?: SinonSpy;
     readonly labelLookupIntervalMilliseconds?: number;
 };
@@ -32,12 +34,18 @@ function factory(overrides: Overrides = {}): GetMergedPullRequests {
         listTags = fake.resolves([latestVersion]),
         getMergeCommitLogs = fake.resolves([]),
         getPullRequestLabel = fake.resolves('bug'),
+        githubClient = {
+            pulls: {
+                get: fake.resolves({ data: { title: 'pull-request-title' } })
+            }
+        } as unknown as Octokit,
         waitForMilliseconds = fake.resolves(undefined),
         labelLookupIntervalMilliseconds
     } = overrides;
 
     const dependencies = {
         getPullRequestLabel,
+        githubClient,
         gitCommandRunner: { listTags, getMergeCommitLogs },
         waitForMilliseconds,
         labelLookupIntervalMilliseconds
@@ -146,7 +154,44 @@ test('throws when the pull request cannot be extracted from the commit message',
     });
 });
 
-test('throws when the the commit log doesn’t have a body', async () => {
+test('falls back to the GitHub API when the commit log doesn’t have a body', async () => {
+    const get = fake.resolves({ data: { title: 'pull request title from github' } });
+    const githubClient = { pulls: { get } } as unknown as Octokit;
+    const getMergeCommitLogs = fake.resolves([
+        {
+            subject: 'Merge pull request #1 from branch',
+            body: undefined
+        }
+    ]);
+    const getMergedPullRequests = factory({ getMergeCommitLogs, githubClient });
+
+    const pullRequests = await getMergedPullRequests(anyRepo, defaultValidLabels);
+
+    assert.strictEqual(get.callCount, 1);
+    assert.deepStrictEqual(get.firstCall.args, [{ owner: 'any', repo: 'repo', pull_number: 1 }]);
+    assert.deepStrictEqual(pullRequests, [{ id: 1, title: 'pull request title from github', label: 'bug' }]);
+});
+
+test('throws when the title is missing in the commit log and the GitHub API request fails', async () => {
+    const githubClient = {
+        pulls: {
+            get: stub().rejects(new Error('GitHub API failed'))
+        }
+    } as unknown as Octokit;
+    const getMergeCommitLogs = fake.resolves([
+        {
+            subject: 'Merge pull request #1 from branch',
+            body: undefined
+        }
+    ]);
+    const getMergedPullRequests = factory({ getMergeCommitLogs, githubClient });
+
+    await assert.rejects(getMergedPullRequests(anyRepo, defaultValidLabels), {
+        message: 'GitHub API failed'
+    });
+});
+
+test('throws when the title is missing in the commit log and the repo is invalid', async () => {
     const getMergeCommitLogs = fake.resolves([
         {
             subject: 'Merge pull request #1 from branch',
@@ -155,8 +200,8 @@ test('throws when the the commit log doesn’t have a body', async () => {
     ]);
     const getMergedPullRequests = factory({ getMergeCommitLogs });
 
-    await assert.rejects(getMergedPullRequests(anyRepo, defaultValidLabels), {
-        message: 'Failed to extract pull request title from merge commit log'
+    await assert.rejects(getMergedPullRequests('invalid-repo', defaultValidLabels), {
+        message: 'Could not find a repository'
     });
 });
 
