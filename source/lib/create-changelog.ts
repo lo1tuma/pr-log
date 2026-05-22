@@ -2,26 +2,35 @@ import { format as formatDate } from 'date-fns';
 import { isPlainObject, isArray, isString } from '@sindresorhus/is';
 import { enUS as enLocale } from 'date-fns/locale/en-US';
 import type { Just, Nothing } from 'true-myth/maybe';
-import type { PullRequest, PullRequestWithLabel } from './get-merged-pull-requests.ts';
+import type { PullRequestWithLabel } from './get-merged-pull-requests.ts';
 
 function formatLinkToPullRequest(pullRequestId: number, repo: string): string {
     return `[#${pullRequestId}](https://github.com/${repo}/pull/${pullRequestId})`;
 }
 
-function formatPullRequest(pullRequest: PullRequest, repo: string): string {
-    return `* ${pullRequest.title} (${formatLinkToPullRequest(pullRequest.id, repo)})\n`;
+type ChangelogEntry = {
+    readonly title: string;
+    readonly pullRequestIds: readonly number[];
+};
+
+function formatPullRequest(entry: ChangelogEntry, repo: string): string {
+    const formattedLinks = entry.pullRequestIds.map((pullRequestId) => {
+        return formatLinkToPullRequest(pullRequestId, repo);
+    });
+
+    return `* ${entry.title} (${formattedLinks.join(', ')})\n`;
 }
 
-function formatListOfPullRequests(pullRequests: readonly PullRequest[], repo: string): string {
-    return pullRequests
-        .map((pr) => {
-            return formatPullRequest(pr, repo);
+function formatListOfPullRequests(entries: readonly ChangelogEntry[], repo: string): string {
+    return entries
+        .map((entry) => {
+            return formatPullRequest(entry, repo);
         })
         .join('');
 }
 
-function formatSection(displayLabel: string, pullRequests: readonly PullRequest[], repo: string): string {
-    return `### ${displayLabel}\n\n${formatListOfPullRequests(pullRequests, repo)}\n`;
+function formatSection(displayLabel: string, entries: readonly ChangelogEntry[], repo: string): string {
+    return `### ${displayLabel}\n\n${formatListOfPullRequests(entries, repo)}\n`;
 }
 
 export type CreateChangelog = (options: ChangelogOptions) => string;
@@ -41,6 +50,56 @@ function getConfigValueFromPackageInfo(packageInfo: PackageInfo, fieldName: stri
     return fallback;
 }
 
+type CollapseRule = {
+    readonly label: string;
+    readonly pattern: RegExp;
+    readonly replace: string;
+    readonly keyGroup: string;
+    readonly fromGroup: string;
+    readonly toGroup: string;
+};
+
+function getRequiredStringField(rule: Record<string, unknown>, fieldName: string): string {
+    const value = rule[fieldName];
+
+    if (!isString(value)) {
+        throw new TypeError(`pr-log.collapseRules[].${fieldName} must be a string`);
+    }
+
+    return value;
+}
+
+function createCollapseRule(rule: Record<string, unknown>): CollapseRule {
+    const customKeyGroup = rule.keyGroup;
+    const customFromGroup = rule.fromGroup;
+    const customToGroup = rule.toGroup;
+
+    return {
+        label: getRequiredStringField(rule, 'label'),
+        pattern: new RegExp(getRequiredStringField(rule, 'pattern'), 'u'),
+        replace: getRequiredStringField(rule, 'replace'),
+        keyGroup: isString(customKeyGroup) ? customKeyGroup : 'dependency',
+        fromGroup: isString(customFromGroup) ? customFromGroup : 'from',
+        toGroup: isString(customToGroup) ? customToGroup : 'to'
+    };
+}
+
+function getCollapseRules(packageInfo: PackageInfo): readonly CollapseRule[] {
+    const prLogConfig = packageInfo['pr-log'];
+
+    if (!isPlainObject(prLogConfig) || !isArray(prLogConfig.collapseRules)) {
+        return [];
+    }
+
+    return prLogConfig.collapseRules.map((rule) => {
+        if (!isPlainObject(rule)) {
+            throw new TypeError('pr-log.collapseRules[] entries must be objects');
+        }
+
+        return createCollapseRule(rule);
+    });
+}
+
 function groupByLabel(pullRequests: readonly PullRequestWithLabel[]): Record<string, PullRequestWithLabel[]> {
     return pullRequests.reduce((groupedObject: Record<string, PullRequestWithLabel[]>, pullRequest) => {
         const { label } = pullRequest;
@@ -58,6 +117,212 @@ function groupByLabel(pullRequests: readonly PullRequestWithLabel[]): Record<str
             [label]: [pullRequest]
         };
     }, {});
+}
+
+type ChangelogEntryWithLabel = ChangelogEntry & {
+    readonly label: string;
+};
+
+type CollapseMatch = {
+    readonly groups: Record<string, string>;
+};
+
+type RuleMatch = CollapseMatch & {
+    readonly key: string;
+    readonly from: string;
+    readonly to: string;
+};
+
+type CollapseChain = {
+    readonly firstIndex: number;
+    readonly indexes: readonly number[];
+    readonly groups: Readonly<Record<string, string>>;
+    readonly pullRequestIds: readonly number[];
+};
+
+function createChangelogEntries(pullRequests: readonly PullRequestWithLabel[]): readonly ChangelogEntryWithLabel[] {
+    return pullRequests.map((pullRequest) => {
+        return {
+            title: pullRequest.title,
+            pullRequestIds: [pullRequest.id],
+            label: pullRequest.label
+        };
+    });
+}
+
+function getRuleGroups(match: CollapseMatch, rule: CollapseRule): Readonly<[string, string, string]> {
+    const key = match.groups[rule.keyGroup];
+    const from = match.groups[rule.fromGroup];
+    const to = match.groups[rule.toGroup];
+
+    if (key === undefined) {
+        throw new TypeError(`Collapse rule for label "${rule.label}" requires capture group "${rule.keyGroup}"`);
+    }
+    if (from === undefined) {
+        throw new TypeError(`Collapse rule for label "${rule.label}" requires capture group "${rule.fromGroup}"`);
+    }
+    if (to === undefined) {
+        throw new TypeError(`Collapse rule for label "${rule.label}" requires capture group "${rule.toGroup}"`);
+    }
+
+    return [key, from, to];
+}
+
+function renderCollapsedTitle(replace: string, groups: Record<string, string>): string {
+    return replace.replaceAll(/\$<(?<groupName>[^>]+)>/gu, (_match, groupName: string) => {
+        return groups[groupName] ?? '';
+    });
+}
+
+function getRuleMatch(entry: ChangelogEntryWithLabel, rule: CollapseRule): RuleMatch | undefined {
+    const match = rule.pattern.exec(entry.title);
+
+    if (match?.groups === undefined) {
+        return undefined;
+    }
+
+    const [key, from, to] = getRuleGroups({ groups: match.groups }, rule);
+
+    return { key, from, to, groups: { ...match.groups } };
+}
+
+function createExtendedChain(
+    chain: CollapseChain,
+    entry: ChangelogEntryWithLabel,
+    index: number,
+    update: { readonly fromGroup: string; readonly from: string }
+): CollapseChain {
+    return {
+        ...chain,
+        indexes: [...chain.indexes, index],
+        groups: {
+            ...chain.groups,
+            [update.fromGroup]: update.from
+        },
+        pullRequestIds: [...chain.pullRequestIds, ...entry.pullRequestIds]
+    };
+}
+
+function createCollapseChain(
+    index: number,
+    entry: ChangelogEntryWithLabel,
+    groups: Record<string, string>
+): CollapseChain {
+    return {
+        firstIndex: index,
+        indexes: [index],
+        groups,
+        pullRequestIds: Array.from(entry.pullRequestIds)
+    };
+}
+
+function createUpdatedChains(
+    existingChains: readonly CollapseChain[],
+    entry: ChangelogEntryWithLabel,
+    index: number,
+    context: { readonly rule: CollapseRule; readonly ruleMatch: RuleMatch }
+): readonly CollapseChain[] {
+    const { rule, ruleMatch } = context;
+    const previousChain = existingChains.at(-1);
+
+    if (previousChain?.groups[rule.fromGroup] !== ruleMatch.to) {
+        return [...existingChains, createCollapseChain(index, entry, ruleMatch.groups)];
+    }
+
+    return [
+        ...existingChains.slice(0, -1),
+        createExtendedChain(previousChain, entry, index, {
+            fromGroup: rule.fromGroup,
+            from: ruleMatch.from
+        })
+    ];
+}
+
+function createUpdatedChainsByKey(
+    chainsByKey: ReadonlyMap<string, readonly CollapseChain[]>,
+    entry: ChangelogEntryWithLabel,
+    index: number,
+    rule: CollapseRule
+): ReadonlyMap<string, readonly CollapseChain[]> {
+    const ruleMatch = getRuleMatch(entry, rule);
+
+    if (ruleMatch === undefined) {
+        return chainsByKey;
+    }
+
+    const nextChainsByKey = new Map(chainsByKey);
+    const existingChains = chainsByKey.get(ruleMatch.key) ?? [];
+    const updatedChains = createUpdatedChains(existingChains, entry, index, { rule, ruleMatch });
+
+    nextChainsByKey.set(ruleMatch.key, updatedChains);
+    return nextChainsByKey;
+}
+
+function createChainsByKey(
+    entries: readonly ChangelogEntryWithLabel[],
+    rule: CollapseRule
+): ReadonlyMap<string, readonly CollapseChain[]> {
+    return entries.reduce<ReadonlyMap<string, readonly CollapseChain[]>>((chainsByKey, entry, index) => {
+        return createUpdatedChainsByKey(chainsByKey, entry, index, rule);
+    }, new Map<string, readonly CollapseChain[]>());
+}
+
+function createCollapsedEntriesByIndex(
+    chainsByKey: ReadonlyMap<string, readonly CollapseChain[]>,
+    rule: CollapseRule
+): Readonly<[Map<number, ChangelogEntryWithLabel>, Set<number>]> {
+    const collapsedEntries = new Map<number, ChangelogEntryWithLabel>();
+    const skippedIndexes = new Set<number>();
+    const minimumChainLength = 2;
+    const collapsedChains = Array.from(chainsByKey.values())
+        .flat()
+        .filter((chain) => {
+            return chain.indexes.length >= minimumChainLength;
+        });
+
+    collapsedChains.forEach((chain) => {
+        const [, ...remainingIndexes] = chain.indexes;
+
+        collapsedEntries.set(chain.firstIndex, {
+            title: renderCollapsedTitle(rule.replace, chain.groups),
+            pullRequestIds: chain.pullRequestIds,
+            label: rule.label
+        });
+
+        remainingIndexes.forEach((index) => {
+            skippedIndexes.add(index);
+        });
+    });
+
+    return [collapsedEntries, skippedIndexes];
+}
+
+function collapseEntriesForRule(
+    entries: readonly ChangelogEntryWithLabel[],
+    rule: CollapseRule
+): readonly ChangelogEntryWithLabel[] {
+    const chainsByKey = createChainsByKey(entries, rule);
+    const [collapsedEntries, skippedIndexes] = createCollapsedEntriesByIndex(chainsByKey, rule);
+
+    return entries.flatMap((entry, index) => {
+        if (skippedIndexes.has(index)) {
+            return [];
+        }
+
+        return [collapsedEntries.get(index) ?? entry];
+    });
+}
+
+function collapseEntries(
+    label: string,
+    entries: readonly ChangelogEntryWithLabel[],
+    rules: readonly CollapseRule[]
+): readonly ChangelogEntryWithLabel[] {
+    return rules
+        .filter((rule) => {
+            return rule.label === label;
+        })
+        .reduce(collapseEntriesForRule, entries);
 }
 
 type Dependencies = {
@@ -88,6 +353,7 @@ const defaultDateFormat = 'MMMM d, yyyy';
 export function createChangelogFactory(dependencies: Dependencies): CreateChangelog {
     const { getCurrentDate, packageInfo } = dependencies;
     const dateFormat = getConfigValueFromPackageInfo(packageInfo, 'dateFormat', defaultDateFormat);
+    const collapseRules = getCollapseRules(packageInfo);
 
     function createChangelogTitle(options: ChangelogOptions): string {
         const { unreleased } = options;
@@ -112,7 +378,8 @@ export function createChangelogFactory(dependencies: Dependencies): CreateChange
             const pullRequests = groupedPullRequests[label];
 
             if (isArray(pullRequests)) {
-                changelog += formatSection(displayLabel, pullRequests, githubRepo);
+                const entries = collapseEntries(label, createChangelogEntries(pullRequests), collapseRules);
+                changelog += formatSection(displayLabel, entries, githubRepo);
             }
         }
 
