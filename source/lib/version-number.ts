@@ -5,20 +5,29 @@ import Unit from 'true-myth/unit';
 
 type ValidateVersionNumberOptionsUnreleased = {
     readonly unreleased: true;
+    readonly autoVersion: false;
+    readonly versionNumber: Nothing<string>;
+};
+
+type ValidateVersionNumberOptionsAuto = {
+    readonly unreleased: false;
+    readonly autoVersion: true;
     readonly versionNumber: Nothing<string>;
 };
 
 type ValidateVersionNumberOptionsReleased = {
     readonly unreleased: false;
+    readonly autoVersion: false;
     readonly versionNumber: Just<string>;
 };
 
 export type ValidateVersionNumberOptions =
+    | ValidateVersionNumberOptionsAuto
     | ValidateVersionNumberOptionsReleased
     | ValidateVersionNumberOptionsUnreleased;
 
 export function validateVersionNumber(options: ValidateVersionNumberOptions): Result<Unit, Error> {
-    if (options.unreleased) {
+    if (options.unreleased || options.autoVersion) {
         return Result.ok(Unit);
     }
 

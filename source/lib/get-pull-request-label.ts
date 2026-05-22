@@ -1,11 +1,28 @@
 import type { Octokit } from '@octokit/rest';
+import { isError, isFiniteNumber, isString } from '@sindresorhus/is';
+import Maybe from 'true-myth/maybe';
 import { splitByString } from './split.ts';
 
 type Dependencies = {
     readonly githubClient: Octokit;
+    readonly waitForMilliseconds: (durationMilliseconds: number) => Promise<void>;
+    readonly getCurrentDate: () => Readonly<Date>;
+    readonly maximumRateLimitRetryCount: number;
 };
 
 export type GetPullRequestLabel = typeof getPullRequestLabel;
+type Headers = Readonly<Record<string, number | string | undefined>>;
+type GitHubClientError = {
+    readonly message: string;
+    readonly status?: number;
+    readonly response?: {
+        readonly headers?: Headers;
+    };
+};
+const millisecondsPerSecond = 1000;
+const noDelayMilliseconds = 0;
+const forbiddenStatusCode = 403;
+const tooManyRequestsStatusCode = 429;
 
 function determineRepoDetails(githubRepo: string): Readonly<[owner: string, repo: string]> {
     const [owner, repo] = splitByString(githubRepo, '/');
@@ -31,16 +48,145 @@ async function fetchLabels(
     return labels;
 }
 
+function getHeaderValue(headers: Headers, headerName: string): string | undefined {
+    const value = headers[headerName];
+    if (isString(value)) {
+        return value;
+    }
+
+    if (isFiniteNumber(value)) {
+        return String(value);
+    }
+
+    return undefined;
+}
+
+function parseDelaySeconds(value: string): number | undefined {
+    const delaySeconds = Number(value);
+    if (!isFiniteNumber(delaySeconds)) {
+        return undefined;
+    }
+
+    return delaySeconds;
+}
+
+function determineRetryAfterDelayMilliseconds(headers: Headers): number | undefined {
+    return Maybe.of(getHeaderValue(headers, 'retry-after'))
+        .andThen((retryAfterValue) => {
+            return Maybe.of(parseDelaySeconds(retryAfterValue));
+        })
+        .map((retryAfterSeconds) => {
+            return retryAfterSeconds * millisecondsPerSecond;
+        })
+        .unwrapOr(undefined);
+}
+
+function determineRateLimitResetDelayMilliseconds(headers: Headers, currentDate: Readonly<Date>): number | undefined {
+    return Maybe.of(getHeaderValue(headers, 'x-ratelimit-reset'))
+        .andThen((rateLimitResetValue) => {
+            return Maybe.of(parseDelaySeconds(rateLimitResetValue));
+        })
+        .map((rateLimitResetSeconds) => {
+            const delayMilliseconds = rateLimitResetSeconds * millisecondsPerSecond - currentDate.getTime();
+            return Math.max(delayMilliseconds, noDelayMilliseconds);
+        })
+        .unwrapOr(undefined);
+}
+
+function isGitHubRateLimitError(error: GitHubClientError): boolean {
+    if (error.status !== forbiddenStatusCode && error.status !== tooManyRequestsStatusCode) {
+        return false;
+    }
+
+    return error.message.toLowerCase().includes('rate limit');
+}
+
+function determineRateLimitDelayMilliseconds(
+    error: GitHubClientError,
+    currentDate: Readonly<Date>
+): number | undefined {
+    if (!isGitHubRateLimitError(error)) {
+        return undefined;
+    }
+
+    const headers = error.response?.headers;
+    if (headers === undefined) {
+        return undefined;
+    }
+
+    const rateLimitResetDelayMilliseconds = determineRateLimitResetDelayMilliseconds(headers, currentDate);
+    return determineRetryAfterDelayMilliseconds(headers) ?? rateLimitResetDelayMilliseconds;
+}
+
+function getGitHubClientError(error: unknown): GitHubClientError | undefined {
+    if (!isError(error)) {
+        return undefined;
+    }
+
+    return error as GitHubClientError;
+}
+
+type FetchLabelsWithRateLimitRetryOptions = {
+    readonly githubRepo: string;
+    readonly pullRequestId: number;
+    readonly dependencies: Dependencies;
+};
+
+async function waitForRateLimitResetIfRetryable(
+    error: unknown,
+    dependencies: Dependencies,
+    retryCount: number
+): Promise<boolean> {
+    const { waitForMilliseconds, getCurrentDate, maximumRateLimitRetryCount } = dependencies;
+    const githubClientError = getGitHubClientError(error);
+    if (githubClientError === undefined) {
+        return false;
+    }
+
+    const delayMilliseconds = determineRateLimitDelayMilliseconds(githubClientError, getCurrentDate());
+    if (retryCount >= maximumRateLimitRetryCount || delayMilliseconds === undefined) {
+        return false;
+    }
+
+    await waitForMilliseconds(delayMilliseconds);
+    return true;
+}
+
+async function fetchLabelsWithRateLimitRetry(
+    options: Readonly<FetchLabelsWithRateLimitRetryOptions>,
+    retryCount: number
+): Promise<Label[]> {
+    const { githubRepo, pullRequestId, dependencies } = options;
+    const { githubClient } = dependencies;
+
+    try {
+        return await fetchLabels(githubClient, githubRepo, pullRequestId);
+    } catch (error) {
+        const shouldRetry = await waitForRateLimitResetIfRetryable(error, dependencies, retryCount);
+        if (!shouldRetry) {
+            throw error;
+        }
+
+        return fetchLabelsWithRateLimitRetry(options, retryCount + 1);
+    }
+}
+
 export async function getPullRequestLabel(
     githubRepo: string,
     validLabels: ReadonlyMap<string, string>,
     pullRequestId: number,
     dependencies: Dependencies
 ): Promise<string> {
-    const { githubClient } = dependencies;
     const validLabelNames = Array.from(validLabels.keys());
 
-    const labels = await fetchLabels(githubClient, githubRepo, pullRequestId);
+    const labels = await fetchLabelsWithRateLimitRetry(
+        {
+            githubRepo,
+            pullRequestId,
+            dependencies
+        },
+        0
+    );
 
     const listOfLabels = validLabelNames.join(', ');
     const filteredLabels = labels.filter((label) => {

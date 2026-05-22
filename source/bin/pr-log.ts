@@ -2,6 +2,7 @@
 
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { setTimeout as waitForTimeout } from 'node:timers/promises';
 import { createCommand } from 'commander';
 import { Octokit } from '@octokit/rest';
 import prependFile from 'prepend-file';
@@ -16,6 +17,7 @@ import { createChangelogFactory } from '../lib/create-changelog.ts';
 import { findRemoteAliasFactory } from '../lib/find-remote-alias.ts';
 import { getPullRequestLabel } from '../lib/get-pull-request-label.ts';
 import { createGitCommandRunner } from '../lib/git-command-runner.ts';
+import { determineLatestVersionTag } from '../lib/latest-version-tag.ts';
 
 loglevel.enableAll();
 
@@ -29,6 +31,12 @@ const config = (await readJson(prLogPackageJsonURL.pathname)) as Record<string, 
 
 const { GH_TOKEN } = process.env;
 const githubClient = new Octokit({ auth: GH_TOKEN });
+const labelLookupIntervalMilliseconds = 250;
+const maximumRateLimitRetryCount = 3;
+
+function getCurrentDate(): Readonly<Date> {
+    return new Date();
+}
 
 let isTracingEnabled = false;
 
@@ -38,10 +46,16 @@ const findRemoteAlias = findRemoteAliasFactory({ gitCommandRunner });
 const getMergedPullRequests = getMergedPullRequestsFactory({
     githubClient,
     gitCommandRunner,
-    getPullRequestLabel
+    getPullRequestLabel,
+    waitForMilliseconds: async (durationMilliseconds) => {
+        await waitForTimeout(durationMilliseconds);
+    },
+    labelLookupIntervalMilliseconds,
+    getCurrentDate,
+    maximumRateLimitRetryCount
 });
-const getCurrentDate = (): Readonly<Date> => {
-    return new Date();
+const getLatestVersionTag = async (): Promise<string> => {
+    return determineLatestVersionTag(await gitCommandRunner.listTags());
 };
 
 const program = createCommand(config.name ?? '');
@@ -54,6 +68,7 @@ program
     .option('--trace', 'show stack traces for any error', false)
     .option('--default-branch <name>', 'set custom default branch', 'main')
     .option('--stdout', 'output the changelog to stdout instead of writing to CHANGELOG.md', false)
+    .option('--auto-version', 'derive the release version from merged pull request labels', false)
     .option('--unreleased', 'include section for unreleased changes', false)
     .action(async (versionNumber: string | undefined, options: Record<string, unknown>) => {
         isTracingEnabled = options.trace === true;
@@ -75,6 +90,7 @@ program
                         { gitCommandRunner, findRemoteAlias },
                         { defaultBranch }
                     ),
+                    getLatestVersionTag,
                     getMergedPullRequests,
                     createChangelog: createChangelogFactory({ getCurrentDate, packageInfo })
                 };

@@ -2,8 +2,9 @@
     "extends": "../tsconfig.base.json",
     "compilerOptions": {
         "tsBuildInfoFile": "../target/buildcache/sources.tsbuildinfo",
-        "rootDir": "../"
+        "rootDir": "../",
+        "types": ["node"]
     },
-    "include": ["./**/*.ts"],
+    "include": ["./**/*.ts", "./**/*.d.cts"],
     "exclude": ["./**/*.test.ts"]
 }

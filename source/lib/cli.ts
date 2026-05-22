@@ -1,13 +1,12 @@
 import type _prependFile from 'prepend-file';
 import type { Logger } from 'loglevel';
-import { isPlainObject, isString } from '@sindresorhus/is';
 import type { CliRunOptions } from './cli-run-options.ts';
 import type { CreateChangelog } from './create-changelog.ts';
 import type { GetMergedPullRequests } from './get-merged-pull-requests.ts';
 import type { EnsureCleanLocalGitState } from './ensure-clean-local-git-state.ts';
+import { getGithubRepoFromPackageInfo, getValidLabels } from './package-info.ts';
+import { type GetLatestVersionTag, resolveReleasedVersionNumber } from './resolve-version-number.ts';
 import { validateVersionNumber } from './version-number.ts';
-import { getGithubRepo } from './get-github-repo.ts';
-import { defaultValidLabels } from './valid-labels.ts';
 
 function stripTrailingEmptyLine(text: string): string {
     if (text.endsWith('\n\n')) {
@@ -17,17 +16,9 @@ function stripTrailingEmptyLine(text: string): string {
     return text;
 }
 
-function getValidLabels(packageInfo: Record<string, unknown>): ReadonlyMap<string, string> {
-    const prLogConfig = packageInfo['pr-log'];
-    if (isPlainObject(prLogConfig) && Array.isArray(prLogConfig.validLabels)) {
-        return new Map(prLogConfig.validLabels);
-    }
-
-    return defaultValidLabels;
-}
-
 export type CliRunnerDependencies = {
     readonly ensureCleanLocalGitState: EnsureCleanLocalGitState;
+    readonly getLatestVersionTag: GetLatestVersionTag;
     readonly getMergedPullRequests: GetMergedPullRequests;
     readonly createChangelog: CreateChangelog;
     readonly packageInfo: Record<string, unknown>;
@@ -39,58 +30,126 @@ export type CliRunner = {
     run(options: CliRunOptions): Promise<void>;
 };
 
-export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner {
-    const { ensureCleanLocalGitState, getMergedPullRequests, createChangelog, packageInfo, prependFile, logger } =
+type ReleasedCliRunOptions = Extract<CliRunOptions, { unreleased: false }>;
+type UnreleasedCliRunOptions = Extract<CliRunOptions, { unreleased: true }>;
+
+type GenerateChangelogContext = Pick<
+    CliRunnerDependencies,
+    'createChangelog' | 'ensureCleanLocalGitState' | 'getLatestVersionTag' | 'getMergedPullRequests' | 'packageInfo'
+>;
+
+type ChangelogData = {
+    readonly githubRepo: string;
+    readonly validLabels: ReadonlyMap<string, string>;
+    readonly mergedPullRequests: Awaited<ReturnType<GetMergedPullRequests>>;
+};
+
+type WriteChangelogContext = Pick<CliRunnerDependencies, 'logger' | 'prependFile'>;
+
+async function ensureCleanState(
+    ensureCleanLocalGitState: EnsureCleanLocalGitState,
+    options: CliRunOptions,
+    githubRepo: string
+): Promise<void> {
+    if (!options.sloppy) {
+        await ensureCleanLocalGitState(githubRepo);
+    }
+}
+
+function generateUnreleasedChangelog(
+    createChangelog: CreateChangelog,
+    options: UnreleasedCliRunOptions,
+    changelogData: ChangelogData
+): string {
+    const { githubRepo, validLabels, mergedPullRequests } = changelogData;
+
+    return stripTrailingEmptyLine(
+        createChangelog({
+            validLabels,
+            mergedPullRequests,
+            githubRepo,
+            unreleased: true,
+            versionNumber: options.versionNumber
+        })
+    );
+}
+
+async function generateReleasedChangelog(
+    context: Pick<CliRunnerDependencies, 'createChangelog' | 'getLatestVersionTag' | 'packageInfo'>,
+    options: ReleasedCliRunOptions,
+    changelogData: ChangelogData
+): Promise<string> {
+    const { createChangelog, packageInfo, getLatestVersionTag } = context;
+    const { githubRepo, validLabels, mergedPullRequests } = changelogData;
+    const versionNumber = options.autoVersion
+        ? await resolveReleasedVersionNumber(packageInfo, validLabels, getLatestVersionTag, mergedPullRequests)
+        : options.versionNumber;
+
+    return stripTrailingEmptyLine(
+        createChangelog({
+            validLabels,
+            mergedPullRequests,
+            githubRepo,
+            unreleased: false,
+            versionNumber
+        })
+    );
+}
+
+async function generateChangelog(
+    dependencies: GenerateChangelogContext,
+    options: CliRunOptions,
+    githubRepo: string,
+    validLabels: ReadonlyMap<string, string>
+): Promise<string> {
+    const { ensureCleanLocalGitState, getLatestVersionTag, getMergedPullRequests, createChangelog, packageInfo } =
         dependencies;
 
-    async function generateChangelog(
-        options: CliRunOptions,
-        githubRepo: string,
-        validLabels: ReadonlyMap<string, string>
-    ): Promise<string> {
-        if (!options.sloppy) {
-            await ensureCleanLocalGitState(githubRepo);
-        }
+    await ensureCleanState(ensureCleanLocalGitState, options, githubRepo);
 
-        const mergedPullRequests = await getMergedPullRequests(githubRepo, validLabels);
-        const commonChangelogOptions = { validLabels, mergedPullRequests, githubRepo };
-        const changelogOptions = options.unreleased
-            ? ({ ...commonChangelogOptions, unreleased: true, versionNumber: options.versionNumber } as const)
-            : ({ ...commonChangelogOptions, unreleased: false, versionNumber: options.versionNumber } as const);
-        const changelog = createChangelog(changelogOptions);
+    const changelogData: ChangelogData = {
+        githubRepo,
+        validLabels,
+        mergedPullRequests: await getMergedPullRequests(githubRepo, validLabels)
+    };
 
-        return stripTrailingEmptyLine(changelog);
+    if (options.unreleased) {
+        return generateUnreleasedChangelog(createChangelog, options, changelogData);
     }
 
-    async function writeChangelog(changelog: string, options: CliRunOptions): Promise<void> {
-        const trimmedChangelog = changelog.trim();
+    return generateReleasedChangelog({ createChangelog, packageInfo, getLatestVersionTag }, options, changelogData);
+}
 
-        if (options.stdout) {
-            logger.log(trimmedChangelog);
-        } else {
-            await prependFile(options.changelogPath, `${trimmedChangelog}\n\n`);
-        }
+async function writeChangelog(
+    context: WriteChangelogContext,
+    changelog: string,
+    options: CliRunOptions
+): Promise<void> {
+    const { prependFile, logger } = context;
+    const trimmedChangelog = changelog.trim();
+
+    if (options.stdout) {
+        logger.log(trimmedChangelog);
+    } else {
+        await prependFile(options.changelogPath, `${trimmedChangelog}\n\n`);
     }
+}
+
+export function createCliRunner(dependencies: CliRunnerDependencies): CliRunner {
+    const { packageInfo } = dependencies;
 
     return {
         async run(options: CliRunOptions) {
-            const { repository } = packageInfo;
-            if (!isPlainObject(repository)) {
-                throw new Error('Repository information missing in package.json');
-            }
-            if (!isString(repository.url)) {
-                throw new TypeError('Repository url is not a string in package.json');
-            }
-            const githubRepo = getGithubRepo(repository.url);
+            const githubRepo = getGithubRepoFromPackageInfo(packageInfo);
             const validLabels = getValidLabels(packageInfo);
 
             validateVersionNumber(options).unwrapOrElse((error) => {
                 throw error;
             });
 
-            const changelog = await generateChangelog(options, githubRepo, validLabels);
+            const changelog = await generateChangelog(dependencies, options, githubRepo, validLabels);
 
-            await writeChangelog(changelog, options);
+            await writeChangelog(dependencies, changelog, options);
         }
     };
 }
