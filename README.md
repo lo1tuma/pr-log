@@ -99,6 +99,49 @@ If you want to use a custom date format you can configure `pr-log.dateFormat` in
 
 Please refer to the [`dates-fn` documentation](https://date-fns.org/docs/format) for details about the format expressions.
 
+#### Collapse repeated pull requests
+
+If your changelog tends to collect several pull requests that represent one logical change, you can configure `pr-log.collapseRules`.
+This is useful for dependency upgrade bots, but the feature is intentionally generic and works with any pull request title format you control.
+
+Each collapse rule:
+
+-   applies only to one label
+-   matches pull request titles with a regular expression
+-   groups entries by one named capture group
+-   collapses only continuous chains where one entry ends with the version the next entry starts from
+-   renders the collapsed title with a replacement template
+
+For example:
+
+```json
+{
+    "pr-log": {
+        "collapseRules": [
+            {
+                "label": "upgrade",
+                "pattern": "^Update (?<dependency>.+?) from (?<from>.+?) to (?<to>.+?)$",
+                "replace": "Update $<dependency> from $<from> to $<to>"
+            }
+        ]
+    }
+}
+```
+
+With that configuration, these pull requests in one release:
+
+-   `Update foo from 1 to 2`
+-   `Update foo from 2 to 3`
+-   `Update foo from 3 to 4`
+
+become one changelog entry:
+
+-   `Update foo from 1 to 4`
+
+The default capture group names are `dependency`, `from`, and `to`.
+If your title format uses different names, you can override them with `keyGroup`, `fromGroup`, and `toGroup`.
+Collapsed entries include links to all pull requests that contributed to the final line item.
+
 ## Usage
 
 To create or update your changelog run
