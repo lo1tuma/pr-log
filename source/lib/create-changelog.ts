@@ -225,7 +225,7 @@ function createUpdatedChains(
     const { rule, ruleMatch } = context;
     const previousChain = existingChains.at(-1);
 
-    if (previousChain === undefined || previousChain.groups[rule.fromGroup] !== ruleMatch.to) {
+    if (previousChain?.groups[rule.fromGroup] !== ruleMatch.to) {
         return [...existingChains, createCollapseChain(index, entry, ruleMatch.groups)];
     }
 

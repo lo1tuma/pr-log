@@ -329,6 +329,46 @@ test('supports custom capture group names in collapse rules', () => {
     assert.ok(changelog.includes(expectedChangelog));
 });
 
+test('falls back to an empty string for missing placeholders in collapse rule replacements', () => {
+    const createChangelog = createChangelogWithPackageInfo({
+        'pr-log': {
+            collapseRules: [
+                {
+                    label: 'upgrade',
+                    pattern: '^Update (?<dependency>.+?) from (?<from>.+?) to (?<to>.+?)$',
+                    replace: 'Update $<dependency> from $<from> to $<to>$<suffix>'
+                }
+            ]
+        }
+    });
+    const validLabels = new Map([['upgrade', 'Dependency Upgrades']]);
+    const mergedPullRequests = [
+        {
+            id: 3,
+            title: 'Update foo from 2 to 3',
+            label: 'upgrade'
+        },
+        {
+            id: 2,
+            title: 'Update foo from 1 to 2',
+            label: 'upgrade'
+        }
+    ] as const;
+
+    const options = changelogOptionsFactory.build({
+        validLabels,
+        mergedPullRequests,
+        githubRepo: 'any/repo'
+    });
+    const changelog = createChangelog(options);
+
+    assert.ok(
+        changelog.includes(
+            '* Update foo from 1 to 3 ([#3](https://github.com/any/repo/pull/3), [#2](https://github.com/any/repo/pull/2))'
+        )
+    );
+});
+
 test('throws when a collapse rule is missing required fields', () => {
     assert.throws(
         () => {
@@ -341,3 +381,88 @@ test('throws when a collapse rule is missing required fields', () => {
         { message: 'pr-log.collapseRules[].replace must be a string' }
     );
 });
+
+test('throws when a collapse rule entry is not an object', () => {
+    assert.throws(
+        () => {
+            createChangelogWithPackageInfo({
+                'pr-log': {
+                    collapseRules: ['invalid']
+                }
+            });
+        },
+        { message: 'pr-log.collapseRules[] entries must be objects' }
+    );
+});
+
+test('does not collapse pull requests when titles do not match the configured collapse rule', () => {
+    const createChangelog = createChangelogWithPackageInfo(createUpgradeCollapseRulePackageInfo());
+    const validLabels = new Map([['upgrade', 'Dependency Upgrades']]);
+    const mergedPullRequests = [
+        {
+            id: 7,
+            title: 'Refresh foo dependency',
+            label: 'upgrade'
+        }
+    ] as const;
+
+    const options = changelogOptionsFactory.build({
+        validLabels,
+        mergedPullRequests,
+        githubRepo: 'any/repo'
+    });
+    const changelog = createChangelog(options);
+
+    assert.ok(changelog.includes('* Refresh foo dependency ([#7](https://github.com/any/repo/pull/7))'));
+});
+
+const invalidCaptureGroupTestCases = [
+    {
+        testName: 'throws when the configured key capture group is missing',
+        packageInfo: createUpgradeCollapseRulePackageInfo({
+            keyGroup: 'packageName'
+        }),
+        expectedErrorMessage: 'Collapse rule for label "upgrade" requires capture group "packageName"'
+    },
+    {
+        testName: 'throws when the configured from capture group is missing',
+        packageInfo: createUpgradeCollapseRulePackageInfo({
+            fromGroup: 'previous'
+        }),
+        expectedErrorMessage: 'Collapse rule for label "upgrade" requires capture group "previous"'
+    },
+    {
+        testName: 'throws when the configured to capture group is missing',
+        packageInfo: createUpgradeCollapseRulePackageInfo({
+            toGroup: 'next'
+        }),
+        expectedErrorMessage: 'Collapse rule for label "upgrade" requires capture group "next"'
+    }
+] as const;
+
+for (const testCase of invalidCaptureGroupTestCases) {
+    test(testCase.testName, () => {
+        const createChangelog = createChangelogWithPackageInfo(testCase.packageInfo);
+        const validLabels = new Map([['upgrade', 'Dependency Upgrades']]);
+        const mergedPullRequests = [
+            {
+                id: 2,
+                title: 'Update foo from 1 to 2',
+                label: 'upgrade'
+            }
+        ] as const;
+
+        const options = changelogOptionsFactory.build({
+            validLabels,
+            mergedPullRequests,
+            githubRepo: 'any/repo'
+        });
+
+        assert.throws(
+            () => {
+                createChangelog(options);
+            },
+            { message: testCase.expectedErrorMessage }
+        );
+    });
+}
