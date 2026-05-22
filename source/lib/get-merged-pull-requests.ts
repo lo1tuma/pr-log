@@ -29,6 +29,7 @@ export type GetMergedPullRequests = (
 ) => Promise<readonly PullRequestWithLabel[]>;
 
 type PullRequestData = Readonly<Awaited<ReturnType<Octokit['pulls']['get']>>['data']>;
+type FirstParentCommitLogEntry = Awaited<ReturnType<GitCommandRunner['getFirstParentCommitLogs']>>[number];
 
 function determineRepoDetails(githubRepo: string): Readonly<[owner: string, repo: string]> {
     const [owner, repo] = githubRepo.split('/');
@@ -40,15 +41,58 @@ function determineRepoDetails(githubRepo: string): Readonly<[owner: string, repo
     return [owner, repo];
 }
 
-function extractPullRequestId(subject: string): number {
-    const matches = /^Merge pull request #(?<id>\d+) from .*$/u.exec(subject);
+function extractPullRequestId(commitSubject: string): number | undefined {
+    const matches = /^Merge pull request #(?<id>\d+) from .*$/u.exec(commitSubject);
     const pullRequestIdentifier = matches?.groups?.id;
 
     if (isUndefined(pullRequestIdentifier)) {
-        throw new TypeError('Failed to extract pull request id from merge commit log');
+        if (commitSubject.startsWith('Merge pull request ')) {
+            throw new TypeError('Failed to extract pull request id from merge commit log');
+        }
+
+        return undefined;
     }
 
     return Number.parseInt(pullRequestIdentifier, 10);
+}
+
+function extractRevertedCommitHash(commitBody: string | undefined): string | undefined {
+    const matches = /^This reverts commit (?<hash>[0-9a-f]+)\./mu.exec(commitBody ?? '');
+    return matches?.groups?.hash;
+}
+
+function isRevertedCommit(
+    revertedCommitHashes: ReadonlySet<string>,
+    firstParentCommitLogEntry: FirstParentCommitLogEntry
+): boolean {
+    return revertedCommitHashes.has(firstParentCommitLogEntry.hash);
+}
+
+function getRevertedCommitHash(firstParentCommitLogEntry: FirstParentCommitLogEntry): string | undefined {
+    return extractRevertedCommitHash(firstParentCommitLogEntry.body);
+}
+
+function collectActiveFirstParentCommitLogs(
+    firstParentCommitLogs: readonly FirstParentCommitLogEntry[]
+): readonly FirstParentCommitLogEntry[] {
+    const revertedCommitHashes = new Set<string>();
+
+    return firstParentCommitLogs.reduce<readonly FirstParentCommitLogEntry[]>(
+        (activeCommitLogs, firstParentCommitLog) => {
+            if (isRevertedCommit(revertedCommitHashes, firstParentCommitLog)) {
+                return activeCommitLogs;
+            }
+
+            const revertedCommitHash = getRevertedCommitHash(firstParentCommitLog);
+            if (!isUndefined(revertedCommitHash)) {
+                revertedCommitHashes.add(revertedCommitHash);
+                return activeCommitLogs;
+            }
+
+            return [...activeCommitLogs, firstParentCommitLog];
+        },
+        []
+    );
 }
 
 async function fetchPullRequestTitle(
@@ -69,12 +113,22 @@ async function fetchPullRequestTitle(
 async function createPullRequest(
     githubClient: Readonly<Octokit>,
     githubRepo: string,
-    mergeCommitLog: { readonly subject: string; readonly body: string | undefined }
-): Promise<PullRequest> {
-    const pullRequestId = extractPullRequestId(mergeCommitLog.subject);
-    const title = mergeCommitLog.body ?? (await fetchPullRequestTitle(githubClient, githubRepo, pullRequestId));
+    firstParentCommitLogEntry: FirstParentCommitLogEntry
+): Promise<PullRequest | undefined> {
+    const pullRequestIdentifier = extractPullRequestId(firstParentCommitLogEntry.subject);
+    if (isUndefined(pullRequestIdentifier)) {
+        return undefined;
+    }
 
-    return { id: pullRequestId, title };
+    const title =
+        firstParentCommitLogEntry.body ??
+        (await fetchPullRequestTitle(githubClient, githubRepo, pullRequestIdentifier));
+
+    return { id: pullRequestIdentifier, title };
+}
+
+function isPullRequest(pullRequest: PullRequest | undefined): pullRequest is PullRequest {
+    return !isUndefined(pullRequest);
 }
 
 export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequestsDependencies): GetMergedPullRequests {
@@ -92,13 +146,15 @@ export function getMergedPullRequestsFactory(dependencies: GetMergedPullRequests
     }
 
     async function getPullRequests(fromTag: string, githubRepo: string): Promise<readonly PullRequest[]> {
-        const mergeCommits = await gitCommandRunner.getMergeCommitLogs(fromTag);
-
-        return Promise.all(
-            mergeCommits.map(async (log) => {
-                return createPullRequest(githubClient, githubRepo, log);
+        const firstParentCommitLogs = await gitCommandRunner.getFirstParentCommitLogs(fromTag);
+        const activeFirstParentCommitLogs = collectActiveFirstParentCommitLogs(firstParentCommitLogs);
+        const pullRequests = await Promise.all(
+            activeFirstParentCommitLogs.map(async (firstParentCommitLogEntry) => {
+                return createPullRequest(githubClient, githubRepo, firstParentCommitLogEntry);
             })
         );
+
+        return pullRequests.filter(isPullRequest);
     }
 
     async function extendWithLabel(
