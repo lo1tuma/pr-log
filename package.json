@@ -30,10 +30,10 @@
         "true-myth": "9.4.0"
     },
     "devDependencies": {
-        "@enormora/eslint-config-base": "0.0.31",
-        "@enormora/eslint-config-mocha": "0.0.26",
-        "@enormora/eslint-config-node": "0.0.26",
-        "@enormora/eslint-config-typescript": "0.0.36",
+        "@enormora/eslint-config-base": "0.0.34",
+        "@enormora/eslint-config-mocha": "0.0.30",
+        "@enormora/eslint-config-node": "0.0.28",
+        "@enormora/eslint-config-typescript": "0.0.39",
         "@types/common-tags": "1.8.4",
         "@types/mocha": "10.0.10",
         "@types/node": "24.12.4",
@@ -41,7 +41,7 @@
         "@types/semver": "7.7.1",
         "@types/sinon": "21.0.1",
         "c8": "11.0.0",
-        "eslint": "10.4.0",
+        "eslint": "10.4.1",
         "fishery": "2.4.0",
         "mocha": "11.7.6",
         "prettier": "3.8.3",
