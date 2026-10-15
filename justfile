@@ -47,6 +47,3 @@ test-integration:
 test:
     just test-unit-with-coverage
     just test-integration
-
-check-packages: compile
-    packtory tree @pr-log/core
