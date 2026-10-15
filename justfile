@@ -15,28 +15,24 @@ lint: eslint
 
 lint-fix: eslint-fix
 
-prepare-packtory-source: compile
-    rm -rf target/packtory/source
-    mkdir -p target/packtory
-    cp -R target/build/source target/packtory/source
-    perl -pi -e 's/from ([\x22\x27])(\.[^\x22\x27]+)\.ts\1/from $1$2.js$1/g' $(find target/packtory/source -name '*.d.ts')
+alias prepare-packtory-source := compile
 
-prepare-release: prepare-packtory-source
-    packtory release-pr maintain --no-dry-run
+prepare-release: compile
+    packtory release-pull-request maintain --no-dry-run
 
 validate-release-pr:
-    packtory release-pr validate
+    packtory release-pull-request validate
 
 authorize-release-publish *OPTIONS:
-    packtory release-pr authorize-publish {{OPTIONS}}
+    packtory release-pull-request authorize-publish {{OPTIONS}}
 
-publish-release: prepare-packtory-source
+publish-release: compile
     packtory release --publish --tag --push --github-release --no-dry-run
 
-publish: prepare-packtory-source
+publish: compile
     packtory publish --no-dry-run
 
-publish-dry-run: prepare-packtory-source
+publish-dry-run: compile
     packtory publish
 
 test-unit:
