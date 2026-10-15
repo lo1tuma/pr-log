@@ -30,7 +30,7 @@
         "@enormora/eslint-config-mocha-node-assert": "0.0.23",
         "@enormora/eslint-config-node": "0.0.47",
         "@enormora/eslint-config-typescript": "0.0.76",
-        "@packtory/cli": "0.0.120",
+        "@packtory/cli": "0.0.124",
         "@types/common-tags": "1.8.4",
         "@types/mocha": "10.0.10",
         "@types/node": "24.19.2",
@@ -73,7 +73,7 @@
         }
     ],
     "engines": {
-        "node": "^22.0.0 || ^24.0.0 || ^26.0.0"
+        "node": "^22.12.0 || ^24.0.0 || ^26.0.0"
     },
     "overrides": {
         "c8": {

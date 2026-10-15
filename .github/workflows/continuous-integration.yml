@@ -76,7 +76,7 @@ jobs:
             - name: Check packages
               env:
                   GH_TOKEN: ${{ github.token }}
-              run: npx just publish-dry-run
+              run: npx just check-packages
 
     workflow-security:
         runs-on: ubuntu-latest
